@@ -4,6 +4,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>科技作文素材 · 课前展示</title>
 <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'&gt;&lt;circle cx='50' cy='50' r='40' fill='%232997ff'/&gt;&lt;/svg&gt;">
+
+<meta name="appver" content="v9-e19cf27f">
 <style>
   :root{
     --bg:#05060A;
@@ -560,6 +562,10 @@ html.m-phone.portrait .story-slide{justify-content:center!important;padding-top:
 html.m-phone.portrait .story-wrap{flex:0 1 auto!important;justify-content:center!important;}
 html.m-phone.portrait .story-right{margin-top:0!important;}
 html.m-phone.portrait .story{width:min(91%,460px)!important;padding:16px 18px!important;justify-content:space-between!important;}
+
+/* ==== v9: 文字框顶部对齐（上移，消除上间距）+ 图文之间留缝，图片位置基本不变 ==== */
+html.m-phone.portrait .story-slide{justify-content:flex-start!important;}
+html.m-phone.portrait .story-wrap{justify-content:flex-start!important;gap:24px!important;flex:0 1 auto!important;}
 </style>
 </head>
 <body class="">
@@ -1169,6 +1175,24 @@ try{
   }
   // 遮罩移除后弹出提示；兜底 9 秒（防加载异常卡死时提示也不出现）
   setTimeout(barShow, 9000);
+})();
+
+/* ==== v9 版本自检：微信等强缓存环境下打开自动探测新版并刷新 ==== */
+(function(){
+  try{
+    var m=document.querySelector('meta[name="appver"]');
+    if(!m) return;
+    var vc=m.content;
+    fetch(location.pathname+'?vc='+Date.now(),{cache:'no-store'})
+      .then(function(r){return r.text();})
+      .then(function(t){
+        if(t && t.indexOf('name="appver" content="'+vc+'"')===-1){
+          var q=location.search? location.search+'&r=1' : '?r=1';
+          location.replace(location.pathname+q);
+        }
+      })
+      .catch(function(){});
+  }catch(e){}
 })();
 </script>
 
