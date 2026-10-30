@@ -423,6 +423,16 @@
     .hint-line{font-size:clamp(13px,1.5vh,16px);line-height:1.55;}
     .slide.framed::before{inset:2.5vh 3vw;border-radius:20px;}
   }
+
+/* ==== v4 图片骨架淡入 + 微信适配（追加，不改原逻辑） ==== */
+img{background:linear-gradient(100deg,#101a30 40%,#1b2a4a 50%,#101a30 60%);background-size:200% 100%;animation:imgShimmer 1.4s linear infinite;}
+@keyframes imgShimmer{to{background-position:-200% 0;}}
+img.pg{opacity:0;transform:scale(.985);transition:opacity .45s ease,transform .45s ease;}
+img.pg.ready{opacity:1;transform:none;}
+html.wx #fsBtn{display:none;}
+#wxHint{display:none;position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:60;background:rgba(10,18,36,.88);border:1px solid rgba(140,180,255,.35);color:#CDE3FF;font-size:12px;padding:8px 15px;border-radius:22px;letter-spacing:.04em;box-shadow:0 6px 24px rgba(0,0,0,.35);white-space:nowrap;}
+html.wx #wxHint{display:block;}
+html.wx #deck{height:100%!important;}
 </style>
 </head>
 <body class="">
@@ -521,7 +531,7 @@
         </div>
         <div class="story-right">
           <div class="photo-stream">
-            <div class="ps-track"><div class="ps-img on"><img loading="lazy" src="images/img-08.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-09.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-10.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-11.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-12.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-13.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-14.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-15.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-16.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-17.jpeg" alt=""></div></div>
+            <div class="ps-track"><div class="ps-img on"><img loading="lazy" src="images/img-01.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-01.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-10.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-10.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-12.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-12.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-14.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-14.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-03.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-03.jpeg" alt=""></div></div>
             <div class="ps-dots"><span class="on"></span><span></span><span></span><span></span><span></span></div>
           </div>
         </div>
@@ -547,7 +557,7 @@
         </div>
         <div class="story-right">
           <div class="photo-stream">
-            <div class="ps-track"><div class="ps-img on"><img loading="lazy" src="images/img-18.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-19.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-20.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-21.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-22.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-23.jpeg" alt=""></div></div>
+            <div class="ps-track"><div class="ps-img on"><img loading="lazy" src="images/img-18.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-18.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-20.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-20.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-22.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-22.jpeg" alt=""></div></div>
             <div class="ps-dots"><span class="on"></span><span></span><span></span><span></span></div>
           </div>
         </div>
@@ -571,7 +581,7 @@
         </div>
         <div class="story-right">
           <div class="photo-stream">
-            <div class="ps-track"><div class="ps-img on"><img loading="lazy" src="images/img-24.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-25.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-26.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-27.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-28.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-29.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-30.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-31.jpeg" alt=""></div></div>
+            <div class="ps-track"><div class="ps-img on"><img loading="lazy" src="images/img-24.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-24.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-26.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-26.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-28.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-28.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-30.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-30.jpeg" alt=""></div></div>
             <div class="ps-dots"><span class="on"></span><span></span><span></span></div>
           </div>
         </div>
@@ -607,7 +617,7 @@
         </div>
         <div class="story-right">
           <div class="photo-stream">
-            <div class="ps-track"><div class="ps-img on"><img loading="lazy" src="images/img-32.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-33.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-34.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-35.jpeg" alt=""></div></div>
+            <div class="ps-track"><div class="ps-img on"><img loading="lazy" src="images/img-04.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-04.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-34.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-34.jpeg" alt=""></div></div>
             <div class="ps-dots"><span class="on"></span><span></span></div>
           </div>
         </div>
@@ -633,7 +643,7 @@
         </div>
         <div class="story-right">
           <div class="photo-stream">
-            <div class="ps-track"><div class="ps-img on"><img loading="lazy" src="images/img-36.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-37.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-38.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-39.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-40.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-41.jpeg" alt=""></div></div>
+            <div class="ps-track"><div class="ps-img on"><img loading="lazy" src="images/img-05.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-05.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-38.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-38.jpeg" alt=""></div><div class="ps-img"><img loading="lazy" src="images/img-40.jpeg" alt=""><img loading="lazy" class="ph" src="images/img-40.jpeg" alt=""></div></div>
             <div class="ps-dots"><span class="on"></span><span></span><span></span></div>
           </div>
         </div>
@@ -917,6 +927,53 @@ try{
   var t = null;
   window.addEventListener("resize", function(){ clearTimeout(t); t = setTimeout(apply, 120); });
   window.addEventListener("orientationchange", function(){ setTimeout(apply, 300); });
+})();
+
+/* ==== v4 图片预加载/淡入 + 微信检测（追加，不改原逻辑） ==== */
+(function(){
+  var imgs = Array.prototype.slice.call(document.querySelectorAll('img'));
+  imgs.forEach(function(im){ im.classList.add('pg'); });
+  imgs.forEach(function(im){
+    if (im.complete && im.naturalWidth > 0) { im.classList.add('ready'); }
+    else {
+      im.addEventListener('load', function(){ im.classList.add('ready'); }, {once:true});
+      im.addEventListener('error', function(){ im.classList.add('ready'); }, {once:true});
+    }
+  });
+  var urls = imgs.map(function(im){ return im.src; });
+  var i = 0;
+  function pump(){
+    if (i >= urls.length) return;
+    var u = urls[i++];
+    var img = new Image();
+    img.onload = img.onerror = pump;
+    img.src = u;
+  }
+  for (var k = 0; k < 6; k++) pump();
+  var tmr = setInterval(function(){
+    var all = true;
+    imgs.forEach(function(im){
+      if (im.complete && im.naturalWidth > 0 && !im.classList.contains('ready')) { im.classList.add('ready'); }
+      if (!im.classList.contains('ready')) { all = false; }
+    });
+    if (all) { clearInterval(tmr); }
+  }, 300);
+  if (/MicroMessenger/i.test(navigator.userAgent)) {
+    document.documentElement.classList.add('wx');
+    function fixH(){
+      var h = window.innerHeight + 'px';
+      document.documentElement.style.height = h;
+      document.body.style.height = h;
+      var d = document.getElementById('deck');
+      if (d) d.style.height = '100%';
+    }
+    fixH();
+    window.addEventListener('resize', fixH);
+    var tip = document.createElement('div');
+    tip.id = 'wxHint';
+    tip.textContent = '点击右上角 ··· 在浏览器打开，可全屏观看';
+    document.body.appendChild(tip);
+  }
 })();
 </script>
 
