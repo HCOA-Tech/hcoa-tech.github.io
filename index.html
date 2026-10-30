@@ -543,6 +543,23 @@ html.m-phone.portrait .story{margin-left:auto!important;margin-right:auto!import
 html.m-phone.portrait .story-head{width:100%!important;justify-content:center!important;flex-wrap:wrap;}
 html.m-phone.portrait .story-tags{width:100%!important;justify-content:center!important;}
 html.m-phone.portrait .story-text{width:100%!important;}
+
+/* ==== v7: 动态视口高度修普通浏览器上下黑边 + story 页文字框上移、图片贴底 ==== */
+html,body,#deck{height:100vh;height:100dvh;}
+html.m-phone.portrait .story-wrap{justify-content:flex-start!important;}
+html.m-phone.portrait .story-right{margin-top:auto!important;}
+html.m-phone.portrait .story-slide{padding-top:4vh!important;}
+
+/* ==== v7.1: story 页顶部对齐消除上方留白 + 图片贴底与文字分离 ==== */
+html.m-phone.portrait .story-slide{justify-content:flex-start!important;}
+html.m-phone.portrait .story-wrap{flex:1 1 auto!important;justify-content:flex-start!important;}
+html.m-phone.portrait .story-right{margin-top:auto!important;}
+
+/* ==== v8: 图片位置不动（恢复居中），文字框加宽、四周留边距、上下分布均匀 ==== */
+html.m-phone.portrait .story-slide{justify-content:center!important;padding-top:2.6vh!important;}
+html.m-phone.portrait .story-wrap{flex:0 1 auto!important;justify-content:center!important;}
+html.m-phone.portrait .story-right{margin-top:0!important;}
+html.m-phone.portrait .story{width:min(91%,460px)!important;padding:16px 18px!important;justify-content:space-between!important;}
 </style>
 </head>
 <body class="">
