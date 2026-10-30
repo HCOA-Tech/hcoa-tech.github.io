@@ -458,6 +458,51 @@ html.m-phone.portrait .tp-grid{grid-template-columns:1fr;}
 html.m-phone.portrait .map-grid{grid-template-columns:1fr;}
 html.m-phone.portrait .framed{inset:2vh 3vw;}
 html.m-phone.portrait .data{font-size:clamp(12px,3.4vw,15px);}
+
+/* ==== v6 竖屏精修：文字框收窄+滚动 / 内容居中 / 概览小结一屏 / 作文实例展开放大 ==== */
+html.m-phone.portrait .story{width:min(92%,460px);}
+html.m-phone.portrait .story-text{max-height:24vh;font-size:14.5px;line-height:1.7;text-align:justify;}
+html.m-phone.portrait .angles{width:min(94%,460px);gap:10px;}
+html.m-phone.portrait .angle{padding:12px 14px;}
+html.m-phone.portrait .angle .no{font-size:13px;margin-bottom:4px;}
+html.m-phone.portrait .angle h3{font-size:17px;margin-bottom:4px;}
+html.m-phone.portrait .angle p{font-size:13px;line-height:1.55;text-align:justify;}
+html.m-phone.portrait .tech-panel{width:min(94%,460px);max-height:none;overflow:visible;gap:8px;}
+html.m-phone.portrait .tp-kicker{font-size:17px;letter-spacing:.25em;margin-bottom:4px;}
+html.m-phone.portrait .tp-grid{gap:8px;}
+html.m-phone.portrait .tp-card{border-radius:14px;}
+html.m-phone.portrait .tp-no{font-size:16px;}
+html.m-phone.portrait .tp-name{font-size:14px;}
+html.m-phone.portrait .picker{width:min(94%,460px);gap:8px;}
+html.m-phone.portrait .p-item{padding:8px 12px;border-radius:12px;}
+html.m-phone.portrait .p-src{font-size:10px;}
+html.m-phone.portrait .p-key{font-size:15px;}
+html.m-phone.portrait .essay{width:min(94%,460px);}
+/* 作文实例展开态：四个点击口缩小，正文放大 */
+html.m-phone.portrait .slide:has(.essay-detail.show) .picker{gap:6px;}
+html.m-phone.portrait .slide:has(.essay-detail.show) .p-item{padding:5px 10px;border-radius:10px;}
+html.m-phone.portrait .slide:has(.essay-detail.show) .p-src{font-size:9px;}
+html.m-phone.portrait .slide:has(.essay-detail.show) .p-key{font-size:12.5px;}
+html.m-phone.portrait .essay-detail.show{max-height:calc(100vh - 210px);}
+html.m-phone.portrait .ed-title{font-size:19px;margin-bottom:10px;}
+html.m-phone.portrait .ed-prompt{font-size:13.5px;line-height:1.6;padding:10px 14px;margin-bottom:12px;text-align:justify;}
+html.m-phone.portrait .ed-body p{font-size:15px;line-height:1.8;text-align:justify;}
+
+/* ==== v7 加载遮罩（模糊+进度条）+ 交互提示条 ==== */
+#loader{position:fixed;inset:0;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;
+  background:rgba(4,10,24,.72);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
+  transition:opacity .45s ease,visibility .45s ease;}
+#loader.off{opacity:0;visibility:hidden;pointer-events:none;}
+#loader .ld-txt{font-size:15px;letter-spacing:.14em;color:#C9DCFF;text-shadow:0 0 18px rgba(95,168,255,.4);}
+#loader .ld-bar{width:min(72%,300px);height:5px;border-radius:3px;background:rgba(120,160,220,.22);overflow:hidden;}
+#loader .ld-bar i{display:block;height:100%;width:0;border-radius:3px;background:linear-gradient(90deg,#5FA8FF,#A5D1FF);box-shadow:0 0 12px rgba(95,168,255,.6);}
+#hintBar{position:fixed;top:calc(env(safe-area-inset-top,0px) + 16px);left:50%;transform:translateX(-50%);z-index:700;
+  background:rgba(8,16,32,.93);border:1px solid rgba(140,180,255,.3);color:#D6E6FF;font-size:12.5px;
+  padding:9px 16px;border-radius:20px;letter-spacing:.03em;box-shadow:0 8px 28px rgba(0,0,0,.4);
+  display:none;max-width:88%;text-align:center;line-height:1.7;}
+#hintBar.show{display:block;animation:hintIn .35s ease;}
+#hintBar.fade{opacity:0;transition:opacity .6s ease;}
+@keyframes hintIn{from{opacity:0;transform:translate(-50%,-10px);}to{opacity:1;transform:translate(-50%,0);}}
 </style>
 </head>
 <body class="">
@@ -1020,6 +1065,53 @@ try{
     var dx = t.clientX - sx, dy = t.clientY - sy;
     if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 45) { e.stopImmediatePropagation(); }
   }, {capture:true, passive:true});
+})();
+
+/* ==== v7 加载遮罩 + 交互提示（微信5秒消失/其他6秒） ==== */
+(function(){
+  var wx = /MicroMessenger/i.test(navigator.userAgent);
+  var oldTip = document.getElementById('wxHint'); if (oldTip && oldTip.parentNode) { oldTip.parentNode.removeChild(oldTip); }
+  // 加载遮罩：进度条前5秒模拟至80%，真实加载完成后再跑完剩余20%
+  var mask = document.createElement('div');
+  mask.id = 'loader';
+  mask.innerHTML = '<div class="ld-txt">正在渲染网页…</div><div class="ld-bar"><i></i></div>';
+  document.body.appendChild(mask);
+  var barEl = mask.querySelector('.ld-bar i');
+  var prog = 0, done = false, hidden = false;
+  var tick = setInterval(function(){
+    if (done) {
+      prog = Math.min(100, prog + 8);
+      barEl.style.width = prog + '%';
+      if (prog >= 100 && !hidden) { hidden = true; clearInterval(tick); setTimeout(function(){ mask.classList.add('off'); }, 180); setTimeout(function(){ if (mask.parentNode) mask.parentNode.removeChild(mask); barShow(); }, 700); }
+    } else {
+      prog = Math.min(80, prog + 1.6);
+      barEl.style.width = prog + '%';
+    }
+  }, 100);
+  function finish(){ if (!done) { done = true; } }
+  var rdy = setInterval(function(){
+    var imgs = Array.prototype.slice.call(document.querySelectorAll('img'));
+    if (imgs.length === 0) { return; }
+    var all = imgs.every(function(im){ return im.classList.contains('ready') || (im.complete && im.naturalWidth > 0); });
+    if (all) { clearInterval(rdy); finish(); }
+  }, 200);
+  setTimeout(finish, 12000);
+  // 交互提示条：微信先提示滑动再提示浏览器打开；其他只提示滑动；约6秒自动消失
+  var bar = document.createElement('div');
+  bar.id = 'hintBar';
+  var t1 = '左右滑动 查看上/下一页 · 点击 跳转下一页';
+  var t2 = '右上角 ··· 在浏览器打开，全屏效果最佳';
+  bar.innerHTML = wx ? '<div>' + t1 + '</div><div style="opacity:.85;font-size:11.5px">' + t2 + '</div>' : t1;
+  document.body.appendChild(bar);
+  var barShown = false;
+  function barShow(){
+    if (barShown) return; barShown = true;
+    bar.classList.add('show');
+    setTimeout(function(){ bar.classList.add('fade'); }, 6000);
+    setTimeout(function(){ bar.classList.remove('show'); }, 6800);
+  }
+  // 遮罩移除后弹出提示；兜底 9 秒（防加载异常卡死时提示也不出现）
+  setTimeout(barShow, 9000);
 })();
 </script>
 
