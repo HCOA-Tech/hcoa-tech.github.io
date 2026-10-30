@@ -5,7 +5,7 @@
 <title>科技作文素材 · 课前展示</title>
 <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'&gt;&lt;circle cx='50' cy='50' r='40' fill='%232997ff'/&gt;&lt;/svg&gt;">
 
-<meta name="appver" content="v9-e19cf27f">
+<meta name="appver" content="v10-7bbfccb7">
 <style>
   :root{
     --bg:#05060A;
@@ -432,8 +432,6 @@ img{background:linear-gradient(100deg,#101a30 40%,#1b2a4a 50%,#101a30 60%);backg
 img.pg{opacity:0;transform:scale(.985);transition:opacity .45s ease,transform .45s ease;}
 img.pg.ready{opacity:1;transform:none;background:none!important;animation:none!important;}
 html.wx #fsBtn{display:none;}
-#wxHint{display:none;position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:60;background:rgba(10,18,36,.88);border:1px solid rgba(140,180,255,.35);color:#CDE3FF;font-size:12px;padding:8px 15px;border-radius:22px;letter-spacing:.04em;box-shadow:0 6px 24px rgba(0,0,0,.35);white-space:nowrap;}
-html.wx #wxHint{display:block;}
 html.wx #deck{height:100%!important;}
 
 /* ==== v5 手机竖屏适配：上文字下图 / 图片淡入 / 交互区滚动兜底 / 取消横放遮罩 ==== */
@@ -1109,10 +1107,6 @@ try{
     }
     fixH();
     window.addEventListener('resize', fixH);
-    var tip = document.createElement('div');
-    tip.id = 'wxHint';
-    tip.textContent = '点击右上角 ··· 在浏览器打开，可全屏观看';
-    document.body.appendChild(tip);
   }
 })();
 
@@ -1133,7 +1127,6 @@ try{
 /* ==== v7 加载遮罩 + 交互提示（微信5秒消失/其他6秒） ==== */
 (function(){
   var wx = /MicroMessenger/i.test(navigator.userAgent);
-  var oldTip = document.getElementById('wxHint'); if (oldTip && oldTip.parentNode) { oldTip.parentNode.removeChild(oldTip); }
   // 加载遮罩：进度条前5秒模拟至80%，真实加载完成后再跑完剩余20%
   var mask = document.createElement('div');
   mask.id = 'loader';
@@ -1159,11 +1152,11 @@ try{
     if (all) { clearInterval(rdy); finish(); }
   }, 200);
   setTimeout(finish, 12000);
-  // 交互提示条：微信先提示滑动再提示浏览器打开；其他只提示滑动；约6秒自动消失
+  // 交互提示条：微信先提示滑动再提示 iPad/电脑预览；其他只提示滑动；约6秒自动消失
   var bar = document.createElement('div');
   bar.id = 'hintBar';
   var t1 = '左右滑动 查看上/下一页 · 点击 跳转下一页';
-  var t2 = '右上角 ··· 在浏览器打开，全屏效果最佳';
+  var t2 = '使用 iPad 或电脑打开预览更佳';
   bar.innerHTML = wx ? '<div>' + t1 + '</div><div style="opacity:.85;font-size:11.5px">' + t2 + '</div>' : t1;
   document.body.appendChild(bar);
   var barShown = false;
