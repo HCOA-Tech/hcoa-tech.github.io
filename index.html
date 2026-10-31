@@ -5,7 +5,7 @@
 <title>科技作文素材 · 课前展示</title>
 <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'&gt;&lt;circle cx='50' cy='50' r='40' fill='%232997ff'/&gt;&lt;/svg&gt;">
 
-<meta name="appver" content="v10-7bbfccb7">
+<meta name="appver" content="v11-4fad901d">
 <style>
   :root{
     --bg:#05060A;
@@ -564,6 +564,12 @@ html.m-phone.portrait .story{width:min(91%,460px)!important;padding:16px 18px!im
 /* ==== v9: 文字框顶部对齐（上移，消除上间距）+ 图文之间留缝，图片位置基本不变 ==== */
 html.m-phone.portrait .story-slide{justify-content:flex-start!important;}
 html.m-phone.portrait .story-wrap{justify-content:flex-start!important;gap:24px!important;flex:0 1 auto!important;}
+
+/* ==== v11: 加载遮罩品牌行 Design by + HCOA logo（60fps 进度条已改 JS） ==== */
+#loader .ld-brand{display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;transform:translateY(6px);transition:opacity .5s ease,transform .5s ease;}
+#loader .ld-brand.show{opacity:1;transform:translateY(0);}
+#loader .ld-brand .ld-by{font-size:12px;letter-spacing:.34em;color:#8FA8D8;}
+#loader .ld-brand .ld-logo{width:auto;height:34px;filter:drop-shadow(0 0 14px rgba(140,190,255,.35));}
 </style>
 </head>
 <body class="">
@@ -1130,20 +1136,27 @@ try{
   // 加载遮罩：进度条前5秒模拟至80%，真实加载完成后再跑完剩余20%
   var mask = document.createElement('div');
   mask.id = 'loader';
-  mask.innerHTML = '<div class="ld-txt">正在渲染网页…</div><div class="ld-bar"><i></i></div>';
+  mask.innerHTML = '<div class="ld-txt">正在渲染网页…</div><div class="ld-bar"><i></i></div><div class="ld-brand"><span class="ld-by">Design by</span><img class="ld-logo" src="images/logo.png" alt="HCOA"></div>';
   document.body.appendChild(mask);
   var barEl = mask.querySelector('.ld-bar i');
-  var prog = 0, done = false, hidden = false;
-  var tick = setInterval(function(){
-    if (done) {
-      prog = Math.min(100, prog + 8);
-      barEl.style.width = prog + '%';
-      if (prog >= 100 && !hidden) { hidden = true; clearInterval(tick); setTimeout(function(){ mask.classList.add('off'); }, 180); setTimeout(function(){ if (mask.parentNode) mask.parentNode.removeChild(mask); barShow(); }, 700); }
-    } else {
-      prog = Math.min(80, prog + 1.6);
-      barEl.style.width = prog + '%';
+  var brand = mask.querySelector('.ld-brand');
+  var prog = 0, done = false, hidden = false, lastT = performance.now();
+  // 60fps 平滑进度：前5秒模拟至80%，真实加载完成后再跑完剩余20%
+  function step(now){
+    var dt = Math.min(64, now - lastT); lastT = now;
+    var target = done ? 100 : 80;
+    prog = Math.min(target, prog + 16 * dt / 1000);
+    barEl.style.width = prog + '%';
+    if (prog >= 100 && !hidden) {
+      hidden = true;
+      brand.classList.add('show');
+      setTimeout(function(){ mask.classList.add('off'); }, 260);
+      setTimeout(function(){ if (mask.parentNode) mask.parentNode.removeChild(mask); barShow(); }, 900);
+      return;
     }
-  }, 100);
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
   function finish(){ if (!done) { done = true; } }
   var rdy = setInterval(function(){
     var imgs = Array.prototype.slice.call(document.querySelectorAll('img'));
