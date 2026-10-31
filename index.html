@@ -5,7 +5,7 @@
 <title>科技作文素材 · 课前展示</title>
 <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'&gt;&lt;circle cx='50' cy='50' r='40' fill='%232997ff'/&gt;&lt;/svg&gt;">
 
-<meta name="appver" content="v12-38f42e78">
+<meta name="appver" content="v13-95cbae87">
 <style>
   :root{
     --bg:#05060A;
@@ -566,10 +566,10 @@ html.m-phone.portrait .story-slide{justify-content:flex-start!important;}
 html.m-phone.portrait .story-wrap{justify-content:flex-start!important;gap:24px!important;flex:0 1 auto!important;}
 
 /* ==== v11: 加载遮罩品牌行 Design by + HCOA logo（60fps 进度条已改 JS） ==== */
-#loader .ld-brand{display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;transform:translateY(6px);transition:opacity .5s ease,transform .5s ease;}
+#loader .ld-brand{display:flex;flex-direction:column;align-items:center;gap:16px;opacity:0;transform:translateY(6px);transition:opacity .5s ease,transform .5s ease;}
 #loader .ld-brand.show{opacity:1;transform:translateY(0);}
-#loader .ld-brand .ld-by{font-size:12px;letter-spacing:.34em;color:#8FA8D8;}
-#loader .ld-brand .ld-logo{width:auto;height:22px;filter:drop-shadow(0 0 14px rgba(140,190,255,.35));}
+#loader .ld-brand .ld-by{font-size:11px;letter-spacing:.36em;color:#A6B9DA;}
+#loader .ld-brand .ld-logo{width:auto;height:30px;filter:drop-shadow(0 0 16px rgba(140,190,255,.16));}
 </style>
 </head>
 <body class="">
@@ -1141,17 +1141,21 @@ try{
   var barEl = mask.querySelector('.ld-bar i');
   var brand = mask.querySelector('.ld-brand');
   var prog = 0, done = false, hidden = false, lastT = performance.now();
-  // 60fps 平滑进度：前5秒模拟至80%，真实加载完成后再跑完剩余20%
+  // 60fps 平滑进度：前段稍慢约6.5秒模拟至80%，真实加载完成后再跑完剩余20%
   function step(now){
     var dt = Math.min(64, now - lastT); lastT = now;
     var target = done ? 100 : 80;
-    prog = Math.min(target, prog + 16 * dt / 1000);
+    prog = Math.min(target, prog + 12.5 * dt / 1000);
     barEl.style.width = prog + '%';
     if (prog >= 100 && !hidden) {
       hidden = true;
-      brand.classList.add('show');
-      setTimeout(function(){ mask.classList.add('off'); }, 260);
-      setTimeout(function(){ if (mask.parentNode) mask.parentNode.removeChild(mask); barShow(); }, 900);
+      // 进度条跑完直接消失，遮罩保持高斯模糊
+      mask.querySelector('.ld-txt').style.display = 'none';
+      mask.querySelector('.ld-bar').style.display = 'none';
+      // 随后正中显示 Design by + logo，停留约2秒再淡出遮罩
+      setTimeout(function(){ brand.classList.add('show'); }, 320);
+      setTimeout(function(){ mask.classList.add('off'); }, 320 + 2000);
+      setTimeout(function(){ if (mask.parentNode) mask.parentNode.removeChild(mask); barShow(); }, 320 + 2000 + 650);
       return;
     }
     requestAnimationFrame(step);
