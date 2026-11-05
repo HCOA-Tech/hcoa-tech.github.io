@@ -67,31 +67,38 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .night-chat .who { font-size:11.5px; color:rgba(201,168,106,.8); letter-spacing:2px; margin-bottom:3px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
 .night-chat .bub { font-size:16px; line-height:1.8; color:rgba(247,245,239,.97); background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:10px 15px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:.3px; white-space:pre-wrap; word-break:break-word; backdrop-filter:blur(6px); position:relative; overflow:hidden; transition:min-height .55s cubic-bezier(.22,1,.36,1), border-color .3s, background .3s; }
 .night-chat .bub .base { display:block; color:rgba(247,245,239,.97); white-space:pre-wrap; word-break:break-word; }
-/* 彩虹跑马灯覆盖层：与扩散/下沉/框弹开并行，扩散结束后平滑淡出露出白色 */
-.night-chat .bub .rainbow { position:absolute; inset:0; padding:10px 15px; color:transparent; background:linear-gradient(90deg,#ff6b6b,#feca57,#48dbfb,#a55eea,#ff6b6b); background-size:200% 100%; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; opacity:0; transition:opacity 1s ease; pointer-events:none; white-space:pre-wrap; word-break:break-word; }
-.night-chat .bub.reveal .rainbow { opacity:1; animation:dropIn .8s cubic-bezier(.3,1.32,.55,1), rainbowFlow 2.4s linear infinite; }
-.night-chat .bub.fade .rainbow { opacity:0; }
+/* 完成后：同一层文字先显示彩虹流动（非第二层叠加），再平滑渐变成白色 */
+.night-chat .bub.reveal .base {
+  color:transparent; -webkit-text-fill-color:transparent;
+  background:linear-gradient(90deg,#ff6b6b,#feca57,#48dbfb,#a55eea,#ff6b6b);
+  background-size:200% 100%;
+  -webkit-background-clip:text; background-clip:text;
+  animation:dropIn 1s cubic-bezier(.3,1.32,.55,1), rainbowFlow 2.4s linear infinite;
+  transition:-webkit-text-fill-color 1.15s ease;
+}
+.night-chat .bub.fade .base { -webkit-text-fill-color:rgba(247,245,239,.97); }
 @keyframes rainbowFlow { to { background-position:200% 50%; } }
-/* 生成前：文字骨架小框占位（模拟文字行）+ 扫光条 */
-.night-chat .bub .skel { display:block; height:14px; border-radius:7px; background:rgba(255,255,255,.15); margin:8px 0; animation:skelPulse 1.6s ease-in-out infinite; transition:opacity .4s ease; }
+/* 生成前：长方形小骨架（四个小圆角），光从上到下波浪式流动 */
+.night-chat .bub .skel { display:block; height:14px; border-radius:4px; margin:8px 0;
+  background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.30), rgba(255,255,255,.10));
+  background-size:100% 230%;
+  animation:skelWave 1.9s ease-in-out infinite; transition:opacity .4s ease; }
 .night-chat .bub .skel:nth-child(2) { width:88%; }
 .night-chat .bub .skel:nth-child(3) { width:62%; }
 .night-chat .bub .skel:nth-child(4) { width:76%; }
-@keyframes skelPulse { 0%,100% { opacity:.5; } 50% { opacity:.95; } }
+@keyframes skelWave { 0% { background-position:0 -115%; } 100% { background-position:0 115%; } }
 .night-chat .bub:not(.pending) .skel { opacity:0; }
 .night-chat .bub.pending { min-height:66px; color:transparent; background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.14); }
-.night-chat .bub.pending::after { content:''; position:absolute; left:-14%; right:-14%; top:-52%; height:48%; background:linear-gradient(180deg,transparent,rgba(255,255,255,.16),rgba(201,168,106,.18),rgba(255,255,255,.16),transparent); filter:blur(14px); animation:scanPulse 2.1s cubic-bezier(.45,0,.55,1) infinite; pointer-events:none; }
-@keyframes scanPulse { 0% { top:-52%; } 100% { top:118%; } }
-/* 完成：框平滑弹开 + 文字从上到下扩散并轻微下沉（苹果写作工具式） */
-.night-chat .bub.reveal { min-height:0; animation:boxSettle .8s cubic-bezier(.22,1,.36,1); }
+/* 完成：框缓慢下沉弹开（放慢）+ 文字从上到下扩散并轻微下沉（苹果写作工具式） */
+.night-chat .bub.reveal { min-height:0; animation:boxSettle 1.2s cubic-bezier(.22,1,.36,1); }
 @keyframes boxSettle { 0% { transform:translateY(16px); } 55% { transform:translateY(-3px); } 100% { transform:none; } }
-.night-chat .bub.reveal .base { animation:dropIn .8s cubic-bezier(.3,1.32,.55,1); }
 @keyframes dropIn {
   0% { clip-path:inset(0 0 100% 0); transform:translateY(14px); opacity:0; }
   55% { clip-path:inset(0 0 0 0); transform:translateY(-3px); opacity:1; }
   100% { clip-path:inset(0 0 0 0); transform:none; opacity:1; }
 }
-.night-chat .msg.user .bub { background:rgba(46,110,94,.25); border-color:rgba(201,168,106,.35); }
+/* 用户自己的消息：中性玻璃质感（不再是绿色） */
+.night-chat .msg.user .bub { background:rgba(255,255,255,.10); border-color:rgba(255,255,255,.18); }
 .night-think { position:absolute; left:80px; top:252px; width:800px; z-index:6; border:1px solid rgba(201,168,106,.5); border-left:4px solid rgba(201,168,106,1); border-radius:12px; background:rgba(13,26,38,.92); overflow:hidden; transition:max-height .5s cubic-bezier(.22,1,.36,1), opacity .4s; max-height:120px; backdrop-filter:blur(8px); }
 .night-think.collapsed { max-height:0; opacity:0; border-width:0; }
 .nt-head { display:flex; align-items:center; gap:8px; padding:9px 14px 6px; font-size:12px; color:rgba(201,168,106,.95); letter-spacing:1.5px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
@@ -373,17 +380,12 @@ function addMsg(role, text) {
   var bub = document.createElement('div');
   bub.className = 'bub';
   if (role === 'assistant') {
-    /* 白色正文层 + 彩虹跑马灯覆盖层（并行扩散，结束后淡出） */
+    /* 单层文字：完成后自身彩虹流动再渐变白色（无第二层叠加） */
     var base = document.createElement('span');
     base.className = 'base';
     base.textContent = text;
-    var rc = document.createElement('span');
-    rc.className = 'rainbow';
-    rc.textContent = text;
     bub.appendChild(base);
-    bub.appendChild(rc);
     bub._base = base;
-    bub._rc = rc;
   } else {
     bub.textContent = text;
   }
@@ -487,13 +489,12 @@ function send() {
       thinkCard.classList.add('collapsed');
       answerEl = addMsg('assistant', answer || '(未返回内容)');
     } else {
-      answerEl.classList.remove('pending');   /* 骨架淡出、框平滑弹开 */
+      answerEl.classList.remove('pending');   /* 骨架淡出、框缓慢弹开 */
       answerEl._base.textContent = answer;
-      answerEl._rc.textContent = answer;
-      answerEl.classList.add('reveal');       /* 彩虹跑马灯 + 从上到下扩散 + 下沉，并行 */
+      answerEl.classList.add('reveal');       /* 同一层文字彩虹流动 + 从上到下扩散 + 下沉 */
       setTimeout(function() {
-        answerEl.classList.add('fade');       /* 扩散结束后彩虹 1s 平滑淡出 → 白色渐显 */
-      }, 950);
+        answerEl.classList.add('fade');       /* 文字从彩虹平滑渐变成白色（1.15s） */
+      }, 1100);
     }
     messages.push({ role: 'assistant', content: answer });
     smoothFollow();
