@@ -65,8 +65,8 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .night-chat::-webkit-scrollbar-thumb { background:rgba(201,168,106,.35); border-radius:3px; }
 .night-chat .msg { margin-bottom:10px; }
 .night-chat .who { font-size:11.5px; color:rgba(201,168,106,.8); letter-spacing:2px; margin-bottom:3px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
-.night-chat .bub { font-size:17.5px; line-height:1.55; font-weight:600; color:rgba(247,245,239,.97); background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:10px 15px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:.3px; white-space:pre-wrap; word-break:break-word; backdrop-filter:blur(6px); position:relative; overflow:hidden; transition:min-height .75s cubic-bezier(.25,1,.4,1), border-color .3s, background 1.3s ease; }
-.night-chat .bub .base { display:block; color:rgba(247,245,239,.97); white-space:pre-wrap; word-break:break-word; max-height:0; overflow:hidden; transition:max-height .85s cubic-bezier(.25,1,.4,1) .18s; }
+.night-chat .bub { font-size:17.5px; line-height:1.55; font-weight:600; color:rgba(247,245,239,.97); background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:16px 18px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:.3px; white-space:pre-wrap; word-break:break-word; backdrop-filter:blur(6px); position:relative; overflow:hidden; transition:min-height .75s cubic-bezier(.25,1,.4,1), border-color .3s; }
+.night-chat .bub .base { position:relative; z-index:1; display:block; color:rgba(247,245,239,.97); white-space:pre-wrap; word-break:break-word; max-height:0; overflow:hidden; transition:max-height .85s cubic-bezier(.25,1,.4,1) .18s; }
 /* 完成后：同一层文字先显示彩虹流动（非第二层叠加），再平滑渐变成白色；延迟软弹撑开，与骨架收回衔接 */
 .night-chat .bub.reveal .base {
   max-height:700px;
@@ -80,7 +80,7 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .night-chat .bub.fade .base { -webkit-text-fill-color:rgba(247,245,239,.97); }
 @keyframes rainbowFlow { to { background-position:200% 50%; } }
 /* 生成前：长方形小骨架（四个小圆角），底层淡AI彩虹+亮带从上到下波浪流动；完成后高度+margin 软弹收回（不占位） */
-.night-chat .bub .skel { display:block; height:14px; border-radius:4px; margin:8px 0;
+.night-chat .bub .skel { position:relative; z-index:1; display:block; height:14px; border-radius:4px; margin:8px 0;
   background:
     linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.22), rgba(255,255,255,0)),
     linear-gradient(90deg, rgba(255,107,107,.16), rgba(254,202,87,.15), rgba(72,219,251,.16), rgba(165,94,234,.16));
@@ -92,19 +92,20 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .night-chat .bub .skel:nth-child(4) { width:76%; }
 @keyframes skelWave { 0% { background-position:0 -115%, 0 0; } 100% { background-position:0 115%, 0 0; } }
 .night-chat .bub.reveal .skel { height:0; margin-top:0; margin-bottom:0; opacity:0; }
-/* 加载中/弹动中：气泡带淡淡AI彩虹背景，fade 后 1.3s 慢慢变回普通高斯透明 */
-.night-chat .bub.pending { min-height:66px; color:transparent; }
-.night-chat .bub.pending, .night-chat .bub.reveal {
+/* 淡AI彩虹只存在于独立色层（::after）：pending/弹动中常驻，fade 后 1.3s 透明度渐变收回（不硬切） */
+.night-chat .bub.pending { min-height:66px; color:transparent; border-color:rgba(255,255,255,.14); }
+.night-chat .bub.pending::after, .night-chat .bub.reveal::after {
+  content:''; position:absolute; inset:0; border-radius:12px; z-index:0; pointer-events:none;
   background:linear-gradient(120deg, rgba(255,107,107,.10), rgba(254,202,87,.09), rgba(72,219,251,.10), rgba(165,94,234,.10));
-  border-color:rgba(255,255,255,.14);
+  opacity:1; transition:opacity 1.3s ease;
 }
-.night-chat .bub.fade { background:rgba(255,255,255,.07); }
-/* 完成：框缓慢下沉弹开（放慢）+ 文字从上到下扩散并轻微下沉（苹果写作工具式） */
+.night-chat .bub.fade::after { opacity:0; }
+/* 完成：框缓慢下沉弹开（放慢，幅度更大）+ 文字从上到下扩散并轻微下沉（苹果写作工具式） */
 .night-chat .bub.reveal { min-height:0; animation:boxSettle 1.2s cubic-bezier(.22,1,.36,1); }
-@keyframes boxSettle { 0% { transform:translateY(16px); } 55% { transform:translateY(-3px); } 100% { transform:none; } }
+@keyframes boxSettle { 0% { transform:translateY(32px); } 55% { transform:translateY(-7px); } 100% { transform:none; } }
 @keyframes dropIn {
-  0% { clip-path:inset(0 0 100% 0); transform:translateY(14px); opacity:0; }
-  55% { clip-path:inset(0 0 0 0); transform:translateY(-3px); opacity:1; }
+  0% { clip-path:inset(0 0 100% 0); transform:translateY(30px); opacity:0; }
+  55% { clip-path:inset(0 0 0 0); transform:translateY(-7px); opacity:1; }
   100% { clip-path:inset(0 0 0 0); transform:none; opacity:1; }
 }
 /* 用户自己的消息：中性玻璃质感（不再是绿色） */
@@ -379,6 +380,16 @@ function smoothFollow() {
   if (target - curY < 1) { aiScroll.scrollTop = target; return; }
   aiScroll.scrollTop = curY + (target - curY) * 0.28;
 }
+/* 弹动期间持续跟随到底（气泡高度在过渡，单次滚动跟不上） */
+var followTimer = null;
+function followBurst(ms) {
+  if (followTimer) clearInterval(followTimer);
+  var end = Date.now() + ms;
+  followTimer = setInterval(function() {
+    smoothFollow();
+    if (Date.now() > end) { clearInterval(followTimer); followTimer = null; smoothFollow(); }
+  }, 55);
+}
 
 /* 消息渲染 */
 function addMsg(role, text) {
@@ -507,7 +518,7 @@ function send() {
       }, 1300);
     }
     messages.push({ role: 'assistant', content: answer });
-    smoothFollow();
+    followBurst(1900);
   }
 
   function fail(msg) {
