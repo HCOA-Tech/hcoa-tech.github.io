@@ -406,25 +406,32 @@ if (kbBtn) {
   });
 }
 
-/* 平滑跟随滚动（非线性，不打扰） */
-function nearBottom() {
-  return aiScroll.scrollHeight - aiScroll.scrollTop - aiScroll.clientHeight < 48;
+/* 生成期间不跟随滚动：动画播完后只滚一次到底（原生 smooth，由合成器跑，不掉帧）
+   用户中途自己滑动则放弃这次自动滚动，不跟用户抢 */
+var userScrolled = false;
+function markUserScroll() { userScrolled = true; }
+if (aiScroll) {
+  aiScroll.addEventListener('wheel', markUserScroll, { passive: true });
+  aiScroll.addEventListener('touchmove', markUserScroll, { passive: true });
 }
-function smoothFollow() {
-  var target = aiScroll.scrollHeight - aiScroll.clientHeight;
-  var curY = aiScroll.scrollTop;
-  if (target - curY < 1) { aiScroll.scrollTop = target; return; }
-  aiScroll.scrollTop = curY + (target - curY) * 0.28;
+function scrollToEndOnce(delay) {
+  setTimeout(function() {
+    if (userScrolled) return;
+    var top = aiScroll.scrollHeight - aiScroll.clientHeight;
+    try {
+      aiScroll.scrollTo({ top: top, behavior: 'smooth' });
+    } catch (e) {
+      aiScroll.scrollTop = top;
+    }
+  }, delay);
 }
-/* 弹动期间持续跟随到底（气泡高度在过渡，单次滚动跟不上） */
-var followTimer = null;
-function followBurst(ms) {
-  if (followTimer) clearInterval(followTimer);
-  var end = Date.now() + ms;
-  followTimer = setInterval(function() {
-    smoothFollow();
-    if (Date.now() > end) { clearInterval(followTimer); followTimer = null; smoothFollow(); }
-  }, 55);
+/* 新气泡出现时一次性对齐到它的顶部，之后画面固定不动（不跟随长文增长） */
+function pinToStart(el) {
+  requestAnimationFrame(function() {
+    userScrolled = false;
+    var top = el.offsetTop - 10;
+    aiScroll.scrollTop = top < 0 ? 0 : top;
+  });
 }
 
 /* 消息渲染 */
@@ -448,7 +455,7 @@ function addMsg(role, text) {
   }
   wrap.appendChild(who); wrap.appendChild(bub);
   aiScroll.appendChild(wrap);
-  smoothFollow();
+  wrap._bub = bub;
   return bub;
 }
 /* 生成前：在气泡里插入 4 条文字骨架小框（模拟文字行占位） */
@@ -532,6 +539,7 @@ function send() {
         answerEl = addMsg('assistant', '');
         answerEl.classList.add('pending');   /* 生成前：骨架小框占位 + 波浪扫光 */
         addSkeleton(answerEl);
+        pinToStart(answerEl.parentNode);      /* 一次性对齐到气泡顶部，之后画面固定不动 */
       }
       answer += delta.content;
       /* 流式期间不渲染正文（避免逐字蹦出），等 finishOK 整段扩散浮现 */
@@ -562,7 +570,7 @@ function send() {
       }, 1150);
     }
     messages.push({ role: 'assistant', content: answer });
-    followBurst(1900);
+    scrollToEndOnce(1750);   /* 动画播完再滚一次到底；期间用户自己滑动则不抢 */
   }
 
   function fail(msg) {
