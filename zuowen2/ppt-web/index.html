@@ -138,19 +138,6 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 #aiSend { border:1px solid rgba(255,255,255,.18); border-radius:999px; background:rgba(255,255,255,.14); color:rgba(255,255,255,.95); padding:0 9px; height:20px; font-size:10.5px; font-weight:500; cursor:pointer; transition:.25s; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:1.5px; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); flex:none; }
 #aiSend:hover { background:rgba(255,255,255,.24); border-color:rgba(255,255,255,.3); }
 #aiSend:disabled { opacity:.45; cursor:default; }
-/* 左上角历史/返回按钮：开始对话且存在历史轮次时才显示 */
-#turnNav { position:absolute; left:18px; top:14px; z-index:20; display:none; align-items:center; gap:5px;
-  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.16); border-radius:999px;
-  padding:6px 14px; font-size:12px; color:rgba(247,245,239,.85); cursor:pointer;
-  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); transition:.25s; letter-spacing:1px;
-  font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; -webkit-tap-highlight-color:transparent; }
-#turnNav:hover { background:rgba(255,255,255,.18); color:#fff; }
-#turnNav:active { transform:scale(.96); }
-#turnNav.show { display:inline-flex; }
-/* 历史轮次隐藏（current 视图只显示当前轮）；切换时容器淡入，不生硬 */
-.night-chat .msg.turn-old { display:none; }
-.night-chat.view-fade { animation:viewFade .35s ease; }
-@keyframes viewFade { from { opacity:.3; } to { opacity:1; } }
 /* 星星：小而淡，点缀夜空 */
 .star { position:absolute; background:#fff; border-radius:50%; animation:twinkle 4.5s ease-in-out infinite; }
 @keyframes twinkle { 0%,100% { opacity:.45; } 50% { opacity:.85; } }
@@ -195,7 +182,6 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 <section class="slide night" data-note="接下来到现场创作环节。刚才讲了这么多素材，我不要求大家记笔记——换个玩法，让 AI 现场写给你们看。你们现在随便报一个角度：奋斗、传承、人与自然，或者你自己想一个题目都可以。我让 AI 现场把刚才的素材写成一篇作文，注意看素材是怎么被用进去的——看一遍，比抄十遍笔记都有用。页面上这三个问题就是示例，同学可以直接点名一个，我们现场生成。课后想自己试的同学，可以从创作台入口打开，或者找我要链接。" data-id="pzS">
   <div class="pg-bg night-bg"></div>
   <div class="pg-bg night-veil"></div>
-  <button id="turnNav" type="button" title="查看历史对话"></button>
   <div class="night-title">现场创作台</div>
   <div class="night-sub">你提问，AI 现场写 · 素材是别人的，作文是你自己的</div>
   <div class="night-badge">已接入 HCOA AI 与 DeepSeek</div>
@@ -337,10 +323,6 @@ var _dm = localStorage.getItem('ds_model');
 var MODEL = (_dm === 'deepseek-flash' || _dm === 'deepseek-v4-pro') ? _dm : 'deepseek-flash';
 var messages = [];
 var streaming = false;
-/* 轮次视图：每次新对话只显示当前轮（从顶部开始，像刷新后的第一次），历史轮次隐藏，左上角按钮回看 */
-var turnCount = 0;      /* 已创建的轮次总数 */
-var activeTurn = 0;     /* 当前轮次号 */
-var viewMode = 'current';
 
 var aiScroll = document.getElementById('aiScroll');
 var aiInput = document.getElementById('aiInput');
@@ -468,7 +450,6 @@ function scrollToEndOnce(delay) {
 function addMsg(role, text) {
   var wrap = document.createElement('div');
   wrap.className = 'msg ' + role;
-  wrap.setAttribute('data-turn', activeTurn);
   var who = document.createElement('div');
   who.className = 'who';
   who.textContent = role === 'user' ? '你 · ' + (MODEL === 'deepseek-v4-pro' ? '深度思考' : '快速') : 'HCOA AI';
@@ -498,45 +479,12 @@ function addSkeleton(bub) {
   }
 }
 
-/* ============ 轮次视图切换 ============ */
-/* current 视图：隐藏非当前轮，回到顶部 */
-function hideOldTurns() {
-  var all = aiScroll.querySelectorAll('.msg');
-  for (var i = 0; i < all.length; i++) {
-    var isCur = all[i].getAttribute('data-turn') === String(activeTurn);
-    all[i].classList.toggle('turn-old', !isCur);
-  }
-  aiScroll.scrollTop = 0;
-}
-function updateTurnNav() {
-  var nav = document.getElementById('turnNav');
-  if (!nav) return;
-  if (turnCount < 2) { nav.classList.remove('show'); return; }
-  nav.classList.add('show');
-  nav.textContent = viewMode === 'current' ? '‹ 历史对话' : '返回当前 ›';
-}
-function viewFadeOnce() {
-  aiScroll.classList.remove('view-fade');
-  void aiScroll.offsetWidth;   /* 强制重排，重新触发淡入 */
-  aiScroll.classList.add('view-fade');
-}
-var turnNav = document.getElementById('turnNav');
-if (turnNav) {
-  turnNav.addEventListener('click', function() {
-    if (streaming) return;     /* 生成中不切，避免视图错乱 */
-    if (viewMode === 'current') {
-      viewMode = 'history';
-      var olds = aiScroll.querySelectorAll('.msg.turn-old');
-      for (var i = 0; i < olds.length; i++) olds[i].classList.remove('turn-old');
-      updateTurnNav();
-      viewFadeOnce();
-      aiScroll.scrollTop = aiScroll.scrollHeight;   /* 历史视图落到最新处 */
-    } else {
-      viewMode = 'current';
-      hideOldTurns();
-      updateTurnNav();
-      viewFadeOnce();
-    }
+/* 新气泡出现时一次性对齐到它的顶部，之后画面固定不动（不跟随长文增长） */
+function pinToStart(el) {
+  requestAnimationFrame(function() {
+    userScrolled = false;
+    var top = el.offsetTop - 10;
+    aiScroll.scrollTop = top < 0 ? 0 : top;
   });
 }
 
@@ -565,13 +513,8 @@ function send() {
   var q = aiInput.value.trim();
   if (!q || streaming) return;
   if (needKey()) return;
-  /* 新一轮：切到当前轮视图，隐藏历史，从顶部开始，等同刷新后的第一次对话 */
-  activeTurn = turnCount++;
-  viewMode = 'current';
-  hideOldTurns();
-  updateTurnNav();
   streaming = true;
-  aiSend.disabled = false;
+  aiSend.disabled = true;
   messages.push({ role: 'user', content: q });
   addMsg('user', q);
   aiInput.value = '';
@@ -606,12 +549,14 @@ function send() {
     messages: [{ role: 'system', content: sys }].concat(messages.slice(-8)),
     stream: true,
     temperature: 0.9,
-    max_tokens: 3000
+    /* 深度思考模型的 max_tokens 含思考+正文，必须留足预算，否则思考吃光预算、正文为0（finish_reason=length） */
+    max_tokens: MODEL === 'deepseek-v4-pro' ? 8000 : 4000
   };
 
   var reasoning = '';
   var answer = '';
   var answerEl = null;
+  var truncated = false;   /* finish_reason=length 截断标志：兜底提示而非干等 */
   var lastDataAt = Date.now();   /* 网络假死检测：60s 无任何数据则切换整体读取 */
 
   function handleLine(line) {
@@ -621,7 +566,9 @@ function send() {
     if (data === '[DONE]') return;
     var obj;
     try { obj = JSON.parse(data); } catch (e) { return; }
-    var delta = obj.choices && obj.choices[0] && obj.choices[0].delta;
+    var choice = obj.choices && obj.choices[0];
+    var delta = choice && choice.delta;
+    if (choice && choice.finish_reason === 'length') truncated = true;
     if (!delta) return;
     if (delta.reasoning_content) {
       lastDataAt = Date.now();
@@ -637,7 +584,7 @@ function send() {
         answerEl = addMsg('assistant', '');
         answerEl.classList.add('pending');   /* 生成前：骨架小框占位 + 波浪扫光 */
         addSkeleton(answerEl);
-        /* 轮次视图保持顶部：新轮开始时已 scrollTop=0，这里不再做定位滚动 */
+        pinToStart(answerEl.parentNode);      /* 一次性对齐到气泡顶部，之后画面固定不动 */
       }
       answer += delta.content;
       /* 流式期间不渲染正文（避免逐字蹦出），等 finishOK 整段扩散浮现 */
@@ -648,25 +595,27 @@ function send() {
     streaming = false;
     aiSend.disabled = false;
     endThink();
+    var hint = truncated
+      ? '输出因长度上限被截断，没能生成正文。请把问题拆小一点，或分多次让我写，再点一次生成。'
+      : '(模型没有返回正文，请再点一次生成)';
     if (!answerEl) {
       thinkCard.classList.add('collapsed');
-      answerEl = addMsg('assistant', answer || '(未返回内容)');
-    } else {
-      answerEl.classList.remove('pending');   /* 骨架淡出、框缓慢弹开 */
-      answerEl._base.textContent = answer || '(模型没有返回正文，请再点一次生成)';
-      if (CLIP_OK) {
-        answerEl.classList.add('reveal');     /* 同一层文字彩虹流动 + 从上到下扩散 + 下沉 */
-        setTimeout(function() {
-          answerEl.classList.add('fade');     /* 文字从淡彩虹平滑渐变成白色（.9s） */
-        }, 780);
-      } else {
-        answerEl.classList.add('reveal-plain');   /* 老浏览器：直接以白色文字展开，避免整段不可见 */
-      }
-      /* 兜底：扩散动画结束后立即解除高度限制，保证滚动开始前高度已稳定，长文不被裁 */
-      setTimeout(function() {
-        if (answerEl && answerEl._base) answerEl._base.style.maxHeight = 'none';
-      }, 900);
+      answerEl = addMsg('assistant', answer || hint);
     }
+    answerEl.classList.remove('pending');   /* 骨架淡出、框缓慢弹开 */
+    if (answerEl._base) answerEl._base.textContent = answer || hint;
+    if (CLIP_OK) {
+      answerEl.classList.add('reveal');     /* 同一层文字彩虹流动 + 从上到下扩散 + 下沉 */
+      setTimeout(function() {
+        answerEl.classList.add('fade');     /* 文字从淡彩虹平滑渐变成白色（.9s） */
+      }, 780);
+    } else {
+      answerEl.classList.add('reveal-plain');   /* 老浏览器：直接以白色文字展开，避免整段不可见 */
+    }
+    /* 兜底：扩散动画结束后立即解除高度限制，保证滚动开始前高度已稳定，长文不被裁 */
+    setTimeout(function() {
+      if (answerEl && answerEl._base) answerEl._base.style.maxHeight = 'none';
+    }, 900);
     messages.push({ role: 'assistant', content: answer });
     scrollToEndOnce(1000);   /* 1 秒时开始滚动，与扩散同时收尾；用户自己滑动则不抢 */
   }
