@@ -78,6 +78,8 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   transition:max-height .85s cubic-bezier(.25,1,.4,1) .18s, -webkit-text-fill-color 1.15s ease;
 }
 .night-chat .bub.fade .base { -webkit-text-fill-color:rgba(247,245,239,.97); }
+/* 兜底：老浏览器不支持 background-clip:text 时，不透明文字直接展开，绝不出现空白气泡 */
+.night-chat .bub.reveal-plain .base { max-height:none; color:rgba(247,245,239,.97); -webkit-text-fill-color:rgba(247,245,239,.97); background:none; animation:none; }
 @keyframes rainbowFlow { to { background-position:200% 50%; } }
 /* 生成前：长方形小骨架（四个小圆角），底层淡AI彩虹+亮带从上到下波浪流动；完成后高度+margin 软弹收回（不占位） */
 .night-chat .bub .skel { position:relative; z-index:1; display:block; height:14px; border-radius:4px; margin:8px 0;
@@ -130,6 +132,11 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 #aiSend { border:1px solid rgba(255,255,255,.18); border-radius:999px; background:rgba(255,255,255,.14); color:rgba(255,255,255,.95); padding:0 9px; height:20px; font-size:10.5px; font-weight:500; cursor:pointer; transition:.25s; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:1.5px; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); flex:none; }
 #aiSend:hover { background:rgba(255,255,255,.24); border-color:rgba(255,255,255,.3); }
 #aiSend:disabled { opacity:.45; cursor:default; }
+/* 触摸屏：小键盘按钮，点一下唤起系统软键盘（不退出全屏） */
+#kbBtn { flex:none; width:20px; height:20px; padding:0; border:1px solid rgba(255,255,255,.14); border-radius:999px; background:rgba(255,255,255,.08); color:rgba(255,255,255,.78); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:.22s; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
+#kbBtn:hover { background:rgba(255,255,255,.2); color:rgba(255,255,255,.95); }
+#kbBtn:active { transform:scale(.94); }
+#kbBtn svg { width:12px; height:12px; }
 /* 星星：小而淡，点缀夜空 */
 .star { position:absolute; background:#fff; border-radius:50%; animation:twinkle 4.5s ease-in-out infinite; }
 @keyframes twinkle { 0%,100% { opacity:.45; } 50% { opacity:.85; } }
@@ -183,7 +190,7 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
     <div id="thinkBody"></div>
   </div>
   <div id="aiScroll" class="night-chat"></div>
-  <div class="night-input"><input id="aiInput" placeholder="报一个角度或题目，AI 现场写给你看……" autocomplete="off"/><button id="aiSend">生成</button></div>
+  <div class="night-input"><input id="aiInput" type="text" inputmode="text" enterkeyhint="send" placeholder="报一个角度或题目，AI 现场写给你看……" autocomplete="off"/><button id="kbBtn" type="button" title="唤起系统触摸键盘"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h1M10 10h1M14 10h1M18 10h1M6 14h1M18 14h1M9.5 14h5"/></svg></button><button id="aiSend">生成</button></div>
 </section>
 <section class="slide" data-note="" data-id="pzD"><div class="pg-bg" style="background-image:url(assets/img/Q1Vhbwbr5oHNfAxJS4OcAXvtnQh.jpg);background-size:cover;background-position:center;"></div><div class="el el-text" style="left:238.79999999999998px;top:193.85000000000002px;width:498.95px;height:118.4px;font-size:54px;font-family:'Kaiti SC','STKaiti','KaiTi',KaiTi,serif;color:rgba(46, 110, 94, 1);;text-align:center;line-height:1.3;justify-content:flex-start;display:flex;flex-direction:column;"><p style="text-align:center;line-height:1.3"><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(46, 110, 94, 1);;font-size:54px;font-family:'Kaiti SC','STKaiti','KaiTi',KaiTi,serif">感谢观看</span></span></p></div><div class="el" style="left:456.0px;top:284.85px;width:48.0px;height:1.5px;background-color:rgba(201, 168, 106, 1);"><div class="el-inner" style="font-size:16px;font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;color:rgba(31, 35, 41, 1);;padding-top:3.6px;padding-bottom:3.6px;padding-left:7.2px;padding-right:7.2px;"><p style="text-align:center;line-height:1.2"><span style="color:rgba(255, 255, 255, 1);;font-size:18px;font-family:'Songti SC','STSong','SimSun',SimSun,serif"> </span></p></div></div><div class="el el-text" style="left:177.738031496063px;top:312.2640157480315px;width:604.5232283464567px;height:68.39622047244094px;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif;color:rgba(74, 74, 66, 1);;text-align:center;line-height:1.7;justify-content:flex-start;display:flex;flex-direction:column;"><p style="text-align:center;line-height:1.7;margin-top:10.0px;margin-left:18.0px;text-indent:-18.0px"><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(74, 74, 66, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">平陆运河不仅是一条水道——它是</span></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><b><span style="color:rgba(46, 110, 94, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">百年家国夙愿的接力</span></b></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(74, 74, 66, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">，是</span></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><b><span style="color:rgba(46, 110, 94, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">工程卓越的见证</span></b></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(74, 74, 66, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">，更是</span></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><b><span style="color:rgba(46, 110, 94, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">生态温柔的典范</span></b></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(74, 74, 66, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">。</span></span></p></div><div class="el el-text" style="left:195.05850393700786px;top:395.0564566929134px;width:569.8829921259843px;height:55.87503937007874px;font-size:15px;font-family:'Songti SC','STSong','SimSun',SimSun,serif;color:rgba(140, 140, 125, 1);;text-align:center;line-height:1.8;justify-content:flex-start;display:flex;flex-direction:column;"><p style="text-align:center;line-height:1.8;margin-top:10.0px;margin-left:18.0px;text-indent:-18.0px"><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(140, 140, 125, 1);;font-size:15px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">从1919年《建国方略》的构想到2026年建成通航，平陆运河凝聚了奋斗、创新与人与自然和谐共生的精神。</span></span></p></div><div class="el el-text" style="left:416.62503937007875px;top:89.81850393700788px;width:126.75px;height:39.37503937007874px;font-size:24px;font-family:'Songti SC','STSong','SimSun',SimSun,serif;color:rgba(46, 110, 94, 0.349);;text-align:left;line-height:1.1;justify-content:flex-start;display:flex;flex-direction:column;"></div></section>
   </div>
@@ -323,6 +330,9 @@ var keyGate = document.getElementById('keyGate');
 var keyInput = document.getElementById('keyInput');
 var keyErr = document.getElementById('keyErr');
 
+/* 老浏览器（如 Win10 旧版内核）不支持 background-clip:text 时，彩虹文字会整段透明不可见 */
+var CLIP_OK = !!(window.CSS && CSS.supports && (CSS.supports('background-clip', 'text') || CSS.supports('-webkit-background-clip', 'text')));
+
 /* 模型切换（夜晚页） */
 var modelBtns = document.querySelectorAll('.night-models button');
 modelBtns.forEach(function(b) { b.classList.toggle('on', b.getAttribute('data-m') === MODEL); });
@@ -369,6 +379,26 @@ keyInput.addEventListener('input', function() { keyErr.textContent = ''; });
 
 aiSend.addEventListener('click', send);
 aiInput.addEventListener('keydown', function(e) { if (e.key === 'Enter' && !streaming) send(); });
+
+/* 触摸屏软键盘：点小键盘按钮强制重新聚焦，唤起 Windows 系统触摸键盘（不用退出全屏）
+   浏览器无法直接启动 TabTip.exe，只能让输入框重新获得焦点，交给系统自己弹键盘 */
+var kbBtn = document.getElementById('kbBtn');
+if (kbBtn) {
+  /* 阻止按钮把焦点抢走，这样下面能准确判断输入框当前是否已聚焦 */
+  kbBtn.addEventListener('pointerdown', function(e) { e.preventDefault(); });
+  kbBtn.addEventListener('mousedown', function(e) { e.preventDefault(); });
+  kbBtn.addEventListener('touchstart', function(e) { e.preventDefault(); }, { passive: false });
+  kbBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var focused = document.activeElement === aiInput;
+    if (focused) aiInput.blur();   /* 已聚焦时先失焦，系统才会把键盘重新弹起来 */
+    setTimeout(function() {
+      aiInput.focus();
+      try { var n = aiInput.value.length; aiInput.setSelectionRange(n, n); } catch (err) {}
+    }, focused ? 90 : 0);
+  });
+}
 
 /* 平滑跟随滚动（非线性，不打扰） */
 function nearBottom() {
@@ -511,11 +541,19 @@ function send() {
       answerEl = addMsg('assistant', answer || '(未返回内容)');
     } else {
       answerEl.classList.remove('pending');   /* 骨架淡出、框缓慢弹开 */
-      answerEl._base.textContent = answer;
-      answerEl.classList.add('reveal');       /* 同一层文字彩虹流动 + 从上到下扩散 + 下沉 */
+      answerEl._base.textContent = answer || '(模型没有返回正文，请再点一次生成)';
+      if (CLIP_OK) {
+        answerEl.classList.add('reveal');     /* 同一层文字彩虹流动 + 从上到下扩散 + 下沉 */
+        setTimeout(function() {
+          answerEl.classList.add('fade');     /* 文字从彩虹平滑渐变成白色（1.15s） */
+        }, 1300);
+      } else {
+        answerEl.classList.add('reveal-plain');   /* 老浏览器：直接以白色文字展开，避免整段不可见 */
+      }
+      /* 兜底：动画结束后解除高度限制，长文不被裁剪，低帧率设备漏执行过渡也能显示 */
       setTimeout(function() {
-        answerEl.classList.add('fade');       /* 文字从彩虹平滑渐变成白色（1.15s） */
-      }, 1300);
+        if (answerEl && answerEl._base) answerEl._base.style.maxHeight = 'none';
+      }, 1150);
     }
     messages.push({ role: 'assistant', content: answer });
     followBurst(1900);
@@ -529,7 +567,10 @@ function send() {
     if (answerEl) {
       answerEl.classList.remove('pending');
       answerEl._base.textContent = msg;
-      answerEl.classList.add('reveal');
+      answerEl.classList.add(CLIP_OK ? 'reveal' : 'reveal-plain');
+      setTimeout(function() {
+        if (answerEl && answerEl._base) answerEl._base.style.maxHeight = 'none';
+      }, 1150);
     } else {
       addMsg('assistant', msg);
     }
