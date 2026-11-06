@@ -420,17 +420,22 @@ function scrollToEndOnce(delay) {
   setTimeout(function() {
     if (userScrolled) return;
     var start = aiScroll.scrollTop;
-    var end = aiScroll.scrollHeight - aiScroll.clientHeight;
-    if (end - start < 2) return;
-    var duration = 1300;   /* 总时长，rAF 与屏幕刷新率同步，60 帧往下走 */
+    var end0 = aiScroll.scrollHeight - aiScroll.clientHeight;
+    if (end0 - start < 2) return;
+    /* 700ms：与文本框扩散动画时长一致，1 秒开始、1.7 秒收尾，和转白同时结束 */
+    var duration = 700;
     var t0 = null;
     function step(ts) {
       if (t0 === null) t0 = ts;
       var p = Math.min(1, (ts - t0) / duration);
+      /* 每帧实时取目标：高度兜底解除后内容若变长，滚动也不会错位 */
+      var end = aiScroll.scrollHeight - aiScroll.clientHeight;
       aiScroll.scrollTop = start + (end - start) * easeInOutCubic(p);
       if (p < 1) {
         if (userScrolled) return;   /* 用户接手就停 */
         requestAnimationFrame(step);
+      } else {
+        aiScroll.scrollTop = aiScroll.scrollHeight - aiScroll.clientHeight;
       }
     }
     requestAnimationFrame(step);
@@ -575,13 +580,13 @@ function send() {
       } else {
         answerEl.classList.add('reveal-plain');   /* 老浏览器：直接以白色文字展开，避免整段不可见 */
       }
-      /* 兜底：动画结束后解除高度限制，长文不被裁剪，低帧率设备漏执行过渡也能显示 */
+      /* 兜底：扩散动画结束后立即解除高度限制，保证滚动开始前高度已稳定，长文不被裁 */
       setTimeout(function() {
         if (answerEl && answerEl._base) answerEl._base.style.maxHeight = 'none';
-      }, 1150);
+      }, 900);
     }
     messages.push({ role: 'assistant', content: answer });
-    scrollToEndOnce(1750);   /* 动画播完再滚一次到底；期间用户自己滑动则不抢 */
+    scrollToEndOnce(1000);   /* 1 秒时开始滚动，与扩散同时收尾；用户自己滑动则不抢 */
   }
 
   function fail(msg) {
@@ -595,7 +600,7 @@ function send() {
       answerEl.classList.add(CLIP_OK ? 'reveal' : 'reveal-plain');
       setTimeout(function() {
         if (answerEl && answerEl._base) answerEl._base.style.maxHeight = 'none';
-      }, 1150);
+      }, 900);
     } else {
       addMsg('assistant', msg);
     }
