@@ -275,19 +275,21 @@ function nav(toPrev) {
   lastNav = now;
   toPrev ? prev() : next();
 }
+/* 判断焦点是否在可编辑元素内（输入框/文本域/下拉/contenteditable） */
+function isEditableTarget(el) {
+  if (!el) return false;
+  var tag = (el.tagName || '').toLowerCase();
+  if (tag === 'input' || tag === 'textarea' || tag === 'select') return true;
+  if (el.isContentEditable) return true;
+  return false;
+}
 function onKey(e) {
   var k = e.key || '';
   var kc = e.keyCode || e.which;
-  var tag = (e.target.tagName || '').toLowerCase();
-  var inField = (tag === 'input' || tag === 'textarea');
+  /* 焦点在输入框等可编辑元素：全局翻页/数字跳页全部让位，保证正常打字、光标移动、数字输入、文字横向滚动 */
+  if (isEditableTarget(e.target)) return;
   var isPrev = (k === 'PageUp' || kc === 33 || k === 'ArrowLeft' || kc === 37 || k === 'ArrowUp' || kc === 38);
   var isNext = (k === 'PageDown' || kc === 34 || k === 'ArrowRight' || kc === 39 || k === ' ' || kc === 32 || k === 'ArrowDown' || kc === 40);
-  if (inField) {
-    /* 输入框内：PageUp/PageDown 仍翻页（翻页笔），方向键/空格留给输入 */
-    if (isPrev && (kc === 33 || kc === 37)) { e.preventDefault(); nav(true); }
-    else if (isNext && (kc === 34 || kc === 39)) { e.preventDefault(); nav(false); }
-    return;
-  }
   if (isPrev) { e.preventDefault(); nav(true); }
   else if (isNext) { e.preventDefault(); nav(false); }
   else if (e.type === 'keydown') {
