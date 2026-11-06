@@ -69,6 +69,13 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .night-chat { position:absolute; left:80px; top:252px; width:800px; height:176px; overflow-y:auto; z-index:5; padding:12px 10px 16px; -webkit-mask-image:linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 18px), transparent 100%); mask-image:linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 18px), transparent 100%); scrollbar-width:thin; }
 .night-chat::-webkit-scrollbar { width:5px; }
 .night-chat::-webkit-scrollbar-thumb { background:rgba(201,168,106,.35); border-radius:3px; }
+/* 每轮翻页：整块淡入，模拟\"翻开新一页\" */
+.night-chat.flip { animation:pageIn .45s cubic-bezier(.22,1,.36,1); }
+@keyframes pageIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+/* 左上角历史翻页按钮：仅在有历史时出现 */
+#prevTurn { position:absolute; left:80px; top:8px; z-index:9; display:none; align-items:center; gap:4px; padding:3px 12px; border-radius:999px; border:1px solid rgba(201,168,106,.28); background:rgba(12,18,24,.55); color:rgba(229,207,156,.85); font-size:11.5px; letter-spacing:1.5px; cursor:pointer; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); transition:.25s; }
+#prevTurn.show { display:inline-flex; }
+#prevTurn:hover { background:rgba(201,168,106,.18); border-color:rgba(201,168,106,.5); color:rgba(247,245,239,.95); }
 .night-chat .msg { margin-bottom:10px; }
 .night-chat .who { font-size:11.5px; color:rgba(201,168,106,.8); letter-spacing:2px; margin-bottom:3px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
 .night-chat .bub { font-size:17.5px; line-height:1.55; font-weight:600; color:rgba(247,245,239,.97); background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:16px 18px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:.3px; white-space:pre-wrap; word-break:break-word; backdrop-filter:blur(16px) saturate(1.15); -webkit-backdrop-filter:blur(16px) saturate(1.15); position:relative; overflow:hidden; transition:min-height .75s cubic-bezier(.25,1,.4,1), border-color .3s; }
@@ -182,6 +189,7 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 <section class="slide night" data-note="接下来到现场创作环节。刚才讲了这么多素材，我不要求大家记笔记——换个玩法，让 AI 现场写给你们看。你们现在随便报一个角度：奋斗、传承、人与自然，或者你自己想一个题目都可以。我让 AI 现场把刚才的素材写成一篇作文，注意看素材是怎么被用进去的——看一遍，比抄十遍笔记都有用。页面上这三个问题就是示例，同学可以直接点名一个，我们现场生成。课后想自己试的同学，可以从创作台入口打开，或者找我要链接。" data-id="pzS">
   <div class="pg-bg night-bg"></div>
   <div class="pg-bg night-veil"></div>
+  <button id="prevTurn" type="button"></button>
   <div class="night-title">现场创作台</div>
   <div class="night-sub">你提问，AI 现场写 · 素材是别人的，作文是你自己的</div>
   <div class="night-badge">已接入 HCOA AI 与 DeepSeek</div>
@@ -479,14 +487,67 @@ function addSkeleton(bub) {
   }
 }
 
-/* 新气泡出现时一次性对齐到它的顶部，之后画面固定不动（不跟随长文增长） */
-function pinToStart(el) {
-  requestAnimationFrame(function() {
-    userScrolled = false;
-    var top = el.offsetTop - 10;
-    aiScroll.scrollTop = top < 0 ? 0 : top;
+/* ============ 单轮独立：每轮对话独立成页，不与上一轮堆叠 ============ */
+var turns = [];              /* 已完成的历史轮次 {q, a} */
+var viewMode = 'current';    /* current = 空白起始页；history = 查看历史轮 */
+var prevBtn = document.getElementById('prevTurn');
+
+/* 清空对话区并播放\"翻页\"淡入：新一页从空白开始 */
+function clearStage() {
+  aiScroll.innerHTML = '';
+  aiScroll.scrollTop = 0;
+  aiScroll.classList.remove('flip');
+  void aiScroll.offsetWidth;      /* 强制重排，保证动画能重新触发 */
+  aiScroll.classList.add('flip');
+  userScrolled = false;
+}
+
+/* 以完成态重建某一轮历史（不播逐段动画，直接可读） */
+function renderTurn(t) {
+  aiScroll.innerHTML = '';
+  aiScroll.scrollTop = 0;
+  addMsg('user', t.q);
+  var bub = addMsg('assistant', t.a || '（未完成）');
+  if (CLIP_OK) {
+    bub.classList.add('reveal');
+    bub.classList.add('fade');    /* 直接落到白色文字，避免历史页读不清 */
+  } else {
+    bub.classList.add('reveal-plain');
+  }
+  if (bub._base) bub._base.style.maxHeight = 'none';
+}
+
+function updatePrevBtn() {
+  if (!prevBtn) return;
+  if (!turns.length) { prevBtn.classList.remove('show'); return; }
+  prevBtn.classList.add('show');
+  prevBtn.textContent = viewMode === 'current' ? '‹ 上一轮' : '返回当前 ›';
+}
+
+if (prevBtn) {
+  prevBtn.addEventListener('click', function() {
+    if (streaming) return;                  /* 生成中不翻页，避免视图错乱 */
+    if (viewMode === 'current') {
+      if (!turns.length) return;
+      viewMode = 'history';
+      renderTurn(turns[turns.length - 1]);
+      updatePrevBtn();
+    } else {
+      viewMode = 'current';
+      clearStage();
+      updatePrevBtn();
+    }
   });
 }
+
+/* 在历史页直接点输入框：自动回到当前空白页并聚焦 */
+aiInput.addEventListener('focus', function() {
+  if (viewMode === 'history' && !streaming) {
+    viewMode = 'current';
+    clearStage();
+    updatePrevBtn();
+  }
+});
 
 /* 动效已改为：骨架占位+扫光 → 完成后整段扩散下沉浮现（非逐字） */
 
@@ -515,6 +576,8 @@ function send() {
   if (needKey()) return;
   streaming = true;
   aiSend.disabled = true;
+  viewMode = 'current';
+  clearStage();                    /* 每轮都是全新一页：清空上一轮，从顶部开始 */
   messages.push({ role: 'user', content: q });
   addMsg('user', q);
   aiInput.value = '';
@@ -586,7 +649,6 @@ function send() {
         answerEl = addMsg('assistant', '');
         answerEl.classList.add('pending');   /* 生成前：骨架小框占位 + 波浪扫光 */
         addSkeleton(answerEl);
-        pinToStart(answerEl.parentNode);      /* 一次性对齐到气泡顶部，之后画面固定不动 */
       }
       answer += delta.content;
       /* 流式期间不渲染正文（避免逐字蹦出），等 finishOK 整段扩散浮现 */
@@ -645,7 +707,9 @@ function send() {
       if (answerEl && answerEl._base) answerEl._base.style.maxHeight = 'none';
     }, 900);
     messages.push({ role: 'assistant', content: answer });
-    scrollToEndOnce(1000);   /* 1 秒时开始滚动，与扩散同时收尾；用户自己滑动则不抢 */
+    turns.push({ q: q, a: answer || hint });   /* 存入历史，供左上角翻回 */
+    updatePrevBtn();
+    aiScroll.scrollTop = 0;   /* 每轮独立成页：停留在开头，由用户自己往下读 */
   }
 
   function fail(msg) {
@@ -663,6 +727,8 @@ function send() {
     } else {
       addMsg('assistant', msg);
     }
+    turns.push({ q: q, a: msg });   /* 失败也计入历史，保证翻页不失语 */
+    updatePrevBtn();
   }
 
   function authFail() {
