@@ -71,11 +71,11 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .night-chat .bub.reveal .base {
   max-height:700px;
   color:transparent; -webkit-text-fill-color:transparent;
-  background:linear-gradient(90deg, rgba(255,150,150,.92), rgba(255,222,150,.92), rgba(150,228,255,.92), rgba(196,160,240,.92), rgba(255,150,150,.92));
+  background:linear-gradient(90deg, rgba(255,178,178,.58), rgba(255,230,178,.56), rgba(178,232,255,.58), rgba(210,188,246,.56), rgba(255,178,178,.58));
   background-size:200% 100%;
   -webkit-background-clip:text; background-clip:text;
-  animation:dropIn 1s cubic-bezier(.3,1.32,.55,1) .25s both, rainbowFlow 2.4s linear .25s infinite;
-  transition:max-height .85s cubic-bezier(.25,1,.4,1) .18s, -webkit-text-fill-color 1.15s ease;
+  animation:dropIn .75s cubic-bezier(.3,1.3,.55,1) .16s both, rainbowFlow 2s linear .16s infinite;
+  transition:max-height .7s cubic-bezier(.25,1,.4,1) .12s, -webkit-text-fill-color .9s ease;
 }
 .night-chat .bub.fade .base { -webkit-text-fill-color:rgba(247,245,239,.97); }
 /* 兜底：老浏览器不支持 background-clip:text 时，不透明文字直接展开，绝不出现空白气泡 */
@@ -84,10 +84,10 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 /* 生成前：长方形小骨架（四个小圆角），底层淡AI彩虹+亮带从上到下波浪流动；完成后高度+margin 软弹收回（不占位） */
 .night-chat .bub .skel { position:relative; z-index:1; display:block; height:14px; border-radius:4px; margin:8px 0;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.22), rgba(255,255,255,0)),
-    linear-gradient(90deg, rgba(255,107,107,.16), rgba(254,202,87,.15), rgba(72,219,251,.16), rgba(165,94,234,.16));
+    linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.16), rgba(255,255,255,0)),
+    linear-gradient(90deg, rgba(255,107,107,.11), rgba(254,202,87,.10), rgba(72,219,251,.11), rgba(165,94,234,.10));
   background-size:100% 230%, 100% 100%;
-  animation:skelWave 1.9s ease-in-out infinite;
+  animation:skelWave 1.55s ease-in-out infinite;
   transition:height .65s cubic-bezier(.3,1.25,.5,1), margin .65s cubic-bezier(.3,1.25,.5,1), opacity .45s ease; }
 .night-chat .bub .skel:nth-child(2) { width:88%; }
 .night-chat .bub .skel:nth-child(3) { width:62%; }
@@ -380,23 +380,29 @@ keyInput.addEventListener('input', function() { keyErr.textContent = ''; });
 aiSend.addEventListener('click', send);
 aiInput.addEventListener('keydown', function(e) { if (e.key === 'Enter' && !streaming) send(); });
 
-/* 触摸屏软键盘：点小键盘按钮强制重新聚焦，唤起 Windows 系统触摸键盘（不用退出全屏）
-   浏览器无法直接启动 TabTip.exe，只能让输入框重新获得焦点，交给系统自己弹键盘 */
+/* 触摸屏软键盘：点小键盘按钮唤起 Windows 系统触摸键盘（TabTip），不用退出全屏
+   注意：网页没有权限直接启动 TabTip.exe，只能让输入框在真实触摸手势里重新聚焦，
+   由 Windows 自己决定弹不弹键盘，所以这里不拦截默认焦点行为 */
 var kbBtn = document.getElementById('kbBtn');
 if (kbBtn) {
-  /* 阻止按钮把焦点抢走，这样下面能准确判断输入框当前是否已聚焦 */
-  kbBtn.addEventListener('pointerdown', function(e) { e.preventDefault(); });
-  kbBtn.addEventListener('mousedown', function(e) { e.preventDefault(); });
-  kbBtn.addEventListener('touchstart', function(e) { e.preventDefault(); }, { passive: false });
+  function kbFocus() {
+    aiInput.focus();
+    try { var n = aiInput.value.length; aiInput.setSelectionRange(n, n); } catch (err) {}
+  }
   kbBtn.addEventListener('click', function(e) {
-    e.preventDefault();
     e.stopPropagation();
     var focused = document.activeElement === aiInput;
-    if (focused) aiInput.blur();   /* 已聚焦时先失焦，系统才会把键盘重新弹起来 */
-    setTimeout(function() {
-      aiInput.focus();
-      try { var n = aiInput.value.length; aiInput.setSelectionRange(n, n); } catch (err) {}
-    }, focused ? 90 : 0);
+    if (focused) {
+      aiInput.blur();                       /* 已聚焦时先失焦，系统才会重新判定并再弹一次 */
+      setTimeout(kbFocus, 0);
+    } else {
+      kbFocus();                            /* 直接在点击手势内聚焦，命中系统唤起时机 */
+    }
+  });
+  /* 再兜一次：触摸抬起时若输入框仍未聚焦，立刻补一次 */
+  kbBtn.addEventListener('touchend', function(e) {
+    e.stopPropagation();
+    if (document.activeElement !== aiInput) kbFocus();
   });
 }
 
@@ -545,8 +551,8 @@ function send() {
       if (CLIP_OK) {
         answerEl.classList.add('reveal');     /* 同一层文字彩虹流动 + 从上到下扩散 + 下沉 */
         setTimeout(function() {
-          answerEl.classList.add('fade');     /* 文字从彩虹平滑渐变成白色（1.15s） */
-        }, 1300);
+          answerEl.classList.add('fade');     /* 文字从淡彩虹平滑渐变成白色（.9s） */
+        }, 780);
       } else {
         answerEl.classList.add('reveal-plain');   /* 老浏览器：直接以白色文字展开，避免整段不可见 */
       }
