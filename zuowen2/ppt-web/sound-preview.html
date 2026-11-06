@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>提示音试听</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { min-height:100vh; background:#0b0f14; color:#e8e6df; font-family:'PingFang SC','Microsoft YaHei',sans-serif; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; padding:32px 20px; }
+  h1 { font-size:19px; font-weight:600; letter-spacing:2px; }
+  p.hint { font-size:12.5px; color:rgba(232,230,223,.55); letter-spacing:.5px; text-align:center; line-height:1.7; }
+  #acState { font-size:13px; color:#9fd0a8; letter-spacing:1px; }
+  #acState.bad { color:#e8a08a; }
+  .row { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+  button { padding:14px 22px; border-radius:14px; border:1px solid rgba(201,168,106,.35); background:rgba(255,255,255,.06); color:#e8e6df; font-size:14.5px; letter-spacing:1px; cursor:pointer; -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); transition:.2s; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
+  button:active { background:rgba(201,168,106,.25); }
+  button.test { border-color:rgba(232,160,138,.55); font-weight:600; }
+  button.combo { border-color:rgba(120,180,255,.4); }
+</style>
+</head>
+<body>
+<h1>提示音试听</h1>
+<p id="acState">音频状态：尚未启动（点任意按钮激活）</p>
+<p class="hint">先确认 iPhone 侧边静音键已关闭、媒体音量已开大<br>然后点“扬声器测试”，能听到一声长音说明设备正常</p>
+<div class="row">
+  <button class="test" onclick="speakerTest()">扬声器测试（大音量）</button>
+</div>
+<div class="row">
+  <button onclick="play(1)">一、清亮双音</button>
+  <button onclick="play(2)">二、柔和单音</button>
+  <button onclick="play(3)">三、灵动铃铛</button>
+</div>
+<p class="hint">下面是“开始音 + 完成音”的完整组合</p>
+<div class="row">
+  <button class="combo" onclick="playCombo(1)">组合一</button>
+  <button class="combo" onclick="playCombo(2)">组合二</button>
+  <button class="combo" onclick="playCombo(3)">组合三</button>
+</div>
+<script>
+var AC = null;
+var stateEl = document.getElementById('acState');
+
+function ac() {
+  if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+  if (AC.state === 'suspended' || AC.state === 'interrupted') AC.resume();
+  return AC;
+}
+function showState() {
+  if (!AC) return;
+  stateEl.textContent = '音频状态：' + AC.state;
+  stateEl.className = AC.state === 'running' ? '' : 'bad';
+}
+/* iOS 要求在用户手势内创建/恢复上下文：任意触摸先解锁 */
+function unlock() {
+  ac();
+  showState();
+  if (AC && AC.resume) AC.resume().then(showState);
+}
+document.addEventListener('touchstart', unlock, { passive: true, capture: true });
+document.addEventListener('click', unlock, true);
+
+function tone(ctx, type, freq, start, dur, vol) {
+  var o = ctx.createOscillator();
+  var g = ctx.createGain();
+  o.type = type;
+  o.frequency.setValueAtTime(freq, start);
+  g.gain.setValueAtTime(0.0001, start);
+  g.gain.exponentialRampToValueAtTime(vol, start + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(start); o.stop(start + dur + 0.02);
+}
+/* 扬声器测试：440Hz 长音，0.5 大增益，确认设备本身能出声 */
+function speakerTest() {
+  var ctx = ac();
+  ctx.resume();
+  var t = ctx.currentTime;
+  var o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(440, t);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.5, t + 0.03);
+  g.gain.setValueAtTime(0.5, t + 0.55);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.8);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(t); o.stop(t + 0.85);
+  setTimeout(showState, 60);
+}
+function play(n) {
+  var ctx = ac();
+  ctx.resume();
+  var t = ctx.currentTime + 0.01;
+  if (n === 1) {
+    tone(ctx, 'sine', 1318.5, t, 0.22, 0.3);
+    tone(ctx, 'sine', 1975.5, t + 0.075, 0.26, 0.28);
+    tone(ctx, 'triangle', 2637, t + 0.075, 0.18, 0.07);
+  } else if (n === 2) {
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(1568, t);
+    o.frequency.exponentialRampToValueAtTime(1760, t + 0.08);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.28, t + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(t); o.stop(t + 0.42);
+  } else {
+    tone(ctx, 'sine', 1174.7, t, 0.18, 0.24);
+    tone(ctx, 'sine', 2793.8, t, 0.14, 0.08);
+    tone(ctx, 'sine', 1568, t + 0.06, 0.2, 0.24);
+    tone(ctx, 'sine', 3720, t + 0.06, 0.12, 0.07);
+    tone(ctx, 'sine', 2093, t + 0.12, 0.24, 0.22);
+  }
+  setTimeout(showState, 60);
+}
+function doneTone(ctx, n) {
+  var t = ctx.currentTime + 0.35;
+  if (n === 1) {
+    tone(ctx, 'sine', 1975.5, t, 0.2, 0.22);
+    tone(ctx, 'sine', 1568, t + 0.08, 0.28, 0.2);
+  } else if (n === 2) {
+    tone(ctx, 'sine', 1760, t, 0.35, 0.2);
+  } else {
+    tone(ctx, 'sine', 2093, t, 0.22, 0.2);
+    tone(ctx, 'sine', 1568, t + 0.09, 0.3, 0.18);
+  }
+}
+function playCombo(n) {
+  var ctx = ac();
+  ctx.resume();
+  play(n);
+  doneTone(ctx, n);
+}
+</script>
+</body>
+</html>
