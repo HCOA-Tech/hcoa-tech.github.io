@@ -24,13 +24,19 @@ body { font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif
 .el-inner { position:absolute; left:0; top:0; width:100%; height:100%; }
 .el-table td { vertical-align:middle; }
 
-/* ============ 导航 HUD（左下角黑边内，缩小版） ============ */
-#hud { position:fixed; z-index:50; left:28px; bottom:26px; display:flex; align-items:center; gap:3px; background:rgba(10,10,10,.35); border:1px solid rgba(201,168,106,.18); border-radius:999px; padding:2px 6px; backdrop-filter:blur(6px); user-select:none; }
-#hud .page { font-size:10px; color:rgba(229,207,156,.75); min-width:36px; text-align:center; font-variant-numeric:tabular-nums; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:.5px; }
-#hud .sep { width:1px; height:11px; background:rgba(201,168,106,.16); margin:0 2px; }
-#hud button { background:none; border:1px solid transparent; color:rgba(247,245,239,.7); border-radius:999px; padding:2px 7px; font-size:9.5px; cursor:pointer; transition:.25s; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:1px; min-width:22px; }
+/* ============ 导航 HUD（左下角黑边内，放大版） ============ */
+#hud { position:fixed; z-index:50; left:28px; bottom:26px; display:flex; align-items:center; gap:5px; background:rgba(10,10,10,.35); border:1px solid rgba(201,168,106,.18); border-radius:999px; padding:4px 10px; backdrop-filter:blur(6px); user-select:none; }
+#hud .page { font-size:12px; color:rgba(229,207,156,.75); min-width:44px; text-align:center; font-variant-numeric:tabular-nums; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:.5px; }
+#hud .sep { width:1px; height:15px; background:rgba(201,168,106,.16); margin:0 3px; }
+#hud button { background:none; border:1px solid transparent; color:rgba(247,245,239,.7); border-radius:999px; padding:5px 11px; font-size:11.5px; cursor:pointer; transition:.25s; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:1px; min-width:30px; display:inline-flex; align-items:center; justify-content:center; }
 #hud button:hover { background:rgba(201,168,106,.12); border-color:rgba(201,168,106,.28); color:#e5cf9c; }
-#hud #btnPrev,#hud #btnNext { font-size:12px; padding:1px 6px 2px; line-height:1; color:rgba(229,207,156,.8); }
+#hud #btnPrev,#hud #btnNext { font-size:19px; padding:2px 12px; line-height:1; min-width:38px; color:rgba(229,207,156,.85); }
+#hud #btnFull { font-size:12px; padding:6px 14px; }
+/* 键盘按钮：只在 AI 页显示，位于全屏按钮左侧 */
+#kbBtn { display:none; padding:5px 9px; }
+#kbBtn svg { width:15px; height:15px; }
+body.onAI #kbBtn { display:inline-flex; }
+#kbBtn:active { transform:scale(.94); }
 
 /* 左右点击翻页热区（无视觉提示，只响应点击） */
 #hitL,#hitR { position:fixed; z-index:40; top:0; bottom:0; width:12%; cursor:pointer; opacity:0; }
@@ -132,11 +138,19 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 #aiSend { border:1px solid rgba(255,255,255,.18); border-radius:999px; background:rgba(255,255,255,.14); color:rgba(255,255,255,.95); padding:0 9px; height:20px; font-size:10.5px; font-weight:500; cursor:pointer; transition:.25s; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:1.5px; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); flex:none; }
 #aiSend:hover { background:rgba(255,255,255,.24); border-color:rgba(255,255,255,.3); }
 #aiSend:disabled { opacity:.45; cursor:default; }
-/* 触摸屏：小键盘按钮，点一下唤起系统软键盘（不退出全屏） */
-#kbBtn { flex:none; width:20px; height:20px; padding:0; border:1px solid rgba(255,255,255,.14); border-radius:999px; background:rgba(255,255,255,.08); color:rgba(255,255,255,.78); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:.22s; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
-#kbBtn:hover { background:rgba(255,255,255,.2); color:rgba(255,255,255,.95); }
-#kbBtn:active { transform:scale(.94); }
-#kbBtn svg { width:12px; height:12px; }
+/* 左上角历史/返回按钮：开始对话且存在历史轮次时才显示 */
+#turnNav { position:absolute; left:18px; top:14px; z-index:20; display:none; align-items:center; gap:5px;
+  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.16); border-radius:999px;
+  padding:6px 14px; font-size:12px; color:rgba(247,245,239,.85); cursor:pointer;
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); transition:.25s; letter-spacing:1px;
+  font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; -webkit-tap-highlight-color:transparent; }
+#turnNav:hover { background:rgba(255,255,255,.18); color:#fff; }
+#turnNav:active { transform:scale(.96); }
+#turnNav.show { display:inline-flex; }
+/* 历史轮次隐藏（current 视图只显示当前轮）；切换时容器淡入，不生硬 */
+.night-chat .msg.turn-old { display:none; }
+.night-chat.view-fade { animation:viewFade .35s ease; }
+@keyframes viewFade { from { opacity:.3; } to { opacity:1; } }
 /* 星星：小而淡，点缀夜空 */
 .star { position:absolute; background:#fff; border-radius:50%; animation:twinkle 4.5s ease-in-out infinite; }
 @keyframes twinkle { 0%,100% { opacity:.45; } 50% { opacity:.85; } }
@@ -181,6 +195,7 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 <section class="slide night" data-note="接下来到现场创作环节。刚才讲了这么多素材，我不要求大家记笔记——换个玩法，让 AI 现场写给你们看。你们现在随便报一个角度：奋斗、传承、人与自然，或者你自己想一个题目都可以。我让 AI 现场把刚才的素材写成一篇作文，注意看素材是怎么被用进去的——看一遍，比抄十遍笔记都有用。页面上这三个问题就是示例，同学可以直接点名一个，我们现场生成。课后想自己试的同学，可以从创作台入口打开，或者找我要链接。" data-id="pzS">
   <div class="pg-bg night-bg"></div>
   <div class="pg-bg night-veil"></div>
+  <button id="turnNav" type="button" title="查看历史对话"></button>
   <div class="night-title">现场创作台</div>
   <div class="night-sub">你提问，AI 现场写 · 素材是别人的，作文是你自己的</div>
   <div class="night-badge">已接入 HCOA AI 与 DeepSeek</div>
@@ -190,18 +205,19 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
     <div id="thinkBody"></div>
   </div>
   <div id="aiScroll" class="night-chat"></div>
-  <div class="night-input"><input id="aiInput" type="text" inputmode="text" enterkeyhint="send" placeholder="报一个角度或题目，AI 现场写给你看……" autocomplete="off"/><button id="kbBtn" type="button" title="唤起系统触摸键盘"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h1M10 10h1M14 10h1M18 10h1M6 14h1M18 14h1M9.5 14h5"/></svg></button><button id="aiSend">生成</button></div>
+  <div class="night-input"><input id="aiInput" type="text" inputmode="text" enterkeyhint="send" placeholder="报一个角度或题目，AI 现场写给你看……" autocomplete="off"/><button id="aiSend">生成</button></div>
 </section>
 <section class="slide" data-note="" data-id="pzD"><div class="pg-bg" style="background-image:url(assets/img/Q1Vhbwbr5oHNfAxJS4OcAXvtnQh.jpg);background-size:cover;background-position:center;"></div><div class="el el-text" style="left:238.79999999999998px;top:193.85000000000002px;width:498.95px;height:118.4px;font-size:54px;font-family:'Kaiti SC','STKaiti','KaiTi',KaiTi,serif;color:rgba(46, 110, 94, 1);;text-align:center;line-height:1.3;justify-content:flex-start;display:flex;flex-direction:column;"><p style="text-align:center;line-height:1.3"><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(46, 110, 94, 1);;font-size:54px;font-family:'Kaiti SC','STKaiti','KaiTi',KaiTi,serif">感谢观看</span></span></p></div><div class="el" style="left:456.0px;top:284.85px;width:48.0px;height:1.5px;background-color:rgba(201, 168, 106, 1);"><div class="el-inner" style="font-size:16px;font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;color:rgba(31, 35, 41, 1);;padding-top:3.6px;padding-bottom:3.6px;padding-left:7.2px;padding-right:7.2px;"><p style="text-align:center;line-height:1.2"><span style="color:rgba(255, 255, 255, 1);;font-size:18px;font-family:'Songti SC','STSong','SimSun',SimSun,serif"> </span></p></div></div><div class="el el-text" style="left:177.738031496063px;top:312.2640157480315px;width:604.5232283464567px;height:68.39622047244094px;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif;color:rgba(74, 74, 66, 1);;text-align:center;line-height:1.7;justify-content:flex-start;display:flex;flex-direction:column;"><p style="text-align:center;line-height:1.7;margin-top:10.0px;margin-left:18.0px;text-indent:-18.0px"><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(74, 74, 66, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">平陆运河不仅是一条水道——它是</span></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><b><span style="color:rgba(46, 110, 94, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">百年家国夙愿的接力</span></b></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(74, 74, 66, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">，是</span></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><b><span style="color:rgba(46, 110, 94, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">工程卓越的见证</span></b></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(74, 74, 66, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">，更是</span></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><b><span style="color:rgba(46, 110, 94, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">生态温柔的典范</span></b></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(74, 74, 66, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">。</span></span></p></div><div class="el el-text" style="left:195.05850393700786px;top:395.0564566929134px;width:569.8829921259843px;height:55.87503937007874px;font-size:15px;font-family:'Songti SC','STSong','SimSun',SimSun,serif;color:rgba(140, 140, 125, 1);;text-align:center;line-height:1.8;justify-content:flex-start;display:flex;flex-direction:column;"><p style="text-align:center;line-height:1.8;margin-top:10.0px;margin-left:18.0px;text-indent:-18.0px"><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(140, 140, 125, 1);;font-size:15px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">从1919年《建国方略》的构想到2026年建成通航，平陆运河凝聚了奋斗、创新与人与自然和谐共生的精神。</span></span></p></div><div class="el el-text" style="left:416.62503937007875px;top:89.81850393700788px;width:126.75px;height:39.37503937007874px;font-size:24px;font-family:'Songti SC','STSong','SimSun',SimSun,serif;color:rgba(46, 110, 94, 0.349);;text-align:left;line-height:1.1;justify-content:flex-start;display:flex;flex-direction:column;"></div></section>
   </div>
 </div>
 
 <div id="hud">
-  <button id="btnPrev" title="上一页">‹</button>
+  <button id="btnPrev" type="button" title="上一页">‹</button>
   <span class="page" id="hudPage">01 / 16</span>
-  <button id="btnNext" title="下一页">›</button>
+  <button id="btnNext" type="button" title="下一页">›</button>
   <span class="sep"></span>
-  <button id="btnFull">全屏</button>
+  <button id="kbBtn" type="button" title="唤起系统触摸键盘"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h1M10 10h1M14 10h1M18 10h1M6 14h1M18 14h1M9.5 14h5"/></svg></button>
+  <button id="btnFull" type="button">全屏</button>
 </div>
 <div id="hitL" title="上一页"></div>
 <div id="hitR" title="下一页"></div>
@@ -319,6 +335,10 @@ var _dm = localStorage.getItem('ds_model');
 var MODEL = (_dm === 'deepseek-flash' || _dm === 'deepseek-v4-pro') ? _dm : 'deepseek-flash';
 var messages = [];
 var streaming = false;
+/* 轮次视图：每次新对话只显示当前轮（从顶部开始，像刷新后的第一次），历史轮次隐藏，左上角按钮回看 */
+var turnCount = 0;      /* 已创建的轮次总数 */
+var activeTurn = 0;     /* 当前轮次号 */
+var viewMode = 'current';
 
 var aiScroll = document.getElementById('aiScroll');
 var aiInput = document.getElementById('aiInput');
@@ -441,19 +461,12 @@ function scrollToEndOnce(delay) {
     requestAnimationFrame(step);
   }, delay);
 }
-/* 新气泡出现时一次性对齐到它的顶部，之后画面固定不动（不跟随长文增长） */
-function pinToStart(el) {
-  requestAnimationFrame(function() {
-    userScrolled = false;
-    var top = el.offsetTop - 10;
-    aiScroll.scrollTop = top < 0 ? 0 : top;
-  });
-}
 
 /* 消息渲染 */
 function addMsg(role, text) {
   var wrap = document.createElement('div');
   wrap.className = 'msg ' + role;
+  wrap.setAttribute('data-turn', activeTurn);
   var who = document.createElement('div');
   who.className = 'who';
   who.textContent = role === 'user' ? '你 · ' + (MODEL === 'deepseek-v4-pro' ? '深度思考' : '快速') : 'HCOA AI';
@@ -483,6 +496,48 @@ function addSkeleton(bub) {
   }
 }
 
+/* ============ 轮次视图切换 ============ */
+/* current 视图：隐藏非当前轮，回到顶部 */
+function hideOldTurns() {
+  var all = aiScroll.querySelectorAll('.msg');
+  for (var i = 0; i < all.length; i++) {
+    var isCur = all[i].getAttribute('data-turn') === String(activeTurn);
+    all[i].classList.toggle('turn-old', !isCur);
+  }
+  aiScroll.scrollTop = 0;
+}
+function updateTurnNav() {
+  var nav = document.getElementById('turnNav');
+  if (!nav) return;
+  if (turnCount < 2) { nav.classList.remove('show'); return; }
+  nav.classList.add('show');
+  nav.textContent = viewMode === 'current' ? '‹ 历史对话' : '返回当前 ›';
+}
+function viewFadeOnce() {
+  aiScroll.classList.remove('view-fade');
+  void aiScroll.offsetWidth;   /* 强制重排，重新触发淡入 */
+  aiScroll.classList.add('view-fade');
+}
+var turnNav = document.getElementById('turnNav');
+if (turnNav) {
+  turnNav.addEventListener('click', function() {
+    if (streaming) return;     /* 生成中不切，避免视图错乱 */
+    if (viewMode === 'current') {
+      viewMode = 'history';
+      var olds = aiScroll.querySelectorAll('.msg.turn-old');
+      for (var i = 0; i < olds.length; i++) olds[i].classList.remove('turn-old');
+      updateTurnNav();
+      viewFadeOnce();
+      aiScroll.scrollTop = aiScroll.scrollHeight;   /* 历史视图落到最新处 */
+    } else {
+      viewMode = 'current';
+      hideOldTurns();
+      updateTurnNav();
+      viewFadeOnce();
+    }
+  });
+}
+
 /* 动效已改为：骨架占位+扫光 → 完成后整段扩散下沉浮现（非逐字） */
 
 /* 思考区计时 */
@@ -508,8 +563,13 @@ function send() {
   var q = aiInput.value.trim();
   if (!q || streaming) return;
   if (needKey()) return;
+  /* 新一轮：切到当前轮视图，隐藏历史，从顶部开始，等同刷新后的第一次对话 */
+  activeTurn = turnCount++;
+  viewMode = 'current';
+  hideOldTurns();
+  updateTurnNav();
   streaming = true;
-  aiSend.disabled = true;
+  aiSend.disabled = false;
   messages.push({ role: 'user', content: q });
   addMsg('user', q);
   aiInput.value = '';
@@ -555,7 +615,7 @@ function send() {
         answerEl = addMsg('assistant', '');
         answerEl.classList.add('pending');   /* 生成前：骨架小框占位 + 波浪扫光 */
         addSkeleton(answerEl);
-        pinToStart(answerEl.parentNode);      /* 一次性对齐到气泡顶部，之后画面固定不动 */
+        /* 轮次视图保持顶部：新轮开始时已 scrollTop=0，这里不再做定位滚动 */
       }
       answer += delta.content;
       /* 流式期间不渲染正文（避免逐字蹦出），等 finishOK 整段扩散浮现 */
