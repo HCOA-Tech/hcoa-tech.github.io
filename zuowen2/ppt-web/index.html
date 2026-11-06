@@ -406,23 +406,34 @@ if (kbBtn) {
   });
 }
 
-/* 生成期间不跟随滚动：动画播完后只滚一次到底（原生 smooth，由合成器跑，不掉帧）
-   用户中途自己滑动则放弃这次自动滚动，不跟用户抢 */
+/* 生成期间不跟随滚动：动画播完后只滚一次到底，rAF 缓动，像手指慢慢滑下去
+   用户中途自己滑动则放弃，不跟用户抢 */
 var userScrolled = false;
 function markUserScroll() { userScrolled = true; }
 if (aiScroll) {
   aiScroll.addEventListener('wheel', markUserScroll, { passive: true });
   aiScroll.addEventListener('touchmove', markUserScroll, { passive: true });
 }
+/* easeInOutCubic：起步慢、中段匀速、收尾慢，模拟人手滑动，不生硬 */
+function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
 function scrollToEndOnce(delay) {
   setTimeout(function() {
     if (userScrolled) return;
-    var top = aiScroll.scrollHeight - aiScroll.clientHeight;
-    try {
-      aiScroll.scrollTo({ top: top, behavior: 'smooth' });
-    } catch (e) {
-      aiScroll.scrollTop = top;
+    var start = aiScroll.scrollTop;
+    var end = aiScroll.scrollHeight - aiScroll.clientHeight;
+    if (end - start < 2) return;
+    var duration = 1300;   /* 总时长，rAF 与屏幕刷新率同步，60 帧往下走 */
+    var t0 = null;
+    function step(ts) {
+      if (t0 === null) t0 = ts;
+      var p = Math.min(1, (ts - t0) / duration);
+      aiScroll.scrollTop = start + (end - start) * easeInOutCubic(p);
+      if (p < 1) {
+        if (userScrolled) return;   /* 用户接手就停 */
+        requestAnimationFrame(step);
+      }
     }
+    requestAnimationFrame(step);
   }, delay);
 }
 /* 新气泡出现时一次性对齐到它的顶部，之后画面固定不动（不跟随长文增长） */
