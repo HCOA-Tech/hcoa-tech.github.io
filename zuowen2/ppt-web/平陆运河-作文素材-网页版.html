@@ -60,10 +60,17 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .night-models button { border:1px solid rgba(201,168,106,.45); background:rgba(255,255,255,.06); color:rgba(247,245,239,.85); border-radius:999px; padding:6px 24px; font-size:13px; cursor:pointer; transition:.3s; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:2px; backdrop-filter:blur(8px); }
 .night-models button:hover { background:rgba(255,255,255,.12); }
 .night-models button.on { background:rgba(201,168,106,.92); color:#0a1220; border-color:rgba(201,168,106,1); font-weight:600; }
-.night-chat { position:absolute; left:80px; top:252px; width:800px; height:176px; overflow-y:auto; z-index:5; padding:12px 10px 16px; -webkit-mask-image:linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 18px), transparent 100%); mask-image:linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 18px), transparent 100%); scrollbar-width:thin; }
-.night-chat::-webkit-scrollbar { width:5px; }
-.night-chat::-webkit-scrollbar-thumb { background:rgba(201,168,106,.35); border-radius:3px; }
+.night-chat { position:absolute; left:80px; top:252px; width:800px; height:176px; overflow:hidden; z-index:5; padding:12px 10px 16px; }
+/* 轮次：默认隐藏，当前轮显示；切换时淡入+轻微上移（无滚动） */
+.night-chat .turn { display:none; flex-direction:column; }
+.night-chat .turn.show { display:flex; animation:turnIn .55s cubic-bezier(.22,1,.36,1); }
+@keyframes turnIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+.night-chat .turn.leaving { animation:turnOut .4s ease forwards; }
+@keyframes turnOut { to { opacity:0; transform:translateY(-12px); } }
 .night-chat .msg { margin-bottom:10px; }
+/* thinking 阶段：给上方思考条预留位置，用户气泡在其下方；思考完移除 .thinking 后平滑上移到顶部 */
+.night-chat .turn .msg.user { margin-top:0; transition:margin-top .6s cubic-bezier(.22,1,.36,1); }
+.slide.night.thinking .night-chat .turn .msg.user { margin-top:96px; }
 .night-chat .who { font-size:11.5px; color:rgba(201,168,106,.8); letter-spacing:2px; margin-bottom:3px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
 .night-chat .bub { font-size:17.5px; line-height:1.55; font-weight:600; color:rgba(247,245,239,.97); background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:16px 18px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:.3px; white-space:pre-wrap; word-break:break-word; backdrop-filter:blur(6px); position:relative; overflow:hidden; transition:min-height .75s cubic-bezier(.25,1,.4,1), border-color .3s; }
 .night-chat .bub .base { position:relative; z-index:1; display:block; color:rgba(247,245,239,.97); white-space:pre-wrap; word-break:break-word; max-height:0; overflow:hidden; transition:max-height .85s cubic-bezier(.25,1,.4,1) .18s; }
@@ -110,8 +117,14 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 }
 /* 用户自己的消息：中性玻璃质感（不再是绿色） */
 .night-chat .msg.user .bub { background:rgba(255,255,255,.10); border-color:rgba(255,255,255,.18); }
-.night-think { position:absolute; left:80px; top:252px; width:800px; z-index:6; border:1px solid rgba(201,168,106,.5); border-left:4px solid rgba(201,168,106,1); border-radius:12px; background:rgba(13,26,38,.92); overflow:hidden; transition:max-height .5s cubic-bezier(.22,1,.36,1), opacity .4s; max-height:120px; backdrop-filter:blur(8px); }
+.night-think { position:absolute; left:80px; top:252px; width:800px; z-index:6; border:1px solid rgba(201,168,106,.42); border-left:4px solid rgba(201,168,106,.9); border-radius:12px; background:rgba(13,26,38,.58); overflow:hidden; transition:max-height .5s cubic-bezier(.22,1,.36,1), opacity .4s; max-height:120px; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
 .night-think.collapsed { max-height:0; opacity:0; border-width:0; }
+/* 轮次导航：仅 chat-mode 且有历史时显示，小而融入 */
+.turn-nav { position:absolute; top:6px; right:84px; z-index:8; display:flex; align-items:center; gap:10px; opacity:0; pointer-events:none; transition:opacity .4s; }
+.turn-nav.show { opacity:1; pointer-events:auto; }
+.turn-nav button { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); color:rgba(247,245,239,.85); border-radius:999px; font-size:11px; padding:3px 10px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; cursor:pointer; }
+.turn-nav button:disabled { opacity:.3; cursor:default; }
+.turn-nav span { font-size:11px; color:rgba(201,168,106,.85); min-width:34px; text-align:center; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
 .nt-head { display:flex; align-items:center; gap:8px; padding:9px 14px 6px; font-size:12px; color:rgba(201,168,106,.95); letter-spacing:1.5px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
 .nt-spin { width:11px; height:11px; border:2px solid rgba(201,168,106,.3); border-top-color:rgba(201,168,106,1); border-radius:50%; animation:rot .8s linear infinite; }
 @keyframes rot { to { transform:rotate(360deg); } }
@@ -181,6 +194,11 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   <div id="thinkCard" class="night-think collapsed">
     <div class="nt-head"><span class="nt-spin"></span><span>思考过程</span><span class="nt-sec" id="thinkSec">0s</span></div>
     <div id="thinkBody"></div>
+  </div>
+  <div id="turnNav" class="turn-nav">
+    <button id="prevTurn" type="button">‹ 上一条</button>
+    <span id="turnLabel"></span>
+    <button id="nextTurn" type="button">下一条 ›</button>
   </div>
   <div id="aiScroll" class="night-chat"></div>
   <div class="night-input"><input id="aiInput" placeholder="报一个角度或题目，AI 现场写给你看……" autocomplete="off"/><button id="aiSend">生成</button></div>
@@ -319,9 +337,52 @@ var aiSend = document.getElementById('aiSend');
 var thinkCard = document.getElementById('thinkCard');
 var thinkBody = document.getElementById('thinkBody');
 var thinkSec = document.getElementById('thinkSec');
+var turnNav = document.getElementById('turnNav');
+var prevTurnBtn = document.getElementById('prevTurn');
+var nextTurnBtn = document.getElementById('nextTurn');
+var turnLabel = document.getElementById('turnLabel');
 var keyGate = document.getElementById('keyGate');
 var keyInput = document.getElementById('keyInput');
 var keyErr = document.getElementById('keyErr');
+
+/* 轮次管理：每次对话一个 turn，只显示当前轮，历史轮通过导航查看（无滚动） */
+var turns = [];
+var viewIndex = -1;
+var currentTurn = null;
+function createTurn() {
+  var t = document.createElement('div');
+  t.className = 'turn';
+  aiScroll.appendChild(t);
+  turns.push(t);
+  showTurn(turns.length - 1, true);
+  return t;
+}
+function showTurn(i, instant) {
+  if (i < 0 || i >= turns.length) return;
+  var next = turns[i];
+  if (currentTurn && currentTurn !== next) {
+    var old = currentTurn;
+    old.classList.remove('show');
+    old.classList.add('leaving');
+    (function(o) { setTimeout(function() { o.classList.remove('leaving'); }, 420); })(old);
+  }
+  next.classList.remove('leaving');
+  /* 强制重排后再加 show，保证动画播放 */
+  void next.offsetWidth;
+  next.classList.add('show');
+  currentTurn = next;
+  viewIndex = i;
+  updateTurnNav();
+}
+function updateTurnNav() {
+  var hasHistory = turns.length > 1;
+  turnNav.classList.toggle('show', hasHistory);
+  prevTurnBtn.disabled = viewIndex <= 0;
+  nextTurnBtn.disabled = viewIndex >= turns.length - 1;
+  turnLabel.textContent = (viewIndex + 1) + ' / ' + turns.length;
+}
+prevTurnBtn.addEventListener('click', function() { showTurn(viewIndex - 1); });
+nextTurnBtn.addEventListener('click', function() { showTurn(viewIndex + 1); });
 
 /* 模型切换（夜晚页） */
 var modelBtns = document.querySelectorAll('.night-models button');
@@ -370,28 +431,7 @@ keyInput.addEventListener('input', function() { keyErr.textContent = ''; });
 aiSend.addEventListener('click', send);
 aiInput.addEventListener('keydown', function(e) { if (e.key === 'Enter' && !streaming) send(); });
 
-/* 平滑跟随滚动（非线性，不打扰） */
-function nearBottom() {
-  return aiScroll.scrollHeight - aiScroll.scrollTop - aiScroll.clientHeight < 48;
-}
-function smoothFollow() {
-  var target = aiScroll.scrollHeight - aiScroll.clientHeight;
-  var curY = aiScroll.scrollTop;
-  if (target - curY < 1) { aiScroll.scrollTop = target; return; }
-  aiScroll.scrollTop = curY + (target - curY) * 0.28;
-}
-/* 弹动期间持续跟随到底（气泡高度在过渡，单次滚动跟不上） */
-var followTimer = null;
-function followBurst(ms) {
-  if (followTimer) clearInterval(followTimer);
-  var end = Date.now() + ms;
-  followTimer = setInterval(function() {
-    smoothFollow();
-    if (Date.now() > end) { clearInterval(followTimer); followTimer = null; smoothFollow(); }
-  }, 55);
-}
-
-/* 消息渲染 */
+/* 消息渲染：追加到当前轮次 turn（无滚动） */
 function addMsg(role, text) {
   var wrap = document.createElement('div');
   wrap.className = 'msg ' + role;
@@ -411,8 +451,7 @@ function addMsg(role, text) {
     bub.textContent = text;
   }
   wrap.appendChild(who); wrap.appendChild(bub);
-  aiScroll.appendChild(wrap);
-  smoothFollow();
+  currentTurn.appendChild(wrap);
   return bub;
 }
 /* 生成前：在气泡里插入 4 条文字骨架小框（模拟文字行占位） */
@@ -452,12 +491,14 @@ function send() {
   streaming = true;
   aiSend.disabled = true;
   messages.push({ role: 'user', content: q });
+  var nightSlide = document.querySelector('.slide.night');
+  /* 新轮次：历史轮隐藏，当前轮在顶部展开（像第一次对话） */
+  currentTurn = createTurn();
+  if (nightSlide && !nightSlide.classList.contains('chat-mode')) nightSlide.classList.add('chat-mode');
   addMsg('user', q);
   aiInput.value = '';
+  if (nightSlide) nightSlide.classList.add('thinking');
   startThink();
-  /* 对话开始：标题/模型按钮等收起，对话区上移占满 */
-  var nightSlide = document.querySelector('.slide.night');
-  if (nightSlide && !nightSlide.classList.contains('chat-mode')) nightSlide.classList.add('chat-mode');
 
   var sys = '你是「平陆运河·语文作文素材」课堂上的 AI 写作助手。可参考这些素材关键词：奋斗、国力、开放、交流、合作、创新、突破常规、代际接力、工匠精神、克服万难、战略布局、大国担当、生态保护、人与自然和谐、绿色循环与可持续发展。请结合素材自然写作，语言流畅优美，不套模板；同学让你写作文、列提纲或回答问题都可以，不要限制发挥。';
   var payload = {
@@ -471,7 +512,21 @@ function send() {
   var reasoning = '';
   var answer = '';
   var answerEl = null;
+  var spawnScheduled = false;   /* AI 气泡延迟创建中（等思考条收起、用户气泡上移） */
+  var finished = false;        /* 流已结束，气泡创建后需立刻浮现 */
+  var failed = false;          /* 请求失败，延迟回调不再创建气泡 */
   var lastDataAt = Date.now();   /* 网络假死检测：60s 无任何数据则切换整体读取 */
+
+  /* 骨架→文字浮现：reveal 后延迟加 fade，彩虹平滑变白 */
+  function doReveal() {
+    if (!answerEl) return;
+    answerEl.classList.remove('pending');
+    answerEl._base.textContent = answer || '(未返回内容)';
+    answerEl.classList.add('reveal');
+    setTimeout(function() {
+      answerEl.classList.add('fade');
+    }, 1300);
+  }
 
   function handleLine(line) {
     line = line.trim();
@@ -491,14 +546,24 @@ function send() {
     if (delta.content) {
       lastDataAt = Date.now();
       if (!answerEl) {
+        /* 串行：先收起思考条，用户气泡上移到顶部；到位后再创建 AI 气泡开始骨架（不并行） */
         endThink();
         thinkCard.classList.add('collapsed');
-        answerEl = addMsg('assistant', '');
-        answerEl.classList.add('pending');   /* 生成前：骨架小框占位 + 扫光 */
-        addSkeleton(answerEl);
+        if (nightSlide) nightSlide.classList.remove('thinking');
+        (function() {
+          spawnScheduled = true;
+          setTimeout(function() {
+            spawnScheduled = false;
+            if (failed) return;
+            answerEl = addMsg('assistant', '');
+            answerEl.classList.add('pending');   /* 骨架小框占位 + 波浪扫光 */
+            addSkeleton(answerEl);
+            if (finished) doReveal();   /* 流已结束：直接进入浮现，不再等 */
+          }, 580);
+        })();
       }
       answer += delta.content;
-      /* 流式期间不渲染正文（避免逐字蹦出），等 finishOK 整段扩散浮现 */
+      /* 流式期间不渲染正文，等 finishOK 整段扩散浮现 */
     }
   }
 
@@ -506,31 +571,30 @@ function send() {
     streaming = false;
     aiSend.disabled = false;
     endThink();
-    if (!answerEl) {
-      thinkCard.classList.add('collapsed');
+    thinkCard.classList.add('collapsed');
+    if (nightSlide) nightSlide.classList.remove('thinking');
+    if (spawnScheduled) { finished = true; }   /* 气泡延迟创建中，回调里会自动浮现 */
+    else if (!answerEl) {
       answerEl = addMsg('assistant', answer || '(未返回内容)');
+      doReveal();
     } else {
-      answerEl.classList.remove('pending');   /* 骨架淡出、框缓慢弹开 */
-      answerEl._base.textContent = answer;
-      answerEl.classList.add('reveal');       /* 同一层文字彩虹流动 + 从上到下扩散 + 下沉 */
-      setTimeout(function() {
-        answerEl.classList.add('fade');       /* 文字从彩虹平滑渐变成白色（1.15s） */
-      }, 1300);
+      doReveal();
     }
     messages.push({ role: 'assistant', content: answer });
-    followBurst(1900);
   }
 
   function fail(msg) {
     streaming = false;
+    failed = true;
     aiSend.disabled = false;
     endThink();
     thinkCard.classList.add('collapsed');
+    if (nightSlide) nightSlide.classList.remove('thinking');
     if (answerEl) {
       answerEl.classList.remove('pending');
       answerEl._base.textContent = msg;
       answerEl.classList.add('reveal');
-    } else {
+    } else if (!spawnScheduled) {
       addMsg('assistant', msg);
     }
   }
