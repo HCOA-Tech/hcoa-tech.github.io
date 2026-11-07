@@ -97,6 +97,13 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 /* ===== 完整论证段：连贯成段，层级靠字重，颜色统一米白 ===== */
 .night-chat .bub.structured .base { max-height:none; overflow:visible; white-space:normal; }
 .night-chat .bub.structured .skel { height:0; margin-top:0; margin-bottom:0; opacity:0; }
+/* 结构化段落 + 完成动效共存：保留外框软弹与扩散，但文字必须是实色（否则 background-clip:text 会把字变透明） */
+.night-chat .bub.structured.reveal .base {
+  color:rgba(247,245,239,.97);
+  -webkit-text-fill-color:rgba(247,245,239,.97);
+  background:none;
+  -webkit-background-clip:border-box; background-clip:border-box;
+}
 .night-chat .bub.structured .zb-anchor { display:block; font-size:12px; font-weight:400; color:rgba(150,160,180,.55); letter-spacing:.4px; margin-bottom:11px; opacity:0; animation:zbIn .5s ease .05s forwards; }
 .night-chat .bub.structured .zb-para { display:block; font-size:16px; font-weight:400; color:rgba(232,234,236,.9); line-height:1.78; letter-spacing:.2px; opacity:0; animation:zbIn .6s cubic-bezier(.22,1,.36,1) .14s forwards; text-align:justify; }
 .night-chat .bub.structured .zb-core { font-weight:600; color:rgba(255,255,255,.98); }
@@ -1083,6 +1090,15 @@ function send() {
       answerEl.classList.add('structured');
       renderPlainText(answerEl._base, answer || hint);
       answerEl._base.style.maxHeight = 'none';
+    }
+    /* 完成动效链（与结构化渲染共存）：外框软弹 + 骨架收回 + 淡彩虹层渐隐到白 */
+    if (answerEl._base) {
+      answerEl.classList.add(CLIP_OK ? 'reveal' : 'reveal-plain');
+      if (CLIP_OK) {
+        setTimeout(function() {
+          if (answerEl) answerEl.classList.add('fade');
+        }, 780);
+      }
     }
     messages.push({ role: 'assistant', content: answer });
     turns.push({ q: q, a: answer || hint });   /* 存入历史，供左上角翻回 */
