@@ -190,35 +190,51 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   100% { opacity:0; transform:translateY(-14px) scale(1); }
 }
 /* 水浪：一整道横向水面从底部抬起、整屏向上掠过去
-   不是同心圆，是一条比屏幕更宽的弧形水面，顶边带亮线，像把整页托起来 */
+   不是同心圆，是一条比屏幕更宽的弧形水面，浪尖带一条淡彩虹亮线 */
 .ai-sweep {
   position:absolute; left:-25%; width:150%; height:82%; bottom:-82%;
   z-index:3; pointer-events:none; opacity:0;
   border-radius:50% 50% 0 0 / 58% 58% 0 0;
-  background:linear-gradient(180deg,
-    rgba(178,208,255,.26) 0%,
-    rgba(168,196,255,.14) 14%,
-    rgba(150,170,235,.06) 42%,
-    rgba(120,140,210,.02) 68%,
-    transparent 100%);
-  filter:blur(6px);
+  background:linear-gradient(102deg,
+    rgba(140,196,255,.46) 0%,
+    rgba(176,166,255,.42) 24%,
+    rgba(255,178,222,.34) 48%,
+    rgba(148,240,226,.34) 72%,
+    rgba(255,226,168,.26) 100%);
+  -webkit-mask-image:linear-gradient(180deg, rgba(0,0,0,.96) 0%, rgba(0,0,0,.62) 22%, rgba(0,0,0,.24) 52%, rgba(0,0,0,.06) 76%, transparent 100%);
+  mask-image:linear-gradient(180deg, rgba(0,0,0,.96) 0%, rgba(0,0,0,.62) 22%, rgba(0,0,0,.24) 52%, rgba(0,0,0,.06) 76%, transparent 100%);
   animation:sweepUp 1.28s cubic-bezier(.32,.72,.24,1) forwards;
 }
 .ai-sweep::before {
-  content:''; position:absolute; left:0; right:0; top:0; height:100%;
-  border-radius:inherit; pointer-events:none;
-  border-top:1.4px solid rgba(226,240,255,.55);
-  box-shadow:0 -12px 34px rgba(190,220,255,.30);
+  content:''; position:absolute; left:0; right:0; top:0; height:2px;
+  border-radius:999px; pointer-events:none;
+  background:linear-gradient(92deg,
+    rgba(150,200,255,0) 4%,
+    rgba(168,208,255,.80) 26%,
+    rgba(198,176,255,.76) 44%,
+    rgba(255,190,226,.66) 60%,
+    rgba(170,242,228,.60) 76%,
+    rgba(255,230,180,.42) 90%,
+    rgba(255,240,205,0) 98%);
+  box-shadow:0 0 16px rgba(198,220,255,.45), 0 0 34px rgba(210,190,255,.28);
 }
 @keyframes sweepUp {
   0%   { transform:translateY(0); opacity:0; }
   10%  { opacity:1; }
-  62%  { opacity:.80; }
+  62%  { opacity:.82; }
   100% { transform:translateY(-190%); opacity:0; }
 }
 /* 第二道稍慢的浪，压在第一道后面，形成层次而不是重复 */
 .ai-sweep.delay { animation-delay:.12s; opacity:0; height:72%; bottom:-72%; }
-.ai-sweep.delay::before { border-top-color:rgba(255,238,214,.42); }
+.ai-sweep.delay::before {
+  background:linear-gradient(92deg,
+    rgba(255,226,180,0) 6%,
+    rgba(255,232,192,.62) 30%,
+    rgba(255,204,214,.55) 52%,
+    rgba(198,214,255,.52) 74%,
+    rgba(214,240,255,0) 94%);
+  box-shadow:0 0 14px rgba(255,226,190,.34);
+}
 
 /* 整页被托起：先上浮、再轻微落回，收尾归位，不留下位移 */
 .slide.night.lift { animation:pageLift 1.22s cubic-bezier(.22,1,.36,1); }
@@ -599,16 +615,58 @@ function clearStage() {
   userScrolled = false;
 }
 
-/* 提示音：与光效/水波同一瞬间起音。点击"生成"属于用户手势，
-   同步调用 play() 不会被浏览器的自动播放策略拦截 */
+/* 提示音：点"生成"后延迟 0.4 秒起音，和浪尖升起对齐。
+   延迟播放已经脱离用户手势，<audio>.play() 会被自动播放策略拦掉，
+   所以走 Web Audio：点击时（仍在手势内）先 resume 解锁，0.4 秒后再 start() */
 var aiCue = document.getElementById('aiCue');
-function playCue() {
-  if (!aiCue) return;
+var cueCtx = null, cueBuf = null;
+function initCue() {
+  if (cueCtx) return;
+  var AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return;
   try {
-    aiCue.currentTime = 0;
-    var p = aiCue.play();
-    if (p && p.catch) p.catch(function() {});   /* 被策略拒绝就静默，不影响动画 */
+    cueCtx = new AC();
+    fetch('assets/audio/ai-cue.m4a')
+      .then(function(r) { return r.arrayBuffer(); })
+      .then(function(b) {
+        return new Promise(function(res, rej) { cueCtx.decodeAudioData(b, res, rej); });
+      })
+      .then(function(buf) { cueBuf = buf; })
+      .catch(function() {});
   } catch (e) {}
+}
+initCue();
+
+/* 页面首次点击先解锁音频上下文，只解锁不出声 */
+function unlockCue() {
+  if (!cueCtx) initCue();
+  if (cueCtx && cueCtx.state === 'suspended') {
+    try { cueCtx.resume(); } catch (e) {}
+  }
+}
+document.addEventListener('pointerdown', unlockCue, { once: true, passive: true });
+
+function playCue() {
+  unlockCue();                                  /* 在手势内完成解锁 */
+  setTimeout(function() {
+    if (cueCtx && cueBuf) {
+      try {
+        var src = cueCtx.createBufferSource();
+        src.buffer = cueBuf;
+        src.connect(cueCtx.destination);
+        src.start(0);
+        return;
+      } catch (e) {}
+    }
+    /* 兜底：Web Audio 不可用时用音频元素（桌面浏览器通常已放行） */
+    if (aiCue) {
+      try {
+        aiCue.currentTime = 0;
+        var p = aiCue.play();
+        if (p && p.catch) p.catch(function() {});
+      } catch (e) {}
+    }
+  }, 400);
 }
 
 /* 生成瞬间的整体动效：整页被一道水浪托起并向上掠过去 + 淡彩光效 + 内容飞升
