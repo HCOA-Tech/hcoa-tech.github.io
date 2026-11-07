@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>平陆运河 · 语文作文素材 2 · 现场创作台</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="平陆运河">
+<meta name="theme-color" content="#0b1210">
 <style>
 /* ============ 基础 ============ */
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -421,15 +426,26 @@ aiInput.addEventListener('keydown', function(e) { if (e.key === 'Enter' && !stre
    注意：网页没有权限直接启动 TabTip.exe，只能让输入框在真实触摸手势里重新聚焦，
    由 Windows 自己决定弹不弹键盘，所以这里不拦截默认焦点行为 */
 var kbBtn = document.getElementById('kbBtn');
+var kbLast = 0;
+/* iOS / 全屏 WebClip 的硬规则：只有在用户手势的同步调用栈里 focus，系统才肯弹键盘；
+   且"已经 focus 但键盘被系统收起"时，activeElement 仍是输入框，靠它判断会死锁，
+   所以每次都先失焦再同步聚焦，强制系统重新判定 */
+function forceKeyboard() {
+  var now = Date.now();
+  if (now - kbLast < 250) return;        /* pointerdown 与 click 去重 */
+  kbLast = now;
+  if (document.activeElement === aiInput) aiInput.blur();
+  aiInput.focus();                        /* 与 blur 同一调用栈，仍算用户手势内 */
+  try { var n = aiInput.value.length; aiInput.setSelectionRange(n, n); } catch (err) {}
+}
 if (kbBtn) {
-  /* 只保留 click 一个入口。touchend 与 click 同时绑定会互相打断：
-     触摸先聚焦弹键盘，紧接着 click 误判为"已聚焦"又 blur 收掉，
-     定时器里的再聚焦不在手势内会被系统拒绝 —— 这正是"第一次能弹、再点就没反应"的原因 */
+  kbBtn.addEventListener('pointerdown', function(e) {
+    e.stopPropagation();                  /* 不 preventDefault：避免阻断系统焦点转移 */
+    forceKeyboard();
+  });
   kbBtn.addEventListener('click', function(e) {
     e.stopPropagation();
-    if (document.activeElement === aiInput) return;   /* 已经聚焦：什么都不做，别把键盘收掉 */
-    aiInput.focus();
-    try { var n = aiInput.value.length; aiInput.setSelectionRange(n, n); } catch (err) {}
+    forceKeyboard();
   });
 }
 
@@ -438,11 +454,9 @@ var nightInputBox = document.querySelector('.night-input');
 if (nightInputBox) {
   nightInputBox.addEventListener('touchend', function(e) {
     if (streaming) return;
+    if (e.target === aiInput) return;                                  /* 点文字区：交给系统原生处理 */
     if (e.target === aiSend || (e.target.closest && e.target.closest('#aiSend'))) return;
-    if (document.activeElement !== aiInput) {
-      aiInput.focus();
-      try { var n = aiInput.value.length; aiInput.setSelectionRange(n, n); } catch (err) {}
-    }
+    forceKeyboard();
   }, { passive: true });
 }
 
