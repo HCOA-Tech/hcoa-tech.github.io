@@ -37,12 +37,6 @@ body { font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif
 #hud button:hover { background:rgba(201,168,106,.12); border-color:rgba(201,168,106,.28); color:#e5cf9c; }
 #hud #btnPrev,#hud #btnNext { font-size:19px; padding:2px 12px; line-height:1; min-width:38px; color:rgba(229,207,156,.85); }
 #hud #btnFull { font-size:12px; padding:6px 14px; }
-/* 键盘按钮：只在 AI 页显示，位于全屏按钮左侧 */
-#kbBtn { display:none; padding:5px 9px; }
-#kbBtn svg { width:15px; height:15px; }
-body.onAI #kbBtn { display:inline-flex; }
-#kbBtn:active { transform:scale(.94); }
-
 /* 左右点击翻页热区（无视觉提示，只响应点击） */
 #hitL,#hitR { position:fixed; z-index:40; top:0; bottom:0; width:12%; cursor:pointer; opacity:0; }
 #hitL { left:0; } #hitR { right:0; }
@@ -178,6 +172,57 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .slide.night .night-chat, .slide.night .night-think { transition:top .7s cubic-bezier(.22,1,.36,1), height .7s cubic-bezier(.22,1,.36,1); }
 .slide.night.chat-mode .night-chat { top:32px; height:430px; }
 .slide.night.chat-mode .night-think { top:32px; }
+
+/* ============ 生成瞬间：AI 光效 + 向上水波 + 内容飞升 ============ */
+/* 整页淡彩光效：从底部涌起，中段最亮，末段化开，不生硬 */
+.ai-glow {
+  position:absolute; inset:0; z-index:3; pointer-events:none; opacity:0;
+  background:
+    radial-gradient(ellipse 62% 42% at 50% 102%, rgba(150,200,255,.32), transparent 66%),
+    radial-gradient(ellipse 46% 34% at 64% 96%, rgba(198,160,255,.22), transparent 66%),
+    radial-gradient(ellipse 46% 34% at 36% 96%, rgba(140,246,222,.20), transparent 66%);
+  animation:glowRise 1.65s cubic-bezier(.22,1,.36,1) forwards;
+}
+@keyframes glowRise {
+  0%   { opacity:0; transform:translateY(26px) scale(1.14); }
+  28%  { opacity:.92; }
+  62%  { opacity:.55; }
+  100% { opacity:0; transform:translateY(-14px) scale(1); }
+}
+/* 水波：从输入框位置起，逐层向上放大消散 */
+.ai-wave {
+  position:absolute; left:50%; bottom:16px; width:140px; height:140px; margin-left:-70px;
+  z-index:3; pointer-events:none; border-radius:50%; opacity:0;
+  background:radial-gradient(circle, rgba(255,255,255,0) 56%, rgba(192,222,255,.26) 70%, rgba(255,255,255,0) 84%);
+  animation:waveUp 1.25s cubic-bezier(.16,.9,.3,1) forwards;
+}
+@keyframes waveUp {
+  0%   { transform:translateY(0) scale(.22); opacity:0; }
+  14%  { opacity:.85; }
+  55%  { opacity:.45; }
+  100% { transform:translateY(-540px) scale(6); opacity:0; }
+}
+/* 飞升副本：把用户刚打的字从输入栏整体弹到对话区 */
+.ai-flyer {
+  position:absolute; left:50%; bottom:20px; transform:translate(-50%,0) scale(.92);
+  max-width:520px; padding:14px 18px; border-radius:12px;
+  background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.18);
+  color:rgba(247,245,239,.97); font-size:17.5px; font-weight:600; line-height:1.5;
+  letter-spacing:.3px; white-space:pre-wrap; word-break:break-word;
+  z-index:9; pointer-events:none; opacity:0;
+  backdrop-filter:blur(16px) saturate(1.15); -webkit-backdrop-filter:blur(16px) saturate(1.15);
+  font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+}
+.ai-flyer.go { animation:flyUp .62s cubic-bezier(.16,1.04,.28,1) forwards; }
+@keyframes flyUp {
+  0%   { opacity:0; transform:translate(-50%,0) scale(.9); }
+  16%  { opacity:1; }
+  74%  { opacity:1; transform:translate(-50%,-424px) scale(.96); }
+  100% { opacity:0; transform:translate(-50%,-410px) scale(.92); }
+}
+/* 真实气泡在落点轻轻浮现，与飞升副本交接，避免硬切 */
+.msg.user { animation:userLand .5s cubic-bezier(.22,1,.36,1) .22s both; }
+@keyframes userLand { from { opacity:0; transform:translateY(12px) scale(.97); } to { opacity:1; transform:none; } }
 </style>
 </head>
 <body>
@@ -222,7 +267,6 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   <span class="page" id="hudPage">01 / 16</span>
   <button id="btnNext" type="button" title="下一页">›</button>
   <span class="sep"></span>
-  <button id="kbBtn" type="button" title="唤起系统触摸键盘"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h1M10 10h1M14 10h1M18 10h1M6 14h1M18 14h1M9.5 14h5"/></svg></button>
   <button id="btnFull" type="button">全屏</button>
 </div>
 <div id="hitL" title="上一页"></div>
@@ -422,31 +466,15 @@ keyInput.addEventListener('input', function() { keyErr.textContent = ''; });
 aiSend.addEventListener('click', send);
 aiInput.addEventListener('keydown', function(e) { if (e.key === 'Enter' && !streaming) send(); });
 
-/* 触摸屏软键盘：点小键盘按钮唤起 Windows 系统触摸键盘（TabTip），不用退出全屏
-   注意：网页没有权限直接启动 TabTip.exe，只能让输入框在真实触摸手势里重新聚焦，
-   由 Windows 自己决定弹不弹键盘，所以这里不拦截默认焦点行为 */
-var kbBtn = document.getElementById('kbBtn');
+/* 点输入胶囊空白处自动进入编辑（键盘按钮已移除，仅保留这一层兜底） */
 var kbLast = 0;
-/* iOS / 全屏 WebClip 的硬规则：只有在用户手势的同步调用栈里 focus，系统才肯弹键盘；
-   且"已经 focus 但键盘被系统收起"时，activeElement 仍是输入框，靠它判断会死锁，
-   所以每次都先失焦再同步聚焦，强制系统重新判定 */
 function forceKeyboard() {
   var now = Date.now();
-  if (now - kbLast < 250) return;        /* pointerdown 与 click 去重 */
+  if (now - kbLast < 250) return;
   kbLast = now;
   if (document.activeElement === aiInput) aiInput.blur();
   aiInput.focus();                        /* 与 blur 同一调用栈，仍算用户手势内 */
   try { var n = aiInput.value.length; aiInput.setSelectionRange(n, n); } catch (err) {}
-}
-if (kbBtn) {
-  kbBtn.addEventListener('pointerdown', function(e) {
-    e.stopPropagation();                  /* 不 preventDefault：避免阻断系统焦点转移 */
-    forceKeyboard();
-  });
-  kbBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    forceKeyboard();
-  });
 }
 
 /* 输入框整块区域兜底：点在胶囊空白处也能进入编辑，且全程不 preventDefault */
@@ -544,6 +572,40 @@ function clearStage() {
   userScrolled = false;
 }
 
+/* 生成瞬间的整体动效：淡彩光效涌起 + 水波向上扩散 + 用户内容飞升到对话区
+   三者共用一个起点（输入框），时长错开 0/0.16/0.32 秒，避免一次性齐放显得生硬 */
+function aiBurst(text) {
+  var night = document.querySelector('.slide.night');
+  if (!night) return;
+
+  var glow = document.createElement('div');
+  glow.className = 'ai-glow';
+  night.appendChild(glow);
+
+  for (var i = 0; i < 3; i++) {
+    var w = document.createElement('div');
+    w.className = 'ai-wave';
+    w.style.animationDelay = (i * 0.16) + 's';
+    night.appendChild(w);
+  }
+
+  if (text) {
+    var f = document.createElement('div');
+    f.className = 'ai-flyer';
+    f.textContent = text;
+    night.appendChild(f);
+    /* 双 rAF：先让初始态完成一次渲染，动画才会真正播放而不是直接跳到终点 */
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() { f.classList.add('go'); });
+    });
+  }
+
+  setTimeout(function() {
+    var olds = night.querySelectorAll('.ai-glow, .ai-wave, .ai-flyer');
+    for (var j = 0; j < olds.length; j++) olds[j].parentNode.removeChild(olds[j]);
+  }, 2400);
+}
+
 /* 以完成态重建某一轮历史（不播逐段动画，直接可读） */
 function renderTurn(t) {
   aiScroll.innerHTML = '';
@@ -620,6 +682,7 @@ function send() {
   aiSend.disabled = true;
   viewMode = 'current';
   clearStage();                    /* 每轮都是全新一页：清空上一轮，从顶部开始 */
+  aiBurst(q);                      /* 光效 + 水波 + 内容飞升，从输入栏起势 */
   messages.push({ role: 'user', content: q });
   addMsg('user', q);
   aiInput.value = '';
