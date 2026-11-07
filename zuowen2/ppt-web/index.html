@@ -359,12 +359,18 @@ var slides = document.querySelectorAll('.slide');
 var cur = 0, total = slides.length;
 var stage = document.getElementById('stage');
 
+/* 手机/触屏判定：触屏设备或窄屏（电脑端宽屏+鼠标返回 false） */
+function isMobileUI() {
+  return (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
+      || window.innerWidth < 820;
+}
 function fit() {
   var isNight = slides[cur] && slides[cur].classList.contains('night');
-  /* AI 页全屏铺满（无黑边，背景顶部对齐从底部裁）；其余页 contain 完整显示 */
-  var s = isNight
-    ? Math.max(window.innerWidth / 960, window.innerHeight / 540)
-    : Math.min(window.innerWidth / 960, window.innerHeight / 540);
+  /* 电脑端 AI 页保持 cover 铺满；手机/触屏上 AI 页改用 contain，与前14页一致，避免突然放大 */
+  var useContain = !isNight || isMobileUI();
+  var s = useContain
+    ? Math.min(window.innerWidth / 960, window.innerHeight / 540)
+    : Math.max(window.innerWidth / 960, window.innerHeight / 540);
   stage.style.transform = 'scale(' + s + ')';
 }
 window.addEventListener('resize', fit);
@@ -456,6 +462,15 @@ function toggleFull() {
 var hudEl = document.getElementById('hud');
 function placeHud() {
   var isNight = slides[cur] && slides[cur].classList.contains('night');
+  /* 手机 AI 页：HUD 移到顶部，避开底部输入框，消除重叠；电脑端不走此分支 */
+  if (isMobileUI() && isNight) {
+    hudEl.style.bottom = '';
+    hudEl.style.top = '14px';
+    hudEl.style.left = '14px';
+    return;
+  }
+  hudEl.style.top = '';
+  hudEl.style.left = '';
   var scale = isNight
     ? Math.max(window.innerWidth / 960, window.innerHeight / 540)
     : Math.min(window.innerWidth / 960, window.innerHeight / 540);
