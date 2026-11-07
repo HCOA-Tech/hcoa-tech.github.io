@@ -104,14 +104,14 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   background:none;
   -webkit-background-clip:border-box; background-clip:border-box;
 }
-.night-chat .bub.structured .zb-anchor { display:block; font-size:12px; font-weight:400; color:rgba(150,160,180,.55); letter-spacing:.4px; margin-bottom:11px; opacity:0; animation:zbIn .5s ease .05s forwards; }
-.night-chat .bub.structured .zb-para { display:block; font-size:16px; font-weight:400; color:rgba(232,234,236,.9); line-height:1.78; letter-spacing:.2px; opacity:0; animation:zbIn .6s cubic-bezier(.22,1,.36,1) .14s forwards; text-align:justify; }
-.night-chat .bub.structured .zb-core { font-weight:600; color:rgba(255,255,255,.98); }
+.night-chat .bub.structured .zb-anchor { display:block; font-size:13px; font-weight:500; color:rgba(201,168,106,.95); letter-spacing:.6px; margin-bottom:11px; opacity:0; animation:zbIn .5s ease .05s forwards; }
+.night-chat .bub.structured .zb-para { display:block; font-size:16px; font-weight:300; color:rgba(232,234,236,.9); line-height:1.8; letter-spacing:.2px; opacity:0; animation:zbIn .6s cubic-bezier(.22,1,.36,1) .14s forwards; text-align:justify; }
+.night-chat .bub.structured .zb-core { font-weight:700; color:rgba(255,251,242,.99); }
 @keyframes zbIn { to { opacity:1; transform:none; } }
 /* ===== 说明性纯文本：行首“标签：内容”自动分层，标签加粗、内容常规但不浅 ===== */
-.night-chat .bub.structured .zb-line { display:block; font-size:16px; line-height:1.72; font-weight:400; color:rgba(232,234,236,.92); letter-spacing:.2px; margin-bottom:10px; opacity:0; animation:zbIn .55s cubic-bezier(.22,1,.36,1) forwards; }
-.night-chat .bub.structured .zb-line .zb-label { font-weight:600; color:rgba(255,255,255,.98); }
-.night-chat .bub.structured .zb-line.is-title { font-size:18px; font-weight:600; color:rgba(255,255,255,.98); margin-bottom:12px; }
+.night-chat .bub.structured .zb-line { display:block; font-size:16px; line-height:1.74; font-weight:300; color:rgba(232,234,236,.92); letter-spacing:.2px; margin-bottom:10px; opacity:0; animation:zbIn .55s cubic-bezier(.22,1,.36,1) forwards; }
+.night-chat .bub.structured .zb-line .zb-label { font-weight:700; color:rgba(255,251,242,.99); }
+.night-chat .bub.structured .zb-line.is-title { font-size:18px; font-weight:600; color:rgba(255,251,242,.98); margin-bottom:12px; }
 /* 生成前：长方形小骨架（四个小圆角），底层淡AI彩虹+亮带从上到下波浪流动；完成后高度+margin 软弹收回（不占位） */
 .night-chat .bub .skel { position:relative; z-index:1; display:block; height:14px; border-radius:4px; margin:8px 0;
   background:
@@ -825,7 +825,7 @@ function renderPara(container, text) {
     if (m.index > last) container.appendChild(document.createTextNode(text.slice(last, m.index)));
     var sp = document.createElement('span');
     sp.className = 'zb-core';
-    sp.textContent = m[1];
+    sp.textContent = m[1].replace(/^[\s▎▍▌│┃|｜]+/, '');   /* 去掉模型自带的装饰竖条 */
     container.appendChild(sp);
     last = re.lastIndex;
   }
@@ -851,7 +851,7 @@ function renderPlainText(base, text) {
   base.textContent = '';
   var idx = 0;
   text.split('\n').forEach(function(rawLine) {
-    var line = rawLine.trim();
+    var line = rawLine.trim().replace(/^[▎▍▌│┃|｜]+/, '');   /* 去掉模型自带的装饰竖条 */
     if (!line) return;
     var d = document.createElement('div');
     d.className = 'zb-line';
