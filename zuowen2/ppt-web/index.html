@@ -152,7 +152,7 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 #aiSend:hover { background:rgba(255,255,255,.24); border-color:rgba(255,255,255,.3); }
 #aiSend:disabled { opacity:.45; cursor:default; }
 /* 星星：小而淡，点缀夜空 */
-.star { position:absolute; background:#fff; border-radius:50%; animation:twinkle 4.5s ease-in-out infinite; }
+.star { position:absolute; background:#fff; border-radius:50%; opacity:.62; }
 @keyframes twinkle { 0%,100% { opacity:.45; } 50% { opacity:.85; } }
 /* 夜空淡入 + 输入框上滑 */
 .slide.night .night-bg, .slide.night .night-veil { opacity:0; transition:opacity 1.2s ease; }
@@ -496,7 +496,7 @@ function setupNight() {
     var st = document.createElement('div');
     st.className = 'star';
     var sz = (Math.random() * 1 + 1).toFixed(1);
-    st.style.cssText = 'left:' + (Math.random() * 96).toFixed(1) + '%;top:' + (Math.random() * 50 + 4).toFixed(1) + '%;width:' + sz + 'px;height:' + sz + 'px;animation-delay:' + (Math.random() * 4).toFixed(2) + 's;animation-duration:' + (3.6 + Math.random() * 3.6).toFixed(2) + 's;';
+    st.style.cssText = 'left:' + (Math.random() * 96).toFixed(1) + '%;top:' + (Math.random() * 50 + 4).toFixed(1) + '%;width:' + sz + 'px;height:' + sz + 'px;';
     frag.appendChild(st);
   }
   bg.appendChild(frag);
