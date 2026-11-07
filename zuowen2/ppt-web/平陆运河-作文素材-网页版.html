@@ -94,27 +94,13 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 /* 兜底：老浏览器不支持 background-clip:text 时，不透明文字直接展开，绝不出现空白气泡 */
 .night-chat .bub.reveal-plain .base { max-height:none; color:rgba(247,245,239,.97); -webkit-text-fill-color:rgba(247,245,239,.97); background:none; animation:none; }
 @keyframes rainbowFlow { to { background-position:200% 50%; } }
-/* ===== 结构化论证段：标记协议渲染，固定层级配色，不走彩虹 ===== */
+/* ===== 完整论证段：连贯成段，层级靠字重，颜色统一米白 ===== */
 .night-chat .bub.structured .base { max-height:none; overflow:visible; white-space:normal; }
-.night-chat .bub.structured .zb { opacity:0; transform:translateY(7px); animation:zbIn .55s cubic-bezier(.22,1,.36,1) forwards; }
-.night-chat .bub.structured .zb:nth-child(1){ animation-delay:.04s; }
-.night-chat .bub.structured .zb:nth-child(2){ animation-delay:.1s; }
-.night-chat .bub.structured .zb:nth-child(3){ animation-delay:.16s; }
-.night-chat .bub.structured .zb:nth-child(4){ animation-delay:.22s; }
-.night-chat .bub.structured .zb:nth-child(5){ animation-delay:.28s; }
-.night-chat .bub.structured .zb:nth-child(6){ animation-delay:.34s; }
-.night-chat .bub.structured .zb:nth-child(n+7){ animation-delay:.4s; }
+.night-chat .bub.structured .skel { height:0; margin-top:0; margin-bottom:0; opacity:0; }
+.night-chat .bub.structured .zb-anchor { display:block; font-size:12px; font-weight:400; color:rgba(150,160,180,.55); letter-spacing:.4px; margin-bottom:11px; opacity:0; animation:zbIn .5s ease .05s forwards; }
+.night-chat .bub.structured .zb-para { display:block; font-size:16px; font-weight:400; color:rgba(232,234,236,.9); line-height:1.78; letter-spacing:.2px; opacity:0; animation:zbIn .6s cubic-bezier(.22,1,.36,1) .14s forwards; text-align:justify; }
+.night-chat .bub.structured .zb-core { font-weight:600; color:rgba(255,255,255,.98); }
 @keyframes zbIn { to { opacity:1; transform:none; } }
-.night-chat .bub.structured .zb + .zb { margin-top:8px; }
-.night-chat .bub.structured .zb-theme { font-size:19.5px; font-weight:700; color:rgba(150,190,255,.98); line-height:1.45; letter-spacing:.5px; }
-.night-chat .bub.structured .zb-anchor { font-size:12.5px; font-weight:400; color:rgba(150,164,190,.62); letter-spacing:.4px; margin-top:2px; }
-.night-chat .bub.structured .zb-point { font-size:16.5px; font-weight:600; color:rgba(222,232,250,.94); line-height:1.55; }
-.night-chat .bub.structured .zb-lead,
-.night-chat .bub.structured .zb-analysis { font-size:15px; font-weight:400; line-height:1.62; }
-.night-chat .bub.structured .zb-lead { color:rgba(188,200,224,.7); }
-.night-chat .bub.structured .zb-analysis { color:rgba(202,213,236,.82); }
-.night-chat .bub.structured .zb-core { font-size:16.5px; font-weight:600; color:rgba(255,255,255,.98); line-height:1.6; background:rgba(201,168,106,.1); border-left:2.5px solid rgba(201,168,106,.95); border-radius:0 8px 8px 0; padding:9px 12px; }
-.night-chat .bub.structured .zb-data { font-size:14px; font-weight:400; color:rgba(255,196,120,.85); line-height:1.5; }
 /* 生成前：长方形小骨架（四个小圆角），底层淡AI彩虹+亮带从上到下波浪流动；完成后高度+margin 软弹收回（不占位） */
 .night-chat .bub .skel { position:relative; z-index:1; display:block; height:14px; border-radius:4px; margin:8px 0;
   background:
@@ -747,26 +733,40 @@ function aiBurst(text) {
   }, 2200);
 }
 
-/* 结构化解析（全局）：识别〔标签〕…〔/标签〕，返回块数组；识别不到返回 null（走纯文本兜底） */
-var ZB_RE = /〔(主题|锚点|分论点|引导句|核心句|分析句|数据句)〕([\s\S]*?)〔\/\1〕/g;
-var ZB_MAP = { '主题':'zb-theme','锚点':'zb-anchor','分论点':'zb-point','引导句':'zb-lead','核心句':'zb-core','分析句':'zb-analysis','数据句':'zb-data' };
+/* 结构化解析：〔锚点〕+〔论证段〕（段内可含行内〔核心〕），返回 {anchor,para}；识别不到返回 null */
 function parseStructured(text) {
-  var blocks = [], m;
-  ZB_RE.lastIndex = 0;
-  while ((m = ZB_RE.exec(text))) {
-    var t = m[2].trim().replace(/\s+/g, ' ');
-    if (t) blocks.push({ type:m[1], text:t });
-  }
-  return blocks.length ? blocks : null;
+  var anchorM = text.match(/〔锚点〕([\s\S]*?)〔\/锚点〕/);
+  var paraM = text.match(/〔论证段〕([\s\S]*?)〔\/论证段〕/);
+  if (!paraM) return null;
+  var para = paraM[1].trim().replace(/\s*\n\s*/g, '');
+  if (!para) return null;
+  return { anchor: anchorM ? anchorM[1].trim() : '', para: para };
 }
-function renderStructured(base, blocks) {
+/* 把含〔核心〕…〔/核心〕的段落文本渲染成连贯节点：普通文本 + 行内核心 span */
+function renderPara(container, text) {
+  var re = /〔核心〕([\s\S]*?)〔\/核心〕/g, last = 0, m;
+  while ((m = re.exec(text))) {
+    if (m.index > last) container.appendChild(document.createTextNode(text.slice(last, m.index)));
+    var sp = document.createElement('span');
+    sp.className = 'zb-core';
+    sp.textContent = m[1];
+    container.appendChild(sp);
+    last = re.lastIndex;
+  }
+  if (last < text.length) container.appendChild(document.createTextNode(text.slice(last)));
+}
+function renderStructured(base, data) {
   base.textContent = '';
-  blocks.forEach(function(bk) {
-    var d = document.createElement('div');
-    d.className = 'zb ' + (ZB_MAP[bk.type] || 'zb-plain');
-    d.textContent = bk.text;
-    base.appendChild(d);
-  });
+  if (data.anchor) {
+    var a = document.createElement('div');
+    a.className = 'zb-anchor';
+    a.textContent = data.anchor;
+    base.appendChild(a);
+  }
+  var p = document.createElement('div');
+  p.className = 'zb-para';
+  renderPara(p, data.para);
+  base.appendChild(p);
 }
 
 /* 以完成态重建某一轮历史（不播逐段动画，直接可读） */
@@ -886,17 +886,13 @@ function send() {
     '十六、科技思辨（大连育明命题组母题）',
     '【写作纪律】',
     '1. 先锚定：从锚点表选一个主题，在〔锚点〕标注来源；用户已给具体题目就用该题并标“用户给定”。问得再短（如“奋斗”“创新”“人与自然”）也直接匹配，不反问、不迟疑。',
-    '2. 少数据：整段最多出现一处概括性事实，能不写数字就不写；禁止数字并列、禁止让数据当主角。数字只是论据的注脚。',
-    '3. 考场书面语：用议论文书面语，不口语、不喊口号、不写“首先其次最后”、不堆砌辞藻。',
-    '4. 核心句必须直接出现“平陆运河”或“这条江海运河”，让人一眼看出素材怎么用。',
-    '5. 短小精悍：正文（分论点+引导句+核心句+分析句）不超过150字，全回答不超过180字；一次只写一个论证段。',
-    '【输出标记协议：严格按顺序平铺，禁止嵌套，禁止任何 Markdown 符号（星号、井号、竖线、表格、分隔线）】',
-    '〔主题〕（16字内完整判断句）〔/主题〕',
-    '〔锚点〕（20字内来源）〔/锚点〕',
-    '〔分论点〕（24字内判断句）〔/分论点〕',
-    '〔引导句〕（35字内）〔/引导句〕',
-    '〔核心句〕（40字内，素材运用的焦点）〔/核心句〕',
-    '〔分析句〕（50字内，回扣主题）〔/分析句〕'
+    '2. 少数据：整段最多一处概括性事实，能不写数字就不写；禁止数字并列、禁止让数据当主角。',
+    '3. 成段且有文采：必须写出一个完整、连贯、可直接抄写的考场论证段，内部自然包含“观点—阐释—例证—分析—回扣”的推进，但这只是内在理路，不是死板公式，禁止“首先其次”“第一第二”这类模板腔。句式长短错落、整散结合，用词讲究、有画面感与思辨味，像一类文的手笔，而不是教辅套话。',
+    '4. 核心句必须直接出现“平陆运河”或“这条江海运河”，是全段最实、最能体现素材运用的一句，用〔核心〕在行内标出。',
+    '5. 篇幅：论证段净字数220至260字（标记符号不计入）；一次只写一个论证段，不寒暄、不另加标题。',
+    '【输出标记协议：只允许以下两种标记，禁止 Markdown 符号（星号、井号、竖线、表格、分隔线）】',
+    '〔锚点〕（来源，20字内）〔/锚点〕',
+    '〔论证段〕（一个完整连贯的段落，220至260字；其中把含平陆运河的核心句用〔核心〕…〔/核心〕在行内标出，其余文字不标记）〔/论证段〕'
   ].join('\n');
   var payload = {
     model: MODEL,
