@@ -89,9 +89,9 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   animation:dropIn .75s cubic-bezier(.3,1.3,.55,1) .16s both, rainbowFlow 2s linear .16s infinite;
   transition:max-height .7s cubic-bezier(.25,1,.4,1) .12s, -webkit-text-fill-color .9s ease;
 }
-.night-chat .bub.fade .base { -webkit-text-fill-color:rgba(247,245,239,.97); }
+.night-chat .bub.fade .base { -webkit-text-fill-color:rgba(247,245,239,.97); animation:dropIn .75s cubic-bezier(.3,1.3,.55,1) .16s both, rainbowFlow 2s linear .16s paused; }
 /* 兜底：老浏览器不支持 background-clip:text 时，不透明文字直接展开，绝不出现空白气泡 */
-.night-chat .bub.reveal-plain .base { max-height:none; color:rgba(247,245,239,.97); -webkit-text-fill-color:rgba(247,245,239,.97); background:none; animation:none; }
+.night-chat .bub.reveal-plain .base { max-height:none; color:rgba(247,245,239,.97); -webkit-text-fill-color:rgba(247,245,239,.97); background:none; animation:dropIn .75s cubic-bezier(.3,1.3,.55,1) .16s both, rainbowFlow 2s linear .16s paused; }
 @keyframes rainbowFlow { to { background-position:200% 50%; } }
 /* 生成前：长方形小骨架（四个小圆角），底层淡AI彩虹+亮带从上到下波浪流动；完成后高度+margin 软弹收回（不占位） */
 .night-chat .bub .skel { position:relative; z-index:1; display:block; height:14px; border-radius:4px; margin:8px 0;
@@ -132,10 +132,12 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .nt-sec { color:rgba(201,168,106,.8); font-size:11px; }
 #thinkBody { max-height:64px; overflow-y:auto; padding:2px 14px 9px; font-size:12.5px; line-height:1.7; color:rgba(247,245,239,.75); font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; white-space:pre-wrap; word-break:break-word; }
 /* 输入框：整块淡淡的彩虹渐变 + 高斯模糊毛玻璃，无生硬描边 */
-.night-input { position:absolute; left:50%; bottom:20px; transform:translateX(-50%); width:450px; height:36px; z-index:7; display:flex; align-items:center; gap:7px; padding:3px 10px 3px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.10); background:linear-gradient(120deg, rgba(255,107,107,.22), rgba(254,202,87,.2), rgba(72,219,251,.22), rgba(165,94,234,.22), rgba(255,107,107,.22)); background-size:300% 100%; backdrop-filter:blur(30px) saturate(1.5); -webkit-backdrop-filter:blur(30px) saturate(1.5); box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 10px 34px rgba(0,0,0,.4); animation:inputFlow 8s linear infinite; transition:box-shadow .35s, transform .35s; }
-/* 光晕：常驻一圈淡淡彩色光晕贴着输入框外沿，颜色随渐变同步流动；聚焦时只有一次小脉冲 */
-.night-input::before { content:''; position:absolute; inset:-5px; border-radius:999px; background:linear-gradient(120deg, rgba(255,107,107,.42), rgba(254,202,87,.38), rgba(72,219,251,.42), rgba(165,94,234,.42), rgba(255,107,107,.42)); background-size:300% 100%; filter:blur(13px); opacity:.34; z-index:-1; pointer-events:none; animation:inputFlow 8s linear infinite; transition:opacity .4s ease; }
-.night-input:focus-within::before { opacity:.5; animation:inputFlow 8s linear infinite, focusPulse .65s ease-out; }
+.night-input { position:absolute; left:50%; bottom:20px; transform:translateX(-50%); width:450px; height:36px; z-index:7; display:flex; align-items:center; gap:7px; padding:3px 10px 3px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.10); background:transparent; box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 10px 34px rgba(0,0,0,.4), 0 0 22px rgba(255,120,150,.16), 0 0 40px rgba(110,190,255,.13); transition:box-shadow .35s, transform .35s; }
+/* 毛玻璃底：完全静止，不参与任何动画，模糊结果可被浏览器缓存下来复用 */
+.night-input::before { content:''; position:absolute; inset:0; border-radius:999px; background:rgba(255,255,255,.04); backdrop-filter:blur(30px) saturate(1.5); -webkit-backdrop-filter:blur(30px) saturate(1.5); z-index:-2; pointer-events:none; }
+/* 流动的彩虹：单独一层，只重绘自己的渐变，不再牵连背后那块 30px 高斯模糊 */
+.night-input::after { content:''; position:absolute; inset:0; border-radius:999px; background:linear-gradient(120deg, rgba(255,107,107,.22), rgba(254,202,87,.2), rgba(72,219,251,.22), rgba(165,94,234,.22), rgba(255,107,107,.22)); background-size:300% 100%; z-index:-1; pointer-events:none; animation:inputFlow 8s linear infinite; }
+.night-input:focus-within::after { animation:inputFlow 8s linear infinite, focusPulse .65s ease-out; }
 @keyframes focusPulse { 0% { transform:scale(1); } 40% { transform:scale(1.06); } 100% { transform:scale(1); } }
 @keyframes inputFlow { to { background-position:300% 0; } }
 .night-input:focus-within { box-shadow:inset 0 1px 0 rgba(255,255,255,.16), 0 14px 46px rgba(0,0,0,.5), 0 0 26px rgba(255,107,107,.18), 0 0 44px rgba(72,219,251,.12); transform:translateX(-50%) translateY(-2px); }
