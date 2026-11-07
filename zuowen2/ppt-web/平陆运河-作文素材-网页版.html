@@ -680,7 +680,7 @@ function playCue() {
         if (p && p.catch) p.catch(function() {});
       } catch (e) {}
     }
-  }, 400);
+  }, 100);
 }
 
 /* 生成瞬间的整体动效：整页被一道水浪托起并向上掠过去 + 淡彩光效 + 内容飞升
@@ -1042,6 +1042,61 @@ function send() {
     retryWhole();
   });
 }
+
+/* 内容页排版微调：文字加粗、小字放大、徽章里的字居中
+   微软雅黑在 Windows 上只有常规/粗体两档，500 会被当成常规，所以正文统一 600 */
+(function polishSlides() {
+  var slides = document.querySelectorAll('.slide:not(.night)');
+  slides.forEach(function (sec) {
+    var boxes = sec.querySelectorAll('.el');
+    var texts = sec.querySelectorAll('.el-text');
+
+    /* 1) 字重与字号 */
+    texts.forEach(function (el) {
+      el.querySelectorAll('span').forEach(function (sp) {
+        var fs = parseFloat(getComputedStyle(sp).fontSize) || 16;
+        sp.style.fontWeight = fs >= 24 ? '700' : '600';
+        if (fs < 14) sp.style.fontSize = (fs * 1.08).toFixed(2) + 'px';
+      });
+    });
+
+    /* 2) 徽章：小方块的文字框与方块重合后居中（修掉文本框内边距造成的偏移） */
+    texts.forEach(function (t) {
+      if (t.offsetWidth > 70 || t.offsetHeight > 70) return;
+      for (var i = 0; i < boxes.length; i++) {
+        var b = boxes[i];
+        if (b.classList.contains('el-text')) continue;
+        if (b.offsetWidth > 70 || b.offsetHeight > 70) continue;
+        if (Math.abs(b.offsetWidth - b.offsetHeight) > 2) continue;
+        if (Math.abs(b.offsetLeft - t.offsetLeft) > 14) continue;
+        if (Math.abs(b.offsetTop - t.offsetTop) > 10) continue;
+        t.style.left = b.offsetLeft + 'px';
+        t.style.top = b.offsetTop + 'px';
+        t.style.width = b.offsetWidth + 'px';
+        t.style.height = b.offsetHeight + 'px';
+        t.style.display = 'flex';
+        t.style.alignItems = 'center';
+        t.style.justifyContent = 'center';
+        var p = t.querySelector('p');
+        if (p) {
+          p.style.textAlign = 'center';
+          p.style.margin = '0';
+          p.style.lineHeight = '1';
+          p.style.paddingLeft = '0';
+        }
+        break;
+      }
+    });
+
+    /* 3) 大卡片加一层极淡投影，做出纸片层次 */
+    boxes.forEach(function (b) {
+      var r = parseFloat(b.style.borderRadius || '0');
+      if (r >= 8 && b.offsetWidth > 200 && b.offsetHeight > 100) {
+        b.style.boxShadow = '0 10px 26px rgba(31,35,41,.07)';
+      }
+    });
+  });
+})();
 </script>
 </body>
 </html>
