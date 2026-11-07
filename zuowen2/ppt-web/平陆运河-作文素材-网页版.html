@@ -101,6 +101,10 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .night-chat .bub.structured .zb-para { display:block; font-size:16px; font-weight:400; color:rgba(232,234,236,.9); line-height:1.78; letter-spacing:.2px; opacity:0; animation:zbIn .6s cubic-bezier(.22,1,.36,1) .14s forwards; text-align:justify; }
 .night-chat .bub.structured .zb-core { font-weight:600; color:rgba(255,255,255,.98); }
 @keyframes zbIn { to { opacity:1; transform:none; } }
+/* ===== 说明性纯文本：行首“标签：内容”自动分层，标签加粗、内容常规但不浅 ===== */
+.night-chat .bub.structured .zb-line { display:block; font-size:16px; line-height:1.72; font-weight:400; color:rgba(232,234,236,.92); letter-spacing:.2px; margin-bottom:10px; opacity:0; animation:zbIn .55s cubic-bezier(.22,1,.36,1) forwards; }
+.night-chat .bub.structured .zb-line .zb-label { font-weight:600; color:rgba(255,255,255,.98); }
+.night-chat .bub.structured .zb-line.is-title { font-size:18px; font-weight:600; color:rgba(255,255,255,.98); margin-bottom:12px; }
 /* 生成前：长方形小骨架（四个小圆角），底层淡AI彩虹+亮带从上到下波浪流动；完成后高度+margin 软弹收回（不占位） */
 .night-chat .bub .skel { position:relative; z-index:1; display:block; height:14px; border-radius:4px; margin:8px 0;
   background:
@@ -769,6 +773,32 @@ function renderStructured(base, data) {
   base.appendChild(p);
 }
 
+/* 说明性纯文本：按行识别行首“标签：内容”，标签加粗、内容常规；无标签的普通行正常显示 */
+var PLAIN_LABEL_RE = /^([^：:]{2,10})[：:]\s*([\s\S]*)$/;
+function renderPlainText(base, text) {
+  base.textContent = '';
+  var idx = 0;
+  text.split('\n').forEach(function(rawLine) {
+    var line = rawLine.trim();
+    if (!line) return;
+    var d = document.createElement('div');
+    d.className = 'zb-line';
+    d.style.animationDelay = (0.05 + idx * 0.06) + 's';
+    var m = line.match(PLAIN_LABEL_RE);
+    if (m && m[2]) {
+      var lab = document.createElement('span');
+      lab.className = 'zb-label';
+      lab.textContent = m[1] + '：';
+      d.appendChild(lab);
+      d.appendChild(document.createTextNode(m[2]));
+    } else {
+      d.textContent = line;
+    }
+    base.appendChild(d);
+    idx++;
+  });
+}
+
 /* 以完成态重建某一轮历史（不播逐段动画，直接可读） */
 function renderTurn(t) {
   aiScroll.innerHTML = '';
@@ -779,11 +809,10 @@ function renderTurn(t) {
   if (blks) {
     bub.classList.add('structured');
     renderStructured(bub._base, blks);
-  } else if (CLIP_OK) {
-    bub.classList.add('reveal');
-    bub.classList.add('fade');    /* 直接落到白色文字，避免历史页读不清 */
   } else {
-    bub.classList.add('reveal-plain');
+    /* 历史里的说明性纯文本同样按标签分层 */
+    bub.classList.add('structured');
+    renderPlainText(bub._base, t.a || '（未完成）');
   }
   if (bub._base) bub._base.style.maxHeight = 'none';
 }
@@ -892,7 +921,8 @@ function send() {
     '5. 篇幅：论证段净字数220至260字（标记符号不计入）；一次只写一个论证段，不寒暄、不另加标题。',
     '【输出标记协议：只允许以下两种标记，禁止 Markdown 符号（星号、井号、竖线、表格、分隔线）】',
     '〔锚点〕（来源，20字内）〔/锚点〕',
-    '〔论证段〕（一个完整连贯的段落，220至260字；其中把含平陆运河的核心句用〔核心〕…〔/核心〕在行内标出，其余文字不标记）〔/论证段〕'
+    '〔论证段〕（一个完整连贯的段落，220至260字；其中把含平陆运河的核心句用〔核心〕…〔/核心〕在行内标出，其余文字不标记）〔/论证段〕',
+    '【说明性内容格式：当用户要求总结、介绍、列写作技巧等（非论证段）时，不写〔论证段〕，每个要点单独一行，统一用“标签：内容”的形式；标签精炼（4至8字），禁用“第一第二”“一、二”等序号，也不写成长段落；要点不超过6条、每条内容不超过60字，总字数不超过400字】'
   ].join('\n');
   var payload = {
     model: MODEL,
@@ -984,19 +1014,10 @@ function send() {
       answerEl.classList.add('structured');
       renderStructured(answerEl._base, blocks);
     } else if (answerEl._base) {
-      answerEl._base.textContent = answer || hint;
-      if (CLIP_OK) {
-        answerEl.classList.add('reveal');     /* 同一层文字彩虹流动 + 从上到下扩散 + 下沉 */
-        setTimeout(function() {
-          answerEl.classList.add('fade');     /* 文字从淡彩虹平滑渐变成白色（.9s） */
-        }, 780);
-      } else {
-        answerEl.classList.add('reveal-plain');   /* 老浏览器：直接以白色文字展开，避免整段不可见 */
-      }
-      /* 兜底：扩散动画结束后立即解除高度限制，保证滚动开始前高度已稳定，长文不被裁 */
-      setTimeout(function() {
-        if (answerEl && answerEl._base) answerEl._base.style.maxHeight = 'none';
-      }, 900);
+      /* 说明性纯文本：行首标签加粗、内容常规，统一走 structured（骨架收起 + 字重分层） */
+      answerEl.classList.add('structured');
+      renderPlainText(answerEl._base, answer || hint);
+      answerEl._base.style.maxHeight = 'none';
     }
     messages.push({ role: 'assistant', content: answer });
     turns.push({ q: q, a: answer || hint });   /* 存入历史，供左上角翻回 */
