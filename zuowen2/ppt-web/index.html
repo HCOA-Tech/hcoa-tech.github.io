@@ -61,6 +61,7 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .night-title { position:absolute; left:0; top:108px; width:960px; text-align:center; font-size:37px; font-weight:600; letter-spacing:4px; text-shadow:0 4px 26px rgba(0,0,0,.5); z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; background:linear-gradient(120deg, rgba(255,255,255,.99), rgba(255,240,228,.95), rgba(226,240,255,.95), rgba(244,236,255,.94), rgba(255,255,255,.99)); background-size:250% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; animation:titleFlow 14s linear infinite; }
 @keyframes titleFlow { to { background-position:250% 0; } }
 .night-sub { position:absolute; left:0; top:168px; width:960px; text-align:center; font-size:14.5px; font-weight:400; color:rgba(190,205,198,.72); letter-spacing:1.5px; z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
+.night-eyebrow { position:absolute; left:0; top:76px; width:960px; text-align:center; font-size:13.5px; font-weight:500; color:rgba(201,168,106,.88); letter-spacing:5px; z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
 .night-badge { position:absolute; left:0; top:204px; width:960px; text-align:center; font-size:11px; z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
 .night-badge .nb-pill { display:inline-block; font-weight:500; color:rgba(214,224,220,.7); letter-spacing:1px; padding:5px 14px; border-radius:999px; border:1px solid rgba(255,255,255,.13); background:rgba(255,255,255,.05); white-space:nowrap; }
 .night-models { position:absolute; left:0; top:248px; width:960px; display:flex; justify-content:center; gap:12px; z-index:5; }
@@ -196,12 +197,12 @@ body.onAI .night-input.mobile-float { display: flex; }
 .slide.night.active .night-title { opacity:1; transform:none; }
 .slide.night .night-input { opacity:0; transform:translateX(-50%) translateY(18px); transition:opacity .9s ease .45s, transform .9s cubic-bezier(.22,1,.36,1) .45s, box-shadow .35s; }
 .slide.night.active .night-input { opacity:1; transform:translateX(-50%) translateY(0); }
-.slide.night .night-sub, .slide.night .night-badge, .slide.night .night-models { opacity:0; transition:opacity .9s ease .3s; }
-.slide.night.active .night-sub, .slide.night.active .night-badge, .slide.night.active .night-models { opacity:1; }
-/* 对话开始后（chat-mode）：标题/副题/徽章/模型按钮整体收起，对话区上移占满、字号以正文为主 */
-.slide.night .night-title, .slide.night .night-sub, .slide.night .night-badge, .slide.night .night-models { transition:opacity .5s ease, transform .6s cubic-bezier(.22,1,.36,1); }
+.slide.night .night-eyebrow, .slide.night .night-badge, .slide.night .night-models { opacity:0; transition:opacity .9s ease .3s; }
+.slide.night.active .night-eyebrow, .slide.night.active .night-badge, .slide.night.active .night-models { opacity:1; }
+/* 对话开始后（chat-mode）：标题/眉题/徽章/模型按钮整体收起，对话区上移占满、字号以正文为主 */
+.slide.night .night-title, .slide.night .night-eyebrow, .slide.night .night-badge, .slide.night .night-models { transition:opacity .5s ease, transform .6s cubic-bezier(.22,1,.36,1); }
 .slide.night.chat-mode .night-title,
-.slide.night.chat-mode .night-sub,
+.slide.night.chat-mode .night-eyebrow,
 .slide.night.chat-mode .night-badge,
 .slide.night.chat-mode .night-models { opacity:0 !important; transform:translateY(-16px) !important; pointer-events:none; }
 .slide.night .night-chat, .slide.night .night-think { transition:top .7s cubic-bezier(.22,1,.36,1), height .7s cubic-bezier(.22,1,.36,1); }
@@ -338,8 +339,8 @@ body.onAI .night-input.mobile-float { display: flex; }
   <div class="pg-bg night-bg"></div>
   <div class="pg-bg night-veil"></div>
   <button id="prevTurn" type="button"></button>
+  <div class="night-eyebrow">作文 AI 智能体</div>
   <div class="night-title">灵活运用素材</div>
-  <div class="night-sub">通过写作智能体。实时创作解锁无限可能</div>
   <div class="night-badge"><span class="nb-pill">已接入 HCOA AI 与 DeepSeek</span></div>
   <div class="night-models"><button data-m="deepseek-flash" class="on">快速</button><button data-m="deepseek-v4-pro">深度思考</button></div>
   <div id="thinkCard" class="night-think collapsed">
