@@ -185,22 +185,48 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 }
 @keyframes glowRise {
   0%   { opacity:0; transform:translateY(26px) scale(1.14); }
-  28%  { opacity:.92; }
-  62%  { opacity:.55; }
+  28%  { opacity:.58; }
+  62%  { opacity:.32; }
   100% { opacity:0; transform:translateY(-14px) scale(1); }
 }
-/* 水波：从输入框位置起，逐层向上放大消散 */
-.ai-wave {
-  position:absolute; left:50%; bottom:16px; width:140px; height:140px; margin-left:-70px;
-  z-index:3; pointer-events:none; border-radius:50%; opacity:0;
-  background:radial-gradient(circle, rgba(255,255,255,0) 56%, rgba(192,222,255,.26) 70%, rgba(255,255,255,0) 84%);
-  animation:waveUp 1.25s cubic-bezier(.16,.9,.3,1) forwards;
+/* 水浪：一整道横向水面从底部抬起、整屏向上掠过去
+   不是同心圆，是一条比屏幕更宽的弧形水面，顶边带亮线，像把整页托起来 */
+.ai-sweep {
+  position:absolute; left:-25%; width:150%; height:82%; bottom:-82%;
+  z-index:3; pointer-events:none; opacity:0;
+  border-radius:50% 50% 0 0 / 58% 58% 0 0;
+  background:linear-gradient(180deg,
+    rgba(178,208,255,.26) 0%,
+    rgba(168,196,255,.14) 14%,
+    rgba(150,170,235,.06) 42%,
+    rgba(120,140,210,.02) 68%,
+    transparent 100%);
+  filter:blur(6px);
+  animation:sweepUp 1.28s cubic-bezier(.32,.72,.24,1) forwards;
 }
-@keyframes waveUp {
-  0%   { transform:translateY(0) scale(.22); opacity:0; }
-  14%  { opacity:.85; }
-  55%  { opacity:.45; }
-  100% { transform:translateY(-540px) scale(6); opacity:0; }
+.ai-sweep::before {
+  content:''; position:absolute; left:0; right:0; top:0; height:100%;
+  border-radius:inherit; pointer-events:none;
+  border-top:1.4px solid rgba(226,240,255,.55);
+  box-shadow:0 -12px 34px rgba(190,220,255,.30);
+}
+@keyframes sweepUp {
+  0%   { transform:translateY(0); opacity:0; }
+  10%  { opacity:1; }
+  62%  { opacity:.80; }
+  100% { transform:translateY(-190%); opacity:0; }
+}
+/* 第二道稍慢的浪，压在第一道后面，形成层次而不是重复 */
+.ai-sweep.delay { animation-delay:.12s; opacity:0; height:72%; bottom:-72%; }
+.ai-sweep.delay::before { border-top-color:rgba(255,238,214,.42); }
+
+/* 整页被托起：先上浮、再轻微落回，收尾归位，不留下位移 */
+.slide.night.lift { animation:pageLift 1.22s cubic-bezier(.22,1,.36,1); }
+@keyframes pageLift {
+  0%   { transform:translateY(0) scale(1); }
+  26%  { transform:translateY(-20px) scale(1.014); }
+  64%  { transform:translateY(5px) scale(1.003); }
+  100% { transform:translateY(0) scale(1); }
 }
 /* 飞升副本：把用户刚打的字从输入栏整体弹到对话区 */
 .ai-flyer {
@@ -585,23 +611,29 @@ function playCue() {
   } catch (e) {}
 }
 
-/* 生成瞬间的整体动效：淡彩光效涌起 + 水波向上扩散 + 用户内容飞升到对话区
-   三者共用一个起点（输入框），时长错开 0/0.16/0.32 秒，避免一次性齐放显得生硬 */
+/* 生成瞬间的整体动效：整页被一道水浪托起并向上掠过去 + 淡彩光效 + 内容飞升
+   浪从屏幕底边（输入框所在高度）起，比屏幕更宽，横向整体抬起，不做同心圆 */
 function aiBurst(text) {
   playCue();                                   /* 动画开始的同时出声音 */
   var night = document.querySelector('.slide.night');
   if (!night) return;
 
+  /* 整页上浮一下再落回 */
+  night.classList.remove('lift');
+  void night.offsetWidth;
+  night.classList.add('lift');
+
   var glow = document.createElement('div');
   glow.className = 'ai-glow';
   night.appendChild(glow);
 
-  for (var i = 0; i < 3; i++) {
-    var w = document.createElement('div');
-    w.className = 'ai-wave';
-    w.style.animationDelay = (i * 0.16) + 's';
-    night.appendChild(w);
-  }
+  var s1 = document.createElement('div');
+  s1.className = 'ai-sweep';
+  night.appendChild(s1);
+
+  var s2 = document.createElement('div');
+  s2.className = 'ai-sweep delay';
+  night.appendChild(s2);
 
   if (text) {
     var f = document.createElement('div');
@@ -615,9 +647,10 @@ function aiBurst(text) {
   }
 
   setTimeout(function() {
-    var olds = night.querySelectorAll('.ai-glow, .ai-wave, .ai-flyer');
+    night.classList.remove('lift');
+    var olds = night.querySelectorAll('.ai-glow, .ai-sweep, .ai-flyer');
     for (var j = 0; j < olds.length; j++) olds[j].parentNode.removeChild(olds[j]);
-  }, 2400);
+  }, 2200);
 }
 
 /* 以完成态重建某一轮历史（不播逐段动画，直接可读） */
