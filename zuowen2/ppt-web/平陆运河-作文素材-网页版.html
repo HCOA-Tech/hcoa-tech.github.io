@@ -80,7 +80,7 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 #prevTurn:hover { background:rgba(201,168,106,.18); border-color:rgba(201,168,106,.5); color:rgba(247,245,239,.95); }
 .night-chat .msg { margin-bottom:10px; }
 .night-chat .who { font-size:11.5px; font-weight:600; color:rgba(201,168,106,.8); letter-spacing:1px; margin-bottom:3px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
-.night-chat .who.flow-ai { background:linear-gradient(120deg, rgba(255,107,107,.95), rgba(254,202,87,.95), rgba(72,219,251,.95), rgba(165,94,234,.95), rgba(255,107,107,.95)); background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; animation:inputFlow 8s linear infinite; }
+.night-chat .who.flow-ai { background:linear-gradient(120deg, rgba(255,150,150,.62), rgba(255,220,150,.62), rgba(150,225,255,.62), rgba(190,160,240,.62), rgba(255,150,150,.62)); background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; animation:inputFlow 12s linear infinite; }
 .night-chat .bub { font-size:17.5px; line-height:1.55; font-weight:600; color:rgba(247,245,239,.97); background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:16px 18px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:.3px; white-space:pre-wrap; word-break:break-word; backdrop-filter:blur(16px) saturate(1.15); -webkit-backdrop-filter:blur(16px) saturate(1.15); position:relative; overflow:hidden; transition:min-height .75s cubic-bezier(.25,1,.4,1), border-color .3s; }
 .night-chat .bub .base { position:relative; z-index:1; display:block; color:rgba(247,245,239,.97); white-space:pre-wrap; word-break:break-word; max-height:0; overflow:hidden; transition:max-height .85s cubic-bezier(.25,1,.4,1) .18s; }
 /* 完成后：同一层文字先显示彩虹流动（非第二层叠加），再平滑渐变成白色；延迟软弹撑开，与骨架收回衔接 */
@@ -119,6 +119,12 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .night-chat .bub.structured .zb-view .zb-head { color:rgba(247,245,239,.92); }
 .night-chat .bub.structured .zb-warn { background:rgba(248,113,113,.07); border:1px solid rgba(248,113,113,.2); border-radius:10px; padding:12px 14px; }
 .night-chat .bub.structured .zb-warn .zb-head { color:rgba(252,165,165,.95); }
+/* 行内标记：题眼（金色加粗）、重点（加粗米白）、核心（加粗米白） */
+.night-chat .bub.structured .zb-eye { font-weight:700; color:rgba(214,184,128,.98); }
+.night-chat .bub.structured .zb-key { font-weight:700; color:rgba(255,251,242,.99); }
+/* 论证段标题 */
+.night-chat .bub.structured .zb-para .zb-para-head { color:rgba(255,251,242,.98); font-weight:700; letter-spacing:1px; margin-bottom:8px; }
+.night-chat .bub.structured .zb-para-body { display:block; }
 .night-chat .bub.structured .zb-para { display:block; font-size:16px; font-weight:300; color:rgba(232,234,236,.9); line-height:1.8; letter-spacing:.2px; opacity:0; animation:zbIn .6s cubic-bezier(.22,1,.36,1) .14s forwards; text-align:justify; }
 .night-chat .bub.structured .zb-core { font-weight:700; color:rgba(255,251,242,.99); }
 @keyframes zbIn { to { opacity:1; transform:none; } }
@@ -824,37 +830,64 @@ function aiBurst(text) {
   }, 2200);
 }
 
-/* 结构化解析：五块〔真题〕〔讲解〕〔观点〕〔避错〕〔论证段〕（兼容旧〔锚点〕），段内可含行内〔核心〕；识别不到论证段返回 null */
-function grabBlock(text, name) {
-  var m = text.match(new RegExp('〔' + name + '〕([\\s\\S]*?)〔\\/' + name + '〕'));
-  return m ? m[1].trim() : '';
+/* 结构化解析（容错版）：块〔真题〕〔讲解〕〔观点〕〔避错〕〔论证段〕（兼容旧〔锚点〕），
+   行内〔核心〕〔题眼〕〔重点〕；闭合标记可省略，下一个块开始即上一块结束。
+   识别不到论证段返回 null。 */
+var BLOCK_NAMES = ['真题','讲解','观点','避错','论证段','锚点'];
+var INLINE_CLASS = { '核心':'zb-core', '题眼':'zb-eye', '重点':'zb-key' };
+function normMarkers(s) {
+  return s.replace(/［/g, '〔').replace(/］/g, '〕');
 }
-function parseStructured(text) {
-  var para = grabBlock(text, '论证段');
-  if (!para) return null;
-  para = para.replace(/\s*\n\s*/g, '').trim();
-  if (!para) return null;
-  return {
-    real: grabBlock(text, '真题'),
-    explain: grabBlock(text, '讲解'),
-    view: grabBlock(text, '观点'),
-    warn: grabBlock(text, '避错'),
-    anchor: grabBlock(text, '锚点'),
-    para: para
-  };
+function parseStructured(raw) {
+  var text = normMarkers(raw);
+  var starts = [];
+  BLOCK_NAMES.forEach(function(n) {
+    var re = new RegExp('〔' + n + '〕', 'g'), m;
+    while ((m = re.exec(text))) {
+      starts.push({ i: m.index, name: n, bodyStart: re.lastIndex });
+    }
+  });
+  if (!starts.length) return null;
+  starts.sort(function(a, b) { return a.i - b.i; });
+  var d = { real:'', explain:'', view:'', warn:'', anchor:'', para:'' };
+  starts.forEach(function(st, k) {
+    var end = k + 1 < starts.length ? starts[k + 1].i : text.length;
+    var body = text.slice(st.bodyStart, end)
+      .replace(new RegExp('〔\\/' + st.name + '〕'), '').trim();
+    if (st.name === '论证段') d.para = body.replace(/\s*\n\s*/g, '').trim();
+    else if (st.name === '真题') d.real = body;
+    else if (st.name === '讲解') d.explain = body;
+    else if (st.name === '观点') d.view = body;
+    else if (st.name === '避错') d.warn = body;
+    else if (st.name === '锚点') d.anchor = body;
+  });
+  if (!d.para) return null;
+  return d;
 }
-/* 把含〔核心〕…〔/核心〕的段落文本渲染成连贯节点：普通文本 + 行内核心 span */
-function renderPara(container, text) {
-  var re = /〔核心〕([\s\S]*?)〔\/核心〕/g, last = 0, m;
+/* 行内标记渲染：〔核心〕〔题眼〕〔重点〕，闭合标记可省略（遇到下一个标记或块结束） */
+function renderInline(container, text, stripLead) {
+  var re = /〔(核心|题眼|重点)〕|〔\/(核心|题眼|重点)〕/g, m, last = 0, span = null, first = true;
+  function pushText(t) {
+    if (!t) return;
+    if (stripLead && first) t = t.replace(/^[\s▎▍▌│┃|｜]+/, '');
+    if (t) {
+      if (span) span.appendChild(document.createTextNode(t));
+      else container.appendChild(document.createTextNode(t));
+    }
+    first = false;
+  }
   while ((m = re.exec(text))) {
-    if (m.index > last) container.appendChild(document.createTextNode(text.slice(last, m.index)));
-    var sp = document.createElement('span');
-    sp.className = 'zb-core';
-    sp.textContent = m[1].replace(/^[\s▎▍▌│┃|｜]+/, '');   /* 去掉模型自带的装饰竖条 */
-    container.appendChild(sp);
+    pushText(text.slice(last, m.index));
+    if (m[1]) {                 /* 开标记 */
+      span = document.createElement('span');
+      span.className = INLINE_CLASS[m[1]];
+      container.appendChild(span);
+    } else {                    /* 闭标记 */
+      span = null;
+    }
     last = re.lastIndex;
   }
-  if (last < text.length) container.appendChild(document.createTextNode(text.slice(last)));
+  pushText(text.slice(last));
 }
 function zbHead(title) {
   var h = document.createElement('div');
@@ -864,19 +897,19 @@ function zbHead(title) {
 }
 function renderSubLines(container, text) {
   text.split('\n').forEach(function(rawLine) {
-    var line = rawLine.trim().replace(/^[▎▍▌│┃|｜]+/, '');
+    var line = rawLine.trim();
     if (!line) return;
     var d = document.createElement('div');
     d.className = 'zb-sub';
-    var m = line.match(PLAIN_LABEL_RE);
-    if (m && m[2]) {
+    var lm = line.match(PLAIN_LABEL_RE);
+    if (lm && lm[2] && !/〔(核心|题眼|重点)〕/.test(line)) {
       var lab = document.createElement('span');
       lab.className = 'zb-label';
-      lab.textContent = m[1] + '：';
+      lab.textContent = lm[1] + '：';
       d.appendChild(lab);
-      d.appendChild(document.createTextNode(m[2]));
+      d.appendChild(document.createTextNode(lm[2]));
     } else {
-      d.textContent = line;
+      renderInline(d, line, true);
     }
     container.appendChild(d);
   });
@@ -904,7 +937,13 @@ function renderStructured(base, data) {
   if (data.warn) addBlock(base, 'zb-warn', '避错示例', data.warn);
   var p = document.createElement('div');
   p.className = 'zb-para';
-  renderPara(p, data.para);
+  var ph = zbHead('论证段');
+  ph.className = 'zb-head zb-para-head';
+  p.appendChild(ph);
+  var pb = document.createElement('div');
+  pb.className = 'zb-para-body';
+  renderInline(pb, data.para, true);
+  p.appendChild(pb);
   base.appendChild(p);
 }
 
@@ -1053,13 +1092,12 @@ function send() {
     'C 方法与素材问答：问怎么写、问素材细节、要总结、要写作技巧，或问其他作文的灵活问题，走【说明性内容格式】，用你自己的话讲清思路，不要只列条目。',
     'A 纯寒暄（最低优先级）：整句只有招呼、感谢或身份询问且不含B、C特征，如“你好”“在吗”“你是谁”“谢谢”，60字内回身份介绍加一句引导，不写段、不套标记。',
     '【多问题与追问】一句话里有几个问题就按顺序逐个回答，不许漏；用户追问、质疑或表示不满（如“我不是问两个问题吗”“什么玩意”）时，结合上一轮对话，针对新问题作答，不许重复上一轮已经给过的段落。',
-    '【B类输出协议：按顺序输出五块，每块用规定标记包住；禁止 Markdown 符号（星号、井号、竖线、表格、分隔线）】',
-    '〔真题〕先写完整来处：年份加卷别全称（如“2025年普通高等学校招生全国统一考试·全国二卷，辽宁使用”），或学校全称（如“大连育明高级中学2026届高三10月调研”）；再写原题，包含材料与题目。高考真题如实复述，材料记不全就标“材料略述”并概括，绝不编造；校内母题没有公开原题，只给来处和题目方向，不硬编材料。〔/真题〕',
-    '〔讲解〕讲清这道题怎么立意、平陆运河素材怎么扣题、哪一句最能用，可以给出你自己的判断和取舍，用自己的话讲，简短不套话。〔/讲解〕',
+    '【B类输出协议：按顺序输出四块，每块用规定标记包住；禁止 Markdown 符号（星号、井号、竖线、表格、分隔线）】',
+    '〔真题〕第一行写来处，用简短叫法，如“2025全国二卷（辽宁）”“2024新高考Ⅱ卷”“大连育明2026届高三10月调研”，禁止写“普通高等学校招生全国统一考试”这类全称。再写材料与题目：高考真题如实复述，材料记不全就标“材料略述”并概括；把材料里点出主题、题眼的关键句用〔题眼〕…〔/题眼〕在行内包住，不再单独写讲解；校内母题没有公开原题，只给来处和题目方向，不硬编材料。〔/真题〕',
     '〔观点〕分两行：“总论点：”写这篇文章总的观点；“分论点：”写下面这一段具体要论证的点。〔/观点〕',
-    '〔避错〕结合本题举一个常见逻辑错误的错误事例，如偷换概念、以偏概全、因果倒置、类比失当等；只举一个，简单展开这个错误例子并点一句为什么错，两三句即可。〔/避错〕',
-    '〔论证段〕按分论点把素材写成完整连贯、可直接抄写的考场段落；含平陆运河的核心句用〔核心〕…〔/核心〕在行内标出，核心句必须直接出现“平陆运河”或“这条江海运河”；篇幅不限，以完整够用为准，不灌水、不模板腔，禁“首先其次”“第一第二”。〔/论证段〕',
-    '【精简版】用户直接给题或只要求写作、没问怎么运用时，可省略〔讲解〕与〔避错〕，只输出〔真题〕〔观点〕〔论证段〕三块。',
+    '〔避错〕结合本题举一个常见逻辑错误的错误事例，如偷换概念、以偏概全、因果倒置、类比失当等；只举一个，简单展开这个错误例子，并把“避免什么”的关键错误短语用〔重点〕…〔/重点〕在行内包住，两三句即可。〔/避错〕',
+    '〔论证段〕按分论点把素材写成完整连贯、可直接抄写的考场段落；凡是运用平陆运河素材的句子，必须整句用〔核心〕…〔/核心〕在行内包住，核心句必须直接出现“平陆运河”或“这条江海运河”；篇幅不限，以完整够用为准，不灌水、不模板腔，禁“首先其次”“第一第二”。〔/论证段〕',
+    '【精简版】用户直接给题或只要求写作、没问怎么运用时，可省略〔避错〕，只输出〔真题〕〔观点〕〔论证段〕三块。',
     '【说明性内容格式（C类）】用你自己的话讲，每个要点单独一行，统一“标签：内容”，标签4至8字；不写成长段落、不堆套话，条数与每条字数按内容需要，不再设上限。'
   ].join('\n');
   var payload = {
