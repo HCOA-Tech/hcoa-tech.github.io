@@ -174,6 +174,8 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   background-size:100% 230%, 100% 100%;
   animation:skelWave 1.55s ease-in-out infinite; }
 .night-think.collapsed { max-height:0; opacity:0; border-width:0; }
+/* 思考卡收起时整个包装（含 HCOA 标签）一起隐藏，杜绝光剩文字的残留 */
+.think-msg.collapsed { display:none; }
 .nt-head { position:relative; z-index:1; display:flex; align-items:center; gap:8px; padding:12px 16px 4px; font-size:12px; color:rgba(247,245,239,.85); letter-spacing:1.2px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
 .nt-spin { width:11px; height:11px; border:2px solid rgba(255,255,255,.25); border-top-color:rgba(255,255,255,.9); border-radius:50%; animation:rot .8s linear infinite; }
 @keyframes rot { to { transform:rotate(360deg); } }
@@ -369,7 +371,7 @@ body.onAI .night-input.mobile-float { display: flex; }
   <div class="night-badge"><span class="nb-pill">已接入 HCOA AI 与 DeepSeek</span></div>
   <div class="night-models"><button data-m="deepseek-flash" class="on">快速</button><button data-m="deepseek-v4-pro">深度思考</button></div>
   <div id="aiScroll" class="night-chat">
-    <div class="msg think-msg" id="thinkWrap">
+    <div class="msg think-msg collapsed" id="thinkWrap">
       <div class="who flow-ai">HCOA</div>
       <div id="thinkCard" class="night-think collapsed">
         <div class="nt-head"><span class="nt-spin"></span><span>思考过程</span><span class="nt-sec" id="thinkSec">0s</span></div>
@@ -746,6 +748,7 @@ function clearStage() {
     m.parentNode.removeChild(m);
   });
   thinkCard.classList.add('collapsed');
+  thinkWrap.classList.add('collapsed');
   void aiScroll.offsetWidth;      /* 强制重排，保证动画能重新触发 */
   aiScroll.classList.add('flip');
   userScrolled = false;
@@ -1049,6 +1052,7 @@ var thinkTimer = null, thinkStart = 0;
 function startThink() {
   thinkBody.textContent = '';
   thinkCard.classList.remove('collapsed');
+  thinkWrap.classList.remove('collapsed');
   thinkStart = Date.now();
   thinkSec.textContent = '0s';
   if (thinkTimer) clearInterval(thinkTimer);
@@ -1163,6 +1167,7 @@ function send() {
         /* 先收起思考卡，等它收起后再展开骨架气泡（同一位置，不重叠） */
         endThink();
         thinkCard.classList.add('collapsed');
+        thinkWrap.classList.add('collapsed');
         setTimeout(function() {
           if (!answerEl) {
             answerEl = addMsg('assistant', '');
@@ -1206,6 +1211,7 @@ function send() {
     aiSend.disabled = false;
     endThink();
     thinkCard.classList.add('collapsed');   /* 思考卡无论如何都收起 */
+    thinkWrap.classList.add('collapsed');
     answer = sanitizeText(answer);   /* 显示前剥掉残留 Markdown 标记，保证干净可直接看 */
     var hint = truncated
       ? '输出因长度上限被截断，没能生成正文。请把问题拆小一点，或分多次让我写，再点一次生成。'
@@ -1246,6 +1252,7 @@ function send() {
     aiSend.disabled = false;
     endThink();
     thinkCard.classList.add('collapsed');
+    thinkWrap.classList.add('collapsed');
     if (answerEl) {
       answerEl.classList.remove('pending');
       answerEl._base.textContent = msg;
@@ -1263,6 +1270,7 @@ function send() {
   function authFail() {
     streaming = false; aiSend.disabled = false; endThink();
     thinkCard.classList.add('collapsed');
+    thinkWrap.classList.add('collapsed');
     keyErr.textContent = 'Key 无效或已过期，请重新填写';
     KEY = '';
     localStorage.removeItem('ds_key');
@@ -1329,6 +1337,7 @@ function send() {
     /* 否则改整体读取：思考卡给出可见提示，骨架气泡继续显示，最多自动重试 2 次（间隔 900ms），仍失败才报错 */
     endThink();
     thinkCard.classList.remove('collapsed');
+    thinkWrap.classList.remove('collapsed');
     thinkBody.textContent = '网络停顿，正在重新连接…';
     var attempt = 0;
     function retryWhole() {
