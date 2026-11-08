@@ -165,14 +165,19 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 }
 /* 用户自己的消息：中性玻璃质感（不再是绿色） */
 .night-chat .msg.user .bub { background:rgba(255,255,255,.10); border-color:rgba(255,255,255,.18); }
-/* 思考卡：与回答气泡同位置、同玻璃质感，带同款 AI 扫光（复用 skelWave），收起后才展开骨架 */
-.night-think { position:relative; width:100%; box-sizing:border-box; z-index:1; border:1px solid rgba(255,255,255,.1); border-radius:12px; background:rgba(255,255,255,.07); overflow:hidden; transition:max-height .5s cubic-bezier(.22,1,.36,1), opacity .4s, border-color .3s; max-height:220px; backdrop-filter:blur(16px) saturate(1.15); -webkit-backdrop-filter:blur(16px) saturate(1.15); }
+/* 思考卡：液态玻璃（30px 透底模糊+内高光+外投影），扫光自上而下、强缓入缓出变速扩散 */
+.night-think { position:relative; width:100%; box-sizing:border-box; z-index:1; border:1px solid rgba(255,255,255,.16); border-radius:14px; background:rgba(255,255,255,.08); overflow:hidden; transition:max-height .5s cubic-bezier(.22,1,.36,1), opacity .4s, border-color .3s; max-height:220px; backdrop-filter:blur(30px) saturate(1.5); -webkit-backdrop-filter:blur(30px) saturate(1.5); box-shadow:inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(255,255,255,.05), 0 8px 30px rgba(0,0,0,.38); }
 .night-think::before { content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.12), rgba(255,255,255,0)),
-    linear-gradient(120deg, rgba(255,107,107,.10), rgba(254,202,87,.09), rgba(72,219,251,.10), rgba(165,94,234,.10));
+    linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.05) 30%, rgba(255,255,255,.15) 50%, rgba(255,255,255,.05) 70%, rgba(255,255,255,0) 100%),
+    linear-gradient(120deg, rgba(255,107,107,.09), rgba(254,202,87,.08), rgba(72,219,251,.09), rgba(165,94,234,.09));
   background-size:100% 230%, 100% 100%;
-  animation:skelWave 1.55s ease-in-out infinite; }
+  animation:thinkWave 2.2s cubic-bezier(.62,0,.38,1) infinite; }
+@keyframes thinkWave {
+  0%   { background-position:0 115%, 0 0; opacity:.55; }
+  45%  { opacity:1; }
+  100% { background-position:0 -115%, 0 0; opacity:.55; }
+}
 .night-think.collapsed { max-height:0; opacity:0; border-width:0; }
 /* 思考卡收起时整个包装（含 HCOA 标签）一起隐藏，杜绝光剩文字的残留 */
 .think-msg.collapsed { display:none; }
@@ -1117,10 +1122,11 @@ function send() {
     'C 方法与素材问答：问怎么写、问素材细节、要总结、要写作技巧，或问其他作文的灵活问题，走【说明性内容格式】，用你自己的话讲清思路，不要只列条目。',
     'A 纯寒暄（最低优先级）：整句只有招呼、感谢或身份询问且不含B、C特征，如“你好”“在吗”“你是谁”“谢谢”，60字内回身份介绍加一句引导，不写段、不套标记。',
     '【多问题与追问】一句话里有几个问题就按顺序逐个回答，不许漏；用户追问、质疑或表示不满（如“我不是问两个问题吗”“什么玩意”）时，结合上一轮对话，针对新问题作答，不许重复上一轮已经给过的段落。',
+    '【题外话不拒答】用户说的任何非写作题外话（公式、概念、其他学科问题、随口问的事）都正常回答，不回避、不说教：先在〔观点〕块里用自己的话把题外话本身讲清楚；若它隐含可用的作文信息（可比喻的道理、可立论的角度），就提取出来，照常输出五块完成写作；完全与作文无关的，走说明性内容格式直接回答。',
     '【B类输出协议：按顺序输出五块，每块用规定标记包住；禁止 Markdown 符号（星号、井号、竖线、表格、分隔线）】',
     '〔见解〕先用一句话直接回答用户的问题：能用就说“可以”，不太合适就说“不太行”或“部分适用”，再用你自己的话讲清判断和理由，像老师当面说话，不要套话。如果这个素材用在这类主题上有风险（比如容易偷换概念、以偏概全、强行拔高），在这里直接点出来。两三句即可。〔/见解〕',
     '〔真题〕第一行写来处，用简短叫法，如“2025全国二卷（辽宁）”“2024新高考Ⅱ卷”“大连育明2026届高三10月调研”，禁止写“普通高等学校招生全国统一考试”这类全称。再写材料与题目：高考真题如实复述，材料记不全就标“材料略述”并概括；把材料里点出主题、题眼的关键句用〔题眼〕…〔/题眼〕在行内包住，不再单独写讲解；校内母题没有公开原题，只给来处和题目方向，不硬编材料。〔/真题〕',
-    '〔观点〕分两行，都从题目和材料的题眼出发、就题目讨论的普遍道理立论，回答题目让我们思考什么，不出现平陆运河、不围着素材写：“总论点：”写全文总的观点；“分论点：”写下面这一段具体要论证的点。〔/观点〕',
+    '〔观点〕若用户问了题外话，先在这里用自己的话把题外话本身答清楚，再写论点；论点分两行，都从题目和材料的题眼出发、就题目讨论的普遍道理立论，回答题目让我们思考什么，不出现平陆运河、不围着素材写：“总论点：”写全文总的观点；“分论点：”写下面这一段具体要论证的点。〔/观点〕',
     '〔避错〕结合本题举一个常见逻辑错误的错误事例，如偷换概念、以偏概全、因果倒置、类比失当等；只举一个，简单展开这个错误例子，并把“避免什么”的关键错误短语用〔重点〕…〔/重点〕在行内包住，两三句即可。〔/避错〕',
     '〔论证段〕按分论点写成完整连贯、可直接抄写的考场段落，平陆运河只作为证明分论点的一个事例出现，不是介绍运河本身；凡是运用平陆运河素材的句子，必须整句用〔核心〕…〔/核心〕在行内包住，核心句必须直接出现“平陆运河”或“这条江海运河”；全段控制在230字以内（含标点），句句有用，不灌水、不模板腔，禁“首先其次”“第一第二”。〔/论证段〕',
     '【篇幅】除论证段外，其余各块简短克制，材料如实复述但不堆砌，每块点到即止，不写多余的话。',
