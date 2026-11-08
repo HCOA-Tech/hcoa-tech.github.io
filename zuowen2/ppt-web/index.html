@@ -638,11 +638,13 @@ function setupNight() {
   var bg = document.querySelector('.slide.night.active .night-veil');
   if (!bg || bg.querySelector('.star')) return;
   var frag = document.createDocumentFragment();
-  for (var i = 0; i < 26; i++) {
+  for (var i = 0; i < 40; i++) {
     var st = document.createElement('div');
     st.className = 'star';
     var sz = (Math.random() * 1 + 1).toFixed(1);
-    st.style.cssText = 'left:' + (Math.random() * 96).toFixed(1) + '%;top:' + (Math.random() * 50 + 4).toFixed(1) + '%;width:' + sz + 'px;height:' + sz + 'px;';
+    /* 幂次加权：pow(,1.8) 让 top 偏向小值，顶部星星更密、往下渐变稀疏；left 仍均匀铺开不集中 */
+    var top = (4 + Math.pow(Math.random(), 1.8) * 50).toFixed(1);
+    st.style.cssText = 'left:' + (Math.random() * 96).toFixed(1) + '%;top:' + top + '%;width:' + sz + 'px;height:' + sz + 'px;';
     frag.appendChild(st);
   }
   bg.appendChild(frag);
