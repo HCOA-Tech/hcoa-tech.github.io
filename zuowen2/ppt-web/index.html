@@ -58,13 +58,14 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 /* 原群山压暗 + 顶部黑色渐变遮罩：天空纯黑，山形保留深黑轮廓 */
 .night-bg { background:url(assets/img/Q1Vhbwbr5oHNfAxJS4OcAXvtnQh.jpg) center top/cover; filter:brightness(.32) saturate(.48) contrast(1.3); }
 .night-veil { background:linear-gradient(180deg, rgba(0,0,0,.86) 0%, rgba(1,3,6,.68) 34%, rgba(2,5,9,.34) 62%, rgba(3,6,10,.1) 80%, rgba(3,6,10,0) 92%); }
-.night-title { position:absolute; left:0; top:108px; width:960px; text-align:center; font-size:37px; font-weight:600; letter-spacing:4px; text-shadow:0 4px 26px rgba(0,0,0,.5); z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; background:linear-gradient(120deg, rgba(255,255,255,.99), rgba(255,240,228,.95), rgba(226,240,255,.95), rgba(244,236,255,.94), rgba(255,255,255,.99)); background-size:250% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; animation:titleFlow 14s linear infinite; }
-@keyframes titleFlow { to { background-position:250% 0; } }
+.night-title { position:absolute; left:0; top:108px; width:960px; text-align:center; font-size:37px; font-weight:600; letter-spacing:4px; text-shadow:0 4px 26px rgba(0,0,0,.5); z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; background:linear-gradient(120deg, rgba(255,255,255,.99), rgba(255,240,228,.95), rgba(226,240,255,.95), rgba(244,236,255,.94), rgba(255,255,255,.99)); background-size:250% 100%; background-position:60% 0; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; }
+/* 标题流光已改为固定渐变（原 titleFlow 停用，降低常驻渲染开销） */
 .night-sub { position:absolute; left:0; top:168px; width:960px; text-align:center; font-size:14.5px; font-weight:400; color:rgba(190,205,198,.72); letter-spacing:1.5px; z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
 .night-eyebrow { position:absolute; left:0; top:76px; width:960px; text-align:center; font-size:13.5px; font-weight:500; color:rgba(201,168,106,.88); letter-spacing:5px; z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
-.night-badge { position:absolute; left:0; top:204px; width:960px; text-align:center; font-size:11px; z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
-.night-badge .nb-pill { display:inline-block; font-weight:500; color:rgba(214,224,220,.7); letter-spacing:1px; padding:5px 14px; border-radius:999px; border:1px solid rgba(255,255,255,.13); background:rgba(255,255,255,.05); white-space:nowrap; }
-.night-models { position:absolute; left:0; top:248px; width:960px; display:flex; justify-content:center; gap:12px; z-index:5; }
+.night-badge { position:absolute; left:26px; top:22px; z-index:5; font-size:10px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
+.night-badge .nb-pill { display:inline-flex; align-items:center; gap:6px; font-weight:400; color:rgba(214,224,220,.62); letter-spacing:.6px; padding:4px 11px 4px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.04); white-space:nowrap; }
+.night-badge .nb-pill::before { content:''; width:5px; height:5px; border-radius:50%; background:rgba(125,211,156,.9); box-shadow:0 0 6px rgba(125,211,156,.7); }
+.night-models { position:absolute; left:0; top:198px; width:960px; display:flex; justify-content:center; gap:12px; z-index:5; }
 .night-models button { border:1px solid rgba(201,168,106,.45); background:rgba(255,255,255,.06); color:rgba(247,245,239,.85); border-radius:999px; padding:6px 24px; font-size:13px; cursor:pointer; transition:.3s; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:2px; backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
 .night-models button:hover { background:rgba(255,255,255,.12); }
 .night-models button.on { background:rgba(201,168,106,.92); color:#0a1220; border-color:rgba(201,168,106,1); font-weight:600; }
@@ -165,19 +166,10 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 }
 /* 用户自己的消息：中性玻璃质感（不再是绿色） */
 .night-chat .msg.user .bub { background:rgba(255,255,255,.10); border-color:rgba(255,255,255,.18); }
-/* 思考卡：液态玻璃（30px 透底模糊+内高光+外投影），扫光自上而下、强缓入缓出变速扩散 */
-.night-think { position:relative; width:100%; box-sizing:border-box; z-index:1; border:1px solid rgba(255,255,255,.16); border-radius:14px; background:rgba(255,255,255,.08); overflow:hidden; transition:max-height .5s cubic-bezier(.22,1,.36,1), opacity .4s, border-color .3s; max-height:220px; backdrop-filter:blur(30px) saturate(1.5); -webkit-backdrop-filter:blur(30px) saturate(1.5); box-shadow:inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(255,255,255,.05), 0 8px 30px rgba(0,0,0,.38); }
+/* 思考卡：静态玻璃（轻量透底模糊+内高光+外投影），扫光已停用以降低常驻渲染开销 */
+.night-think { position:relative; width:100%; box-sizing:border-box; z-index:1; border:1px solid rgba(255,255,255,.16); border-radius:14px; background:rgba(255,255,255,.08); overflow:hidden; transition:max-height .5s cubic-bezier(.22,1,.36,1), opacity .4s, border-color .3s; max-height:220px; backdrop-filter:blur(16px) saturate(1.3); -webkit-backdrop-filter:blur(16px) saturate(1.3); box-shadow:inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(255,255,255,.05), 0 8px 30px rgba(0,0,0,.38); }
 .night-think::before { content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.05) 30%, rgba(255,255,255,.15) 50%, rgba(255,255,255,.05) 70%, rgba(255,255,255,0) 100%),
-    linear-gradient(120deg, rgba(255,107,107,.09), rgba(254,202,87,.08), rgba(72,219,251,.09), rgba(165,94,234,.09));
-  background-size:100% 230%, 100% 100%;
-  animation:thinkWave 2.2s cubic-bezier(.62,0,.38,1) infinite; }
-@keyframes thinkWave {
-  0%   { background-position:0 115%, 0 0; opacity:.55; }
-  45%  { opacity:1; }
-  100% { background-position:0 -115%, 0 0; opacity:.55; }
-}
+  background:linear-gradient(120deg, rgba(255,107,107,.06), rgba(254,202,87,.05), rgba(72,219,251,.06), rgba(165,94,234,.06)); }
 .night-think.collapsed { max-height:0; opacity:0; border-width:0; }
 /* 思考卡收起时整个包装（含 HCOA 标签）一起隐藏，杜绝光剩文字的残留 */
 .think-msg.collapsed { display:none; }
@@ -187,10 +179,10 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .nt-sec { color:rgba(247,245,239,.6); font-size:11px; }
 #thinkBody { position:relative; z-index:1; max-height:72px; overflow-y:auto; padding:2px 16px 12px; font-size:12.5px; line-height:1.7; color:rgba(247,245,239,.75); font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; white-space:pre-wrap; word-break:break-word; }
 /* 输入框：整块淡淡的彩虹渐变 + 高斯模糊毛玻璃，无生硬描边 */
-.night-input { position:absolute; left:50%; bottom:20px; transform:translateX(-50%); width:450px; height:36px; z-index:7; display:flex; align-items:center; gap:7px; padding:3px 10px 3px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.10); background:linear-gradient(120deg, rgba(255,107,107,.22), rgba(254,202,87,.2), rgba(72,219,251,.22), rgba(165,94,234,.22), rgba(255,107,107,.22)); background-size:300% 100%; backdrop-filter:blur(30px) saturate(1.5); -webkit-backdrop-filter:blur(30px) saturate(1.5); box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 10px 34px rgba(0,0,0,.4); animation:inputFlow 8s linear infinite; transition:box-shadow .35s, transform .35s; }
-/* 光晕：常驻一圈淡淡彩色光晕贴着输入框外沿，颜色随渐变同步流动；聚焦时只有一次小脉冲 */
-.night-input::before { content:''; position:absolute; inset:-5px; border-radius:999px; background:linear-gradient(120deg, rgba(255,107,107,.42), rgba(254,202,87,.38), rgba(72,219,251,.42), rgba(165,94,234,.42), rgba(255,107,107,.42)); background-size:300% 100%; filter:blur(13px); opacity:.34; z-index:-1; pointer-events:none; animation:inputFlow 8s linear infinite; transition:opacity .4s ease; }
-.night-input:focus-within::before { opacity:.5; animation:inputFlow 8s linear infinite, focusPulse .65s ease-out; }
+.night-input { position:absolute; left:50%; bottom:20px; transform:translateX(-50%); width:450px; height:36px; z-index:7; display:flex; align-items:center; gap:7px; padding:3px 10px 3px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.10); background:linear-gradient(120deg, rgba(255,107,107,.22), rgba(254,202,87,.2), rgba(72,219,251,.22), rgba(165,94,234,.22), rgba(255,107,107,.22)); background-size:300% 100%; background-position:50% 0; backdrop-filter:blur(30px) saturate(1.5); -webkit-backdrop-filter:blur(30px) saturate(1.5); box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 10px 34px rgba(0,0,0,.4); transition:box-shadow .35s, transform .35s; }
+/* 光晕：静态淡彩光晕贴输入框外沿（原流动动画停用）；聚焦时只做一次小脉冲 */
+.night-input::before { content:''; position:absolute; inset:-5px; border-radius:999px; background:linear-gradient(120deg, rgba(255,107,107,.42), rgba(254,202,87,.38), rgba(72,219,251,.42), rgba(165,94,234,.42), rgba(255,107,107,.42)); background-size:300% 100%; background-position:50% 0; filter:blur(13px); opacity:.3; z-index:-1; pointer-events:none; transition:opacity .4s ease; }
+.night-input:focus-within::before { opacity:.46; animation:focusPulse .65s ease-out; }
 @keyframes focusPulse { 0% { transform:scale(1); } 40% { transform:scale(1.06); } 100% { transform:scale(1); } }
 @keyframes inputFlow { to { background-position:300% 0; } }
 .night-input:focus-within { box-shadow:inset 0 1px 0 rgba(255,255,255,.16), 0 14px 46px rgba(0,0,0,.5), 0 0 26px rgba(255,107,107,.18), 0 0 44px rgba(72,219,251,.12); transform:translateX(-50%) translateY(-2px); }
@@ -373,7 +365,7 @@ body.onAI .night-input.mobile-float { display: flex; }
   <button id="prevTurn" type="button"></button>
   <div class="night-eyebrow">作文 AI 智能体</div>
   <div class="night-title">灵活运用素材</div>
-  <div class="night-badge"><span class="nb-pill">已接入 HCOA AI 与 DeepSeek</span></div>
+  <div class="night-badge"><span class="nb-pill">已接入 HCOA AI · DeepSeek · ChatGPT</span></div>
   <div class="night-models"><button data-m="deepseek-flash" class="on">快速</button><button data-m="deepseek-v4-pro">深度思考</button></div>
   <div id="aiScroll" class="night-chat">
     <div class="msg think-msg collapsed" id="thinkWrap">
