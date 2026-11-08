@@ -217,7 +217,16 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   transform:translate3d(0,-110%,0);
 }
 .night-chat .bub.reveal .bub-flow, .night-chat .bub.reveal-plain .bub-flow {
-  animation:flowFade 2.4s cubic-bezier(.22,1,.36,1) forwards, flowSweep 2.4s cubic-bezier(.33,.85,.28,1) forwards;
+  animation:flowFade 2.1s cubic-bezier(.22,1,.36,1) forwards;
+}
+.night-chat .bub.reveal .bub-flow::before, .night-chat .bub.reveal-plain .bub-flow::before {
+  animation:bandDown 1.05s cubic-bezier(.33,.85,.28,1) forwards;
+}
+@keyframes flowFade {
+  0%   { opacity:0; }
+  14%  { opacity:.92; }
+  40%  { opacity:.58; }
+  100% { opacity:0; }
 }
 .night-chat .bub.reveal .bub-flow::before, .night-chat .bub.reveal-plain .bub-flow::before {
   animation:bandDown 1.05s cubic-bezier(.33,.85,.28,1) forwards;
@@ -229,12 +238,7 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   80%  { opacity:.40; }
   100% { opacity:0; }
 }
-/* 离场：弹框（1.2s）结束后，光晕的边界从上往下推移、逐层收掉，直到整块退干净；
-   不用 filter、不用遮罩位移动画，clip-path 走合成器，亚像素级推进不会出现硬跳 */
-@keyframes flowSweep {
-  0%, 50% { clip-path:inset(0 0 0 0); -webkit-clip-path:inset(0 0 0 0); }
-  100%    { clip-path:inset(100% 0 0 0); -webkit-clip-path:inset(100% 0 0 0); }
-}
+/* 离场只用整体柔性淡出：不做任何裁切推进，避免气泡中间出现一条往下移的硬边界 */
 @keyframes bandDown {
   0%   { transform:translate3d(0,-110%,0); }
   100% { transform:translate3d(0,240%,0); }
@@ -261,15 +265,16 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .think-msg.collapsed { display:none; }
 .nt-head { position:relative; z-index:1; display:flex; align-items:center; gap:10px; padding:12px 16px 4px; font-size:15px; color:rgba(247,245,239,.85); letter-spacing:1.2px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
 .nt-spin { width:15px; height:15px; border:2px solid rgba(255,255,255,.25); border-top-color:rgba(255,255,255,.9); border-radius:50%; animation:rot 1.2s linear infinite; flex:none; }
-/* 标题文字：高光贴着文字字形从左到右扫过（不是扫一个矩形块），周期与转圈完全一致（1.2s）——转一圈、光扫一次 */
+/* 标题文字：高光贴着文字字形从左到右扫过，周期与转圈完全一致（1.2s）——转一圈、光扫一次；
+   底色压暗、亮带收窄到纯白，扫过时对比明显 */
 .nt-label {
   display:inline-block;
   background-image:linear-gradient(100deg,
-    rgba(247,245,239,.85) 0%,
-    rgba(247,245,239,.85) 38%,
+    rgba(247,245,239,.55) 0%,
+    rgba(247,245,239,.55) 40%,
     rgba(255,255,255,1) 50%,
-    rgba(247,245,239,.85) 62%,
-    rgba(247,245,239,.85) 100%);
+    rgba(247,245,239,.55) 60%,
+    rgba(247,245,239,.55) 100%);
   background-size:260% 100%;
   background-repeat:no-repeat;
   -webkit-background-clip:text;
