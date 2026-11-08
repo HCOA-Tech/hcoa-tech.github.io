@@ -90,8 +90,8 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .night-chat .bub.reveal .base {
   max-height:700px;
   color:transparent; -webkit-text-fill-color:transparent;
-  background:linear-gradient(90deg, rgba(255,178,178,.58), rgba(255,230,178,.56), rgba(178,232,255,.58), rgba(210,188,246,.56), rgba(255,178,178,.58));
-  background-size:200% 100%;
+  background:linear-gradient(180deg, rgba(255,178,178,.58), rgba(255,230,178,.56), rgba(178,232,255,.58), rgba(210,188,246,.56), rgba(255,178,178,.58));
+  background-size:100% 200%;
   -webkit-background-clip:text; background-clip:text;
   animation:dropIn .75s cubic-bezier(.3,1.3,.55,1) .16s both, rainbowFlow 2s linear .16s infinite;
   transition:max-height .7s cubic-bezier(.25,1,.4,1) .12s, -webkit-text-fill-color .9s ease;
@@ -99,7 +99,24 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .night-chat .bub.fade .base { -webkit-text-fill-color:rgba(247,245,239,.97); }
 /* 兜底：老浏览器不支持 background-clip:text 时，不透明文字直接展开，绝不出现空白气泡 */
 .night-chat .bub.reveal-plain .base { max-height:none; color:rgba(247,245,239,.97); -webkit-text-fill-color:rgba(247,245,239,.97); background:none; animation:none; }
-@keyframes rainbowFlow { to { background-position:200% 50%; } }
+@keyframes rainbowFlow { to { background-position:50% 200%; } }
+/* 文字从上到下的流光：结构化各块依次透亮再回落，只提亮文字观感，
+   不改字号、字重、颜色值和排版；不整页扫、不做大光带 */
+.night-chat .bub.structured.reveal .base > * {
+  animation:textGlowDown 1.1s cubic-bezier(.35,0,.25,1) both;
+}
+.night-chat .bub.structured.reveal .base > *:nth-child(1) { animation-delay:.10s; }
+.night-chat .bub.structured.reveal .base > *:nth-child(2) { animation-delay:.30s; }
+.night-chat .bub.structured.reveal .base > *:nth-child(3) { animation-delay:.50s; }
+.night-chat .bub.structured.reveal .base > *:nth-child(4) { animation-delay:.70s; }
+.night-chat .bub.structured.reveal .base > *:nth-child(5) { animation-delay:.90s; }
+.night-chat .bub.structured.reveal .base > *:nth-child(6) { animation-delay:1.10s; }
+.night-chat .bub.structured.reveal .base > *:nth-child(7) { animation-delay:1.30s; }
+@keyframes textGlowDown {
+  0%   { filter:none; }
+  32%  { filter:brightness(1.34) saturate(1.08); }
+  100% { filter:none; }
+}
 /* ===== 完整论证段：连贯成段，层级靠字重，颜色统一米白 ===== */
 .night-chat .bub.structured .base { max-height:none; overflow:visible; white-space:normal; }
 .night-chat .bub.structured .skel { height:0; margin-top:0; margin-bottom:0; opacity:0; }
@@ -161,7 +178,8 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   100% { height:14px; margin-top:8px; margin-bottom:8px; opacity:1; transform:none; }
 }
 @keyframes skelWave { 0% { background-position:0 -115%, 0 0; } 100% { background-position:0 115%, 0 0; } }
-.night-chat .bub.reveal .skel, .night-chat .bub.skel-out .skel { height:0; margin-top:0; margin-bottom:0; opacity:0; }
+/* 收起时必须先摘掉 skelEnter 的 fill-mode both，否则动画把新增行的 height 锁在 14px，会残留两行收不干净 */
+.night-chat .bub.reveal .skel, .night-chat .bub.skel-out .skel { height:0; margin-top:0; margin-bottom:0; opacity:0; animation:none !important; }
 /* 骨架收起阶段：先软收起骨架并淡掉底色，再渲染正文，杜绝硬切 */
 .night-chat .bub.skel-out { min-height:0; }
 /* 淡AI彩虹只存在于独立色层（::after）：pending/弹动中常驻，fade/skel-out 后 1.3s 透明度渐变收回（不硬切） */
@@ -208,6 +226,7 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   #aiInput { font-size:20px; letter-spacing:.3px; }
   #aiInput::placeholder { font-size:16px; }
   #aiSend { height:26px; font-size:13px; }
+  #aiRetry { height:26px; font-size:13px; }
   .night-input { height:44px; }
 }
 /* ===== 手机端独立浮动输入框：JS 把它移出缩放舞台、固定在视口底部，保证好点；电脑端不加 .mobile-float，保持舞台内原样 ===== */
@@ -224,9 +243,14 @@ body.onAI .night-input.mobile-float { display: flex; }
 .night-input.mobile-float #aiInput { font-size: 16px; flex: 1 1 auto; min-width: 0; height: auto; letter-spacing: .3px; }
 .night-input.mobile-float #aiInput::placeholder { font-size: 14px; }
 .night-input.mobile-float #aiSend { height: 32px; font-size: 13px; padding: 0 16px; flex: none; }
+.night-input.mobile-float #aiRetry { height: 32px; font-size: 13px; padding: 0 14px; }
 #aiSend { border:1px solid rgba(255,255,255,.18); border-radius:999px; background:rgba(255,255,255,.14); color:rgba(255,255,255,.95); padding:0 9px; height:20px; font-size:10.5px; font-weight:500; cursor:pointer; transition:.25s; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:1.5px; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); flex:none; }
 #aiSend:hover { background:rgba(255,255,255,.24); border-color:rgba(255,255,255,.3); }
 #aiSend:disabled { opacity:.45; cursor:default; }
+/* 重试按钮：平时隐藏，出问题时弹在“生成”左侧 */
+#aiRetry { display:none; border:1px solid rgba(201,168,106,.5); border-radius:999px; background:rgba(201,168,106,.18); color:rgba(229,207,156,.95); padding:0 9px; height:20px; font-size:10.5px; font-weight:500; cursor:pointer; transition:background .25s, border-color .25s; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:1.5px; flex:none; }
+#aiRetry.show { display:inline-flex; align-items:center; justify-content:center; }
+#aiRetry:hover { background:rgba(201,168,106,.3); border-color:rgba(201,168,106,.75); }
 /* 星星：小而淡，点缀夜空 */
 .star { position:absolute; background:#fff; border-radius:50%; opacity:.62; }
 @keyframes twinkle { 0%,100% { opacity:.45; } 50% { opacity:.85; } }
@@ -377,7 +401,7 @@ body.onAI .night-input.mobile-float { display: flex; }
       </div>
     </div>
   </div>
-  <div class="night-input"><input id="aiInput" type="text" inputmode="text" enterkeyhint="send" placeholder="报一个角度或题目，AI 现场写给你看……" autocomplete="off"/><button id="aiSend">生成</button></div>
+  <div class="night-input"><input id="aiInput" type="text" inputmode="text" enterkeyhint="send" placeholder="报一个角度或题目，AI 现场写给你看……" autocomplete="off"/><button id="aiRetry" type="button">重试</button><button id="aiSend">生成</button></div>
 </section>
 <section class="slide" data-note="" data-id="pzD"><div class="pg-bg" style="background-image:url(assets/img/Q1Vhbwbr5oHNfAxJS4OcAXvtnQh.jpg);background-size:cover;background-position:center;"></div><div class="el el-text" style="left:238.79999999999998px;top:193.85000000000002px;width:498.95px;height:118.4px;font-size:54px;font-family:'Kaiti SC','STKaiti','KaiTi',KaiTi,serif;color:rgba(46, 110, 94, 1);;text-align:center;line-height:1.3;justify-content:flex-start;display:flex;flex-direction:column;"><p style="text-align:center;line-height:1.3"><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(46, 110, 94, 1);;font-size:54px;font-family:'Kaiti SC','STKaiti','KaiTi',KaiTi,serif">感谢观看</span></span></p></div><div class="el" style="left:456.0px;top:284.85px;width:48.0px;height:1.5px;background-color:rgba(201, 168, 106, 1);"><div class="el-inner" style="font-size:16px;font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;color:rgba(31, 35, 41, 1);;padding-top:3.6px;padding-bottom:3.6px;padding-left:7.2px;padding-right:7.2px;"><p style="text-align:center;line-height:1.2"><span style="color:rgba(255, 255, 255, 1);;font-size:18px;font-family:'Songti SC','STSong','SimSun',SimSun,serif"> </span></p></div></div><div class="el el-text" style="left:177.738031496063px;top:312.2640157480315px;width:604.5232283464567px;height:68.39622047244094px;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif;color:rgba(74, 74, 66, 1);;text-align:center;line-height:1.7;justify-content:flex-start;display:flex;flex-direction:column;"><p style="text-align:center;line-height:1.7;margin-top:10.0px;margin-left:18.0px;text-indent:-18.0px"><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(74, 74, 66, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">平陆运河不仅是一条水道——它是</span></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><b><span style="color:rgba(46, 110, 94, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">百年家国夙愿的接力</span></b></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(74, 74, 66, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">，是</span></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><b><span style="color:rgba(46, 110, 94, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">工程卓越的见证</span></b></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(74, 74, 66, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">，更是</span></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><b><span style="color:rgba(46, 110, 94, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">生态温柔的典范</span></b></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(74, 74, 66, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">。</span></span></p></div><div class="el el-text" style="left:195.05850393700786px;top:395.0564566929134px;width:569.8829921259843px;height:55.87503937007874px;font-size:15px;font-family:'Songti SC','STSong','SimSun',SimSun,serif;color:rgba(140, 140, 125, 1);;text-align:center;line-height:1.8;justify-content:flex-start;display:flex;flex-direction:column;"><p style="text-align:center;line-height:1.8;margin-top:10.0px;margin-left:18.0px;text-indent:-18.0px"><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(140, 140, 125, 1);;font-size:15px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">从1919年《建国方略》的构想到2026年建成通航，平陆运河凝聚了奋斗、创新与人与自然和谐共生的精神。</span></span></p></div><div class="el el-text" style="left:416.62503937007875px;top:89.81850393700788px;width:126.75px;height:39.37503937007874px;font-size:24px;font-family:'Songti SC','STSong','SimSun',SimSun,serif;color:rgba(46, 110, 94, 0.349);;text-align:left;line-height:1.1;justify-content:flex-start;display:flex;flex-direction:column;"></div></section>
   </div>
@@ -576,6 +600,9 @@ var streaming = false;
 var aiScroll = document.getElementById('aiScroll');
 var aiInput = document.getElementById('aiInput');
 var aiSend = document.getElementById('aiSend');
+var aiRetry = document.getElementById('aiRetry');
+var retryQ = '';               /* 上一次失败的提问，供“重试”按钮复用 */
+var retryPending = false;      /* true 表示 turns 末尾那条是失败记录，重试时先弹掉 */
 var thinkCard = document.getElementById('thinkCard');
 var thinkWrap = document.getElementById('thinkWrap');
 var thinkBody = document.getElementById('thinkBody');
@@ -657,6 +684,20 @@ hudKeyInput.addEventListener('blur', function() {
 refreshKeyDot();
 
 aiSend.addEventListener('click', send);
+
+/* 重试按钮：任何原因失败后在“生成”左侧弹出，点一下用原问题重发，不用重新打字 */
+function hideRetry() { if (aiRetry) aiRetry.classList.remove('show'); }
+function showRetry() { if (aiRetry) aiRetry.classList.add('show'); }
+aiRetry.addEventListener('click', function() {
+  if (streaming) return;
+  hideRetry();
+  if (!retryQ) return;
+  /* 失败那一轮在历史里只是错误文案，重试前先弹掉，避免历史里留下假问答 */
+  if (retryPending && turns.length) { turns.pop(); }
+  retryPending = false;
+  aiInput.value = retryQ;
+  send();
+});
 aiInput.addEventListener('keydown', function(e) { if (e.key === 'Enter' && !streaming) send(); });
 
 /* 点输入胶囊空白处自动进入编辑（键盘按钮已移除，仅保留这一层兜底） */
@@ -1080,6 +1121,8 @@ aiInput.addEventListener('focus', function() {
 
 /* 思考区计时 */
 var thinkTimer = null, thinkStart = 0;
+/* 网络故障自动重试的定时器（模块级：新一轮提问时先清掉上一轮遗留的自动重试，避免并发） */
+var autoRetryTimer = null;
 function startThink() {
   thinkBody.textContent = '';
   thinkCard.classList.remove('collapsed');
@@ -1102,6 +1145,9 @@ function send() {
   var q = aiInput.value.trim();
   if (!q || streaming) return;
   if (needKey()) return;
+  if (autoRetryTimer) { clearTimeout(autoRetryTimer); autoRetryTimer = null; }
+  hideRetry();
+  retryPending = false;      /* 手动重新提问时不再认定为“失败待重试”，避免误删历史 */
   streaming = true;
   aiSend.disabled = true;
   viewMode = 'current';
@@ -1127,13 +1173,13 @@ function send() {
     '人文：为古树“一树一策”，妥善安置搬迁群众、修便民桥与惠民路；建生态鱼道、护红树林，以人为本。',
     '绿色：弃土近乎全量利用、新增耕地，把工程负担变成土地与集体收入。',
     '【真题索引：先匹配最贴近的一个真实考试主题，再据此找到完整真题；禁止自拟空泛主题、禁止罗列多个】',
-    '【近期名校真题（2026年10-11月，优先匹配）：先从这组里选最贴合用户主题的；若逻辑上不贴合，严禁硬套，再往下从高考真题里选，匹配必须经得起推敲】',
+    '【近期名校真题（2026年10-11月）：与下面高考真题同等重要，两组不分先后，只按“和用户主题的贴合度”来选——不因为它新就优先，也不因为它旧就靠后；若逻辑上不贴合，严禁硬套，匹配必须经得起推敲】',
     '一、工具理性与人文价值·不可衡量的温度与光芒（大连育明2027届高三10月调研）',
     '二、有限禀赋与不竭志向·器局有止而志意无竭（辽宁名校联盟2027届高三10月联考）',
     '三、内在精神与外在探索·灵魂与太空（大连八中2027届高三9月检测）',
     '四、竭尽所能后的从容·真正的顺其自然（T8联考2027届高三10月检测）',
     '五、登高见世界·自我成长与外界认可（大连二十四中2027届高三第一次月考）',
-    '【高考真题（近期题不贴合时再选）】',
+    '【高考真题（与近期名校真题同等重要）：按贴合度选，不要因为年份早或不是最新一届就往后排】',
     '六、梦·梦想的价值与分享·个人与他人及社会（2025辽宁高考·全国二卷）',
     '七、探索未知·创新·理想与勇气（2024辽宁高考·新高考Ⅱ卷）',
     '八、好的故事·叙事与精神的力量（2023全国高考）',
@@ -1249,6 +1295,8 @@ function send() {
 
   function finishOK() {
     streaming = false;
+    if (autoRetryTimer) { clearTimeout(autoRetryTimer); autoRetryTimer = null; }
+    hideRetry(); retryPending = false;
     aiSend.disabled = false;
     clearSkelTimers(skelTimers);
     endThink();
@@ -1299,6 +1347,7 @@ function send() {
 
   function fail(msg) {
     streaming = false;
+    if (autoRetryTimer) { clearTimeout(autoRetryTimer); autoRetryTimer = null; }
     aiSend.disabled = false;
     clearSkelTimers(skelTimers);
     endThink();
@@ -1315,11 +1364,13 @@ function send() {
       addMsg('assistant', msg);
     }
     turns.push({ q: q, a: msg });   /* 失败也计入历史，保证翻页不失语 */
+    retryQ = q; retryPending = true; showRetry();   /* 让用户在生成左侧一键重发 */
     updatePrevBtn();
   }
 
   function authFail() {
     streaming = false; aiSend.disabled = false;
+    if (autoRetryTimer) { clearTimeout(autoRetryTimer); autoRetryTimer = null; }
     clearSkelTimers(skelTimers);
     endThink();
     thinkCard.classList.add('collapsed');
@@ -1327,6 +1378,7 @@ function send() {
     KEY = '';
     localStorage.removeItem('ds_key');
     refreshKeyDot();
+    retryQ = q; retryPending = false; showRetry();
     openKeyInput('Key 无效或已过期，请重新填写');
   }
 
@@ -1381,36 +1433,60 @@ function send() {
     });
   }
 
-  fetchOnce(true).then(function(st) {
-    if (st === 'AUTH') return;
-  }).catch(function() {
-    /* 流式被拒/中断：若已收到正文，直接保留结果浮现，避免白等 */
-    if (answer) { finishOK(); return; }
-    /* 否则改整体读取：思考卡给出可见提示，骨架气泡继续显示，最多自动重试 2 次（间隔 900ms），仍失败才报错 */
-    endThink();
-    thinkCard.classList.remove('collapsed');
-    thinkWrap.classList.remove('collapsed');
-    thinkBody.textContent = '网络停顿，正在重新连接…';
-    var attempt = 0;
-    function retryWhole() {
-      attempt++;
+  /* 网络故障自动重连：全程不用用户手动点。每轮先试整体读取，失败则 5 秒后自动重来 */
+  var autoRound = 0;
+  var AUTO_ROUNDS = 3;     /* 最多自动重试 3 轮 */
+  var AUTO_GAP = 5000;     /* 每轮间隔 5 秒 */
+
+  /* 重试前把这一轮的临时产物清干净：避免半截正文残留、避免出现两个骨架气泡 */
+  function resetTurnForRetry(tip) {
+    if (skelTimers) { clearSkelTimers(skelTimers); skelTimers = null; }
+    if (answerEl && answerEl.parentNode) answerEl.parentNode.removeChild(answerEl);
+    answerEl = null;
+    bubbleQueued = false;
+    answer = '';
+    reasoning = '';
+    truncated = false;
+    startThink();                    /* 新一轮重新计时 */
+    thinkBody.textContent = tip;
+    lastDataAt = Date.now();
+  }
+
+  function runRound() {
+    fetchOnce(true).then(function(st) {
+      if (st === 'AUTH') return;
+    }).catch(function() {
+      /* 已收到部分正文：保留结果直接浮现，不再重来 */
+      if (answer) { finishOK(); return; }
+      /* 先补一次整体读取：思考卡给可见提示，骨架气泡继续显示 */
+      endThink();
+      thinkCard.classList.remove('collapsed');
+      thinkWrap.classList.remove('collapsed');
+      thinkBody.textContent = '网络停顿，正在重新连接…';
       fetchOnce(false).then(function(st2) {
         if (st2 === 'AUTH') return;
       }).catch(function(e2) {
-        if (attempt < 2) { setTimeout(retryWhole, 900); }
-        else {
-          /* TypeError 通常是浏览器禁止本地页面联网：给明确指引 */
-          var em = (e2 && e2.message) || '';
-          if (em.indexOf('TypeError') >= 0 || /Failed to fetch|NetworkError/i.test(em)) {
-            fail('本地页面联网被浏览器拦截（TypeError）。请用 Safari 或 Chrome 打开本文件（文件上点右键→打开方式→Safari），或在豆包外新建标签页打开。');
-          } else {
-            fail('请求失败（' + em + '），请检查网络后重试。');
-          }
+        /* 仍然失败：自己等 5 秒重来，不让用户动手 */
+        if (autoRound < AUTO_ROUNDS) {
+          autoRound++;
+          resetTurnForRetry('网络波动，5 秒后自动重试（第 ' + autoRound + ' 次，共 ' + AUTO_ROUNDS + ' 次）…');
+          autoRetryTimer = setTimeout(function() {
+            autoRetryTimer = null;
+            runRound();
+          }, AUTO_GAP);
+          return;
+        }
+        /* 自动重试都失败，才把情况告诉用户 */
+        var em = (e2 && e2.message) || '';
+        if (em.indexOf('TypeError') >= 0 || /Failed to fetch|NetworkError/i.test(em)) {
+          fail('本地页面联网被浏览器拦截（TypeError）。请用 Safari 或 Chrome 打开本文件（文件上点右键→打开方式→Safari），或在豆包外新建标签页打开。');
+        } else {
+          fail('网络多次中断，已自动重试 ' + AUTO_ROUNDS + ' 次仍未成功，请检查网络后再点一次生成。');
         }
       });
-    }
-    retryWhole();
-  });
+    });
+  }
+  runRound();
 }
 
 /* 内容页排版微调：文字加粗、小字放大、徽章里的字居中
