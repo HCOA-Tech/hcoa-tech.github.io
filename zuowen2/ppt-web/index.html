@@ -100,26 +100,7 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 /* 兜底：老浏览器不支持 background-clip:text 时，不透明文字直接展开，绝不出现空白气泡 */
 .night-chat .bub.reveal-plain .base { max-height:none; color:rgba(247,245,239,.97); -webkit-text-fill-color:rgba(247,245,239,.97); background:none; animation:none; }
 @keyframes rainbowFlow { to { background-position:50% 200%; } }
-/* 文字从上到下的流光：与各块原有的入场动画（zbIn）并联，绝不能顶掉它——
-   块初始 opacity:0，靠 zbIn 才浮现；只动 filter，不改字号、字重、颜色和排版 */
-.night-chat .bub.structured.reveal .base > * {
-  animation-name: zbIn, textGlowDown;
-  animation-duration: .55s, 1.1s;
-  animation-timing-function: cubic-bezier(.22,1,.36,1), cubic-bezier(.35,0,.25,1);
-  animation-fill-mode: forwards, both;
-  animation-delay: 0s, .10s;
-}
-.night-chat .bub.structured.reveal .base > *:nth-child(2) { animation-delay: 0s, .28s; }
-.night-chat .bub.structured.reveal .base > *:nth-child(3) { animation-delay: 0s, .46s; }
-.night-chat .bub.structured.reveal .base > *:nth-child(4) { animation-delay: 0s, .64s; }
-.night-chat .bub.structured.reveal .base > *:nth-child(5) { animation-delay: 0s, .82s; }
-.night-chat .bub.structured.reveal .base > *:nth-child(6) { animation-delay: 0s, 1.00s; }
-.night-chat .bub.structured.reveal .base > *:nth-child(7) { animation-delay: 0s, 1.18s; }
-@keyframes textGlowDown {
-  0%   { filter:none; }
-  32%  { filter:brightness(1.34) saturate(1.08); }
-  100% { filter:none; }
-}
+/* 文字流光已停用（老电脑 filter 动画开销大）：各块只保留原本的 zbIn 淡入，不再叠加提亮 */
 /* ===== 完整论证段：连贯成段，层级靠字重，颜色统一米白 ===== */
 .night-chat .bub.structured .base { max-height:none; overflow:visible; white-space:normal; }
 .night-chat .bub.structured .skel { height:0; margin-top:0; margin-bottom:0; opacity:0; }
