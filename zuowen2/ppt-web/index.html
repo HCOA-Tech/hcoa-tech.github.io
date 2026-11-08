@@ -91,7 +91,7 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .night-badge .nb-pill { display:inline-flex; align-items:center; gap:6px; font-weight:400; color:rgba(214,224,220,.62); letter-spacing:.6px; padding:4px 11px 4px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.04); white-space:nowrap; }
 .night-badge .nb-pill::before { content:''; width:5px; height:5px; border-radius:50%; background:rgba(125,211,156,.9); box-shadow:0 0 6px rgba(125,211,156,.7); }
 .night-logo { position:absolute; right:26px; top:19px; height:44px; width:auto; z-index:5; opacity:1; }
-.night-models { position:absolute; left:0; top:300px; width:960px; display:flex; justify-content:center; gap:12px; z-index:5; }
+.night-models { position:absolute; left:0; top:300px; width:960px; display:flex; justify-content:center; gap:12px; z-index:6; }
 .night-models button { border:1px solid rgba(201,168,106,.45); background:rgba(255,255,255,.1); color:rgba(247,245,239,.85); border-radius:999px; padding:9px 28px; font-size:13px; cursor:pointer; transition:.3s; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:2px; touch-action:manipulation; }
 .night-models button:hover { background:rgba(255,255,255,.12); }
 .night-models button.on { background:rgba(201,168,106,.92); color:#0a1220; border-color:rgba(201,168,106,1); font-weight:600; }
@@ -491,12 +491,9 @@ function isMobileUI() {
       || window.innerWidth < 820;
 }
 function fit() {
-  var isNight = slides[cur] && slides[cur].classList.contains('night');
-  /* 电脑端 AI 页保持 cover 铺满；手机/触屏上 AI 页改用 contain，与前14页一致，避免突然放大 */
-  var useContain = !isNight || isMobileUI();
-  var s = useContain
-    ? Math.min(window.innerWidth / 960, window.innerHeight / 540)
-    : Math.max(window.innerWidth / 960, window.innerHeight / 540);
+  /* 全部页面统一 contain：AI 页不再 cover 裁切，保证左上角徽章和右上角 logo 在任何屏幕比例下都完整可见；
+     AI 页本身近黑，两侧留白几乎看不出来 */
+  var s = Math.min(window.innerWidth / 960, window.innerHeight / 540);
   stage.style.transform = 'scale(' + s + ')';
 }
 window.addEventListener('resize', fit);
@@ -606,10 +603,7 @@ var hudEl = document.getElementById('hud');
 function placeHud() {
   var isNight = slides[cur] && slides[cur].classList.contains('night');
   var mobile = isMobileUI();
-  var s = isNight
-    ? (mobile ? Math.min(window.innerWidth / 960, window.innerHeight / 540)
-              : Math.max(window.innerWidth / 960, window.innerHeight / 540))
-    : Math.min(window.innerWidth / 960, window.innerHeight / 540);
+  var s = Math.min(window.innerWidth / 960, window.innerHeight / 540);
   /* 手机端：HUD 在舞台外、不随页面缩放，内容缩小后会显得异常大 —— 让它等比跟随舞台缩小 */
   if (mobile) {
     var k = Math.min(1, Math.max(0.75, s));
