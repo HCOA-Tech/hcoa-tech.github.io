@@ -148,6 +148,18 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .night-chat .bub .skel:nth-child(2) { width:88%; }
 .night-chat .bub .skel:nth-child(3) { width:62%; }
 .night-chat .bub .skel:nth-child(4) { width:76%; }
+.night-chat .bub .skel:nth-child(5) { width:82%; }
+.night-chat .bub .skel:nth-child(6) { width:58%; }
+.night-chat .bub .skel:nth-child(7) { width:74%; }
+.night-chat .bub .skel:nth-child(8) { width:90%; }
+.night-chat .bub .skel:nth-child(9) { width:64%; }
+/* 长文本等待：新增骨架行从左到右滑入，高度同步撑开，边框自然向下展开 */
+.night-chat .bub .skel.skel-enter { animation:skelEnter .6s cubic-bezier(.22,1,.36,1) both, skelWave 1.55s ease-in-out .6s infinite; }
+@keyframes skelEnter {
+  0% { height:0; margin-top:0; margin-bottom:0; opacity:0; transform:translateX(-46px); }
+  60% { opacity:1; }
+  100% { height:14px; margin-top:8px; margin-bottom:8px; opacity:1; transform:none; }
+}
 @keyframes skelWave { 0% { background-position:0 -115%, 0 0; } 100% { background-position:0 115%, 0 0; } }
 .night-chat .bub.reveal .skel, .night-chat .bub.skel-out .skel { height:0; margin-top:0; margin-bottom:0; opacity:0; }
 /* 骨架收起阶段：先软收起骨架并淡掉底色，再渲染正文，杜绝硬切 */
@@ -743,13 +755,31 @@ function addMsg(role, text) {
   wrap._bub = bub;
   return bub;
 }
-/* 生成前：在气泡里插入 4 条文字骨架小框（模拟文字行占位） */
+/* 生成前：在气泡里插入 4 条文字骨架小框（模拟文字行占位）；长文本等待时分两批向下展开 */
 function addSkeleton(bub) {
   for (var i = 0; i < 4; i++) {
     var s = document.createElement('span');
     s.className = 'skel';
     bub.insertBefore(s, bub._base);
   }
+}
+/* 长文本占位：3 秒后先加 2 行，停顿后再加 3 行，新增行从左到右滑入；最多 9 行，与实际长度无关 */
+function scheduleSkelGrowth(bub) {
+  var timers = [];
+  function addLines(n) {
+    for (var i = 0; i < n; i++) {
+      if (bub.querySelectorAll('.skel').length >= 9) return;
+      var s = document.createElement('span');
+      s.className = 'skel skel-enter';
+      bub.insertBefore(s, bub._base);
+    }
+  }
+  timers.push(setTimeout(function() { addLines(2); }, 3000));
+  timers.push(setTimeout(function() { addLines(3); }, 4400));
+  return timers;
+}
+function clearSkelTimers(timers) {
+  if (timers) timers.forEach(function(t) { clearTimeout(t); });
 }
 
 /* ============ 单轮独立：每轮对话独立成页，不与上一轮堆叠 ============ */
@@ -1114,22 +1144,29 @@ function send() {
     '人文：为古树“一树一策”，妥善安置搬迁群众、修便民桥与惠民路；建生态鱼道、护红树林，以人为本。',
     '绿色：弃土近乎全量利用、新增耕地，把工程负担变成土地与集体收入。',
     '【真题索引：先匹配最贴近的一个真实考试主题，再据此找到完整真题；禁止自拟空泛主题、禁止罗列多个】',
-    '一、梦·梦想的价值与分享·个人与他人及社会（2025辽宁高考·全国二卷）',
-    '二、探索未知·创新·理想与勇气（2024辽宁高考·新高考Ⅱ卷）',
-    '三、好的故事·叙事与精神的力量（2023全国高考）',
-    '四、基础与创造·本手妙手俗手（2022新高考Ⅰ卷）',
-    '五、选择·创造·未来（2022新高考Ⅱ卷）',
-    '六、强弱之变·自强不息（2021新高考Ⅰ卷）',
-    '七、做人之道·逆锋起笔、藏而不露（2021新高考Ⅱ卷）',
-    '八、知人善任·识才与格局（2020全国Ⅰ卷）',
-    '九、距离与联系（2020新高考Ⅰ卷）',
-    '十、青年携手·共创未来（2020新高考Ⅱ卷）',
-    '十一、工具理性与人文价值·不可衡量之物（大连育明2026届高三10月调研）',
-    '十二、艰苦奋斗·节俭·时代新境（大连二十四中高考押题）',
-    '十三、青年成长（大连育明命题组母题）',
-    '十四、家国时代（大连育明命题组母题）',
-    '十五、文化传承（大连育明命题组母题）',
-    '十六、科技思辨（大连育明命题组母题）',
+    '【近期名校真题（2026年10-11月，优先匹配）：先从这组里选最贴合用户主题的；若逻辑上不贴合，严禁硬套，再往下从高考真题里选，匹配必须经得起推敲】',
+    '一、工具理性与人文价值·不可衡量的温度与光芒（大连育明2027届高三10月调研）',
+    '二、有限禀赋与不竭志向·器局有止而志意无竭（辽宁名校联盟2027届高三10月联考）',
+    '三、内在精神与外在探索·灵魂与太空（大连八中2027届高三9月检测）',
+    '四、竭尽所能后的从容·真正的顺其自然（T8联考2027届高三10月检测）',
+    '五、登高见世界·自我成长与外界认可（大连二十四中2027届高三第一次月考）',
+    '【高考真题（近期题不贴合时再选）】',
+    '六、梦·梦想的价值与分享·个人与他人及社会（2025辽宁高考·全国二卷）',
+    '七、探索未知·创新·理想与勇气（2024辽宁高考·新高考Ⅱ卷）',
+    '八、好的故事·叙事与精神的力量（2023全国高考）',
+    '九、基础与创造·本手妙手俗手（2022新高考Ⅰ卷）',
+    '十、选择·创造·未来（2022新高考Ⅱ卷）',
+    '十一、强弱之变·自强不息（2021新高考Ⅰ卷）',
+    '十二、做人之道·逆锋起笔、藏而不露（2021新高考Ⅱ卷）',
+    '十三、知人善任·识才与格局（2020全国Ⅰ卷）',
+    '十四、距离与联系（2020新高考Ⅰ卷）',
+    '十五、青年携手·共创未来（2020新高考Ⅱ卷）',
+    '【校内母题（无公开原题，只给来处和题目方向）】',
+    '十六、艰苦奋斗·节俭·时代新境（大连二十四中高考押题）',
+    '十七、青年成长（大连育明命题组母题）',
+    '十八、家国时代（大连育明命题组母题）',
+    '十九、文化传承（大连育明命题组母题）',
+    '二十、科技思辨（大连育明命题组母题）',
     '【先判断意图，再数清问题】',
     'B 写作运用（最高优先级）：出现具体主题（奋斗、创新、人与自然、家国、文化传承等）、具体题目，或“写、来一段、论证段、作文、议论文、题目、素材、立意、论点、帮我写、改写、点评、如何运用、怎么用”等特征，即按B输出。',
     'C 方法与素材问答：问怎么写、问素材细节、要总结、要写作技巧，或问其他作文的灵活问题，走【说明性内容格式】，用你自己的话讲清思路，不要只列条目。',
@@ -1138,7 +1175,7 @@ function send() {
     '【题外话不拒答】用户说的任何非写作题外话（公式、概念、其他学科问题、随口问的事）都正常回答，不回避、不说教：先在〔观点〕块里用自己的话把题外话本身讲清楚；若它隐含可用的作文信息（可比喻的道理、可立论的角度），就提取出来，照常输出五块完成写作；完全与作文无关的，走说明性内容格式直接回答。',
     '【B类输出协议：按顺序输出五块，每块用规定标记包住；禁止 Markdown 符号（星号、井号、竖线、表格、分隔线）】',
     '〔见解〕这是你自己的思考，不要端着：先用一句话直接回答用户的问题——能用就说“可以”，不太合适就说“不太行”或“部分适用”；再顺着这个判断，用自己的话讲讲你为什么这么想、关键的顾虑在哪，像老师当面跟学生聊，允许有真实的犹豫和权衡，不要套话、不要罗列。如果这个素材用在这类主题上有风险（比如容易偷换概念、以偏概全、强行拔高），直接点出来。整体控制在三四句以内，别长。〔/见解〕',
-    '〔真题〕第一行写来处，用简短叫法，如“2025全国二卷（辽宁）”“2024新高考Ⅱ卷”“大连育明2026届高三10月调研”，禁止写“普通高等学校招生全国统一考试”这类全称。再写材料与题目：高考真题如实复述，材料记不全就标“材料略述”并概括；把材料里点出主题、题眼的关键句用〔题眼〕…〔/题眼〕在行内包住，不再单独写讲解；校内母题没有公开原题，只给来处和题目方向，不硬编材料。〔/真题〕',
+    '〔真题〕第一行写来处，用简短叫法，如“2025全国二卷（辽宁）”“2024新高考Ⅱ卷”“大连育明2027届高三10月调研”，禁止写“普通高等学校招生全国统一考试”这类全称。再写材料与题目：高考真题与近期名校真题都如实复述，材料记不全就标“材料略述”并概括，禁止编造材料；把材料里点出主题、题眼的关键句用〔题眼〕…〔/题眼〕在行内包住，不再单独写讲解；校内母题没有公开原题，只给来处和题目方向，不硬编材料。〔/真题〕',
     '〔观点〕若用户问了题外话，先在这里用自己的话把题外话本身答清楚，再写论点；论点分两行，都从题目和材料的题眼出发、就题目讨论的普遍道理立论，回答题目让我们思考什么，不出现平陆运河、不围着素材写：“总论点：”写全文总的观点；“分论点：”写下面这一段具体要论证的点。〔/观点〕',
     '〔避错〕结合本题举一个常见逻辑错误的错误事例，如偷换概念、以偏概全、因果倒置、类比失当等；只举一个，简单展开这个错误例子，并把“避免什么”的关键错误短语用〔重点〕…〔/重点〕在行内包住，两三句即可。〔/避错〕',
     '〔论证段〕按分论点写成完整连贯、可直接抄写的考场段落，平陆运河只作为证明分论点的一个事例出现，不是介绍运河本身；凡是运用平陆运河素材的句子，必须整句用〔核心〕…〔/核心〕在行内包住，核心句必须直接出现“平陆运河”或“这条江海运河”；全段控制在230字以内（含标点），句句有用，不灌水、不模板腔，禁“首先其次”“第一第二”。〔/论证段〕',
@@ -1159,6 +1196,7 @@ function send() {
   var answer = '';
   var answerEl = null;
   var bubbleQueued = false;   /* 骨架气泡排队标志：思考卡收起后再创建 */
+  var skelTimers = null;     /* 骨架分阶段展开定时器，结束时清理 */
   var truncated = false;   /* finish_reason=length 截断标志：兜底提示而非干等 */
   var lastDataAt = Date.now();   /* 网络假死检测：60s 无任何数据则切换整体读取 */
 
@@ -1183,15 +1221,16 @@ function send() {
       lastDataAt = Date.now();
       if (!answerEl && !bubbleQueued) {
         bubbleQueued = true;
-        /* 先收起思考卡，等它收起后再展开骨架气泡（同一位置，不重叠） */
+        /* 思考卡先回收（max-height 收缩动画），再展开骨架气泡，杜绝硬切；外层等动画后再隐藏 */
         endThink();
         thinkCard.classList.add('collapsed');
-        thinkWrap.classList.add('collapsed');
+        setTimeout(function() { thinkWrap.classList.add('collapsed'); }, 520);
         setTimeout(function() {
           if (!answerEl) {
             answerEl = addMsg('assistant', '');
             answerEl.classList.add('pending');   /* 骨架小框占位 + 波浪扫光 */
             addSkeleton(answerEl);
+            skelTimers = scheduleSkelGrowth(answerEl);   /* 长文本等待：分阶段向下展开 */
           }
         }, 450);
       }
@@ -1228,6 +1267,7 @@ function send() {
   function finishOK() {
     streaming = false;
     aiSend.disabled = false;
+    clearSkelTimers(skelTimers);
     endThink();
     thinkCard.classList.add('collapsed');   /* 思考卡无论如何都收起 */
     thinkWrap.classList.add('collapsed');
@@ -1277,6 +1317,7 @@ function send() {
   function fail(msg) {
     streaming = false;
     aiSend.disabled = false;
+    clearSkelTimers(skelTimers);
     endThink();
     thinkCard.classList.add('collapsed');
     thinkWrap.classList.add('collapsed');
@@ -1295,7 +1336,9 @@ function send() {
   }
 
   function authFail() {
-    streaming = false; aiSend.disabled = false; endThink();
+    streaming = false; aiSend.disabled = false;
+    clearSkelTimers(skelTimers);
+    endThink();
     thinkCard.classList.add('collapsed');
     thinkWrap.classList.add('collapsed');
     KEY = '';
