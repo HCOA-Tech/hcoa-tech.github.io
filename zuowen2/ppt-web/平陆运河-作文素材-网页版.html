@@ -470,50 +470,55 @@ body.onAI .night-input.mobile-float { display: flex; }
   transition:opacity 1s ease .2s, transform 1s cubic-bezier(.22,1,.36,1) .2s;
 }
 .slide.night.active .thx-wrap { opacity:1; transform:none; }
-/* 标题：冷白→暖金→冷蓝的渐变直接裁进字形，光带只在笔画里从左到右缓慢滑过，不用任何矩形块；
+/* 标题：渐变裁进字形，光带只在笔画里从左到右扫；进入该页时扫一次就停，不做循环。
+   渐变两端都是纯底色，扫到尾时窗口正好落在图层右端，视觉上回到和静态完全一样，不会留一条亮带；
    letter-spacing 会在末字后多留一格空白，用 padding-left 补回一半让它视觉居中 */
 .thx-title {
+  position:relative; isolation:isolate;
   font-family:-apple-system,'SF Pro Display','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
   font-size:54px; font-weight:600; line-height:1.2; letter-spacing:10px; padding-left:5px;
   background-image:linear-gradient(100deg,
-    rgba(238,243,252,.86) 0%,
-    rgba(249,250,247,.88) 12%,
-    rgba(255,255,255,.96) 24%,
-    rgb(255,249,236) 30%,
-    rgb(255,255,255) 36%,
-    rgb(203,231,255) 44%,
-    rgba(244,242,252,.88) 56%,
-    rgba(238,243,252,.86) 74%,
-    rgba(238,243,252,.86) 100%);
+    rgba(240,244,252,.88) 0%,
+    rgba(240,244,252,.88) 36%,
+    rgba(255,255,255,.90) 39%,
+    rgb(255,253,247) 42%,
+    rgb(255,255,255) 44%,
+    rgb(214,236,255) 48%,
+    rgba(255,255,255,.90) 52%,
+    rgba(240,244,252,.88) 56%,
+    rgba(240,244,252,.88) 100%);
   background-size:300% 100%;
   background-repeat:no-repeat;
   -webkit-background-clip:text; background-clip:text;
   color:transparent; -webkit-text-fill-color:transparent;
-  animation:thxSheen 3s linear infinite;
 }
-/* 同字形的模糊副本：彩色光从笔画边缘溢出形成 AI 光晕；与上层共用 thxSheen，光带和光晕同步移动 */
-.thx-title { position:relative; isolation:isolate; }
+/* 同字形的模糊副本：高亮带往外溢出的彩色光晕；与上层同一关键帧，光带与光晕始终重合 */
 .thx-title::after {
   content:"感谢观看";
   position:absolute; inset:0; padding-left:5px;
   background-image:linear-gradient(100deg,
     rgba(120,210,255,0) 0%,
-    rgba(126,213,255,.72) 9%,
-    rgba(210,240,255,.86) 18%,
-    rgba(255,255,255,.95) 26%,
-    rgba(228,236,255,.9) 34%,
-    rgba(168,188,255,.86) 42%,
-    rgba(140,205,255,.6) 56%,
-    rgba(120,210,255,0) 74%);
+    rgba(126,213,255,0) 36%,
+    rgba(150,220,255,.55) 39%,
+    rgba(255,255,255,.95) 43%,
+    rgba(255,247,226,.85) 46%,
+    rgba(186,198,255,.9) 49%,
+    rgba(140,205,255,.5) 52%,
+    rgba(120,210,255,0) 56%,
+    rgba(120,210,255,0) 100%);
   background-size:300% 100%;
   background-repeat:no-repeat;
   -webkit-background-clip:text; background-clip:text;
   color:transparent; -webkit-text-fill-color:transparent;
-  filter:blur(9px) saturate(1.9);
+  filter:blur(9px) saturate(2);
   opacity:1;
-  animation:thxSheen 3s linear infinite;
   pointer-events:none;
   z-index:-1;
+}
+/* 只在该页激活时启动，保证每次翻到这一页才扫，且只扫一次 */
+.slide.night.active .thx-title,
+.slide.night.active .thx-title::after {
+  animation:thxSheen 2.6s linear forwards;
 }
 @keyframes thxSheen {
   from { background-position:100% 0; }
