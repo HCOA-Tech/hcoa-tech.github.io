@@ -83,7 +83,7 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   62%  { transform:translate3d(0,5px,0) scale(1.01); }
   100% { transform:translate3d(0,0,0) scale(1); }
 }
-.night-title { position:absolute; left:0; top:210px; width:960px; text-align:center; font-size:37px; font-weight:600; letter-spacing:4px; text-shadow:0 4px 26px rgba(0,0,0,.5); z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; background-image:linear-gradient(100deg, rgba(255,255,255,.92) 0%, rgba(255,255,255,.92) 40%, rgba(255,250,240,.99) 46%, rgb(255,255,255) 48%, rgb(232,242,255) 50%, rgba(255,255,255,.97) 52%, rgba(244,236,255,.94) 55%, rgba(255,255,255,.92) 62%, rgba(255,255,255,.92) 100%); background-size:300% 100%; background-position:100% 0; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; }
+.night-title { position:absolute; left:0; top:210px; width:960px; text-align:center; font-size:37px; font-weight:600; letter-spacing:4px; text-shadow:0 4px 26px rgba(0,0,0,.5); z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; background-image:linear-gradient(100deg, rgba(255,255,255,.86) 0%, rgba(255,255,255,.86) 38%, rgba(255,248,231,.97) 45%, rgb(255,253,244) 48%, rgb(255,255,255) 50%, rgb(222,238,255) 52%, rgba(236,232,255,.96) 55%, rgba(255,255,255,.86) 62%, rgba(255,255,255,.86) 100%); background-size:300% 100%; background-position:100% 0; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; }
 /* 标题：进入本页时从左到右扫一次高光，带同字形模糊光晕溢出笔画；扫完停在纯底色，与静态一致。
    8 个字比感谢页多，节奏压到 1.6s，比 16 页的 2.2s 更利落 */
 .night-title { position:relative; isolation:isolate; }
@@ -92,26 +92,27 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   position:absolute; inset:0;
   background-image:linear-gradient(100deg,
     rgba(120,210,255,0) 0%,
-    rgba(126,213,255,0) 38%,
-    rgba(150,220,255,.55) 43%,
-    rgba(255,255,255,.95) 47%,
-    rgba(255,247,226,.85) 50%,
-    rgba(186,198,255,.9) 54%,
-    rgba(140,205,255,.5) 58%,
+    rgba(126,213,255,0) 37%,
+    rgba(146,218,255,.72) 42%,
+    rgba(255,255,255,1) 46%,
+    rgba(255,246,224,.95) 49%,
+    rgba(214,208,255,1) 53%,
+    rgba(150,208,255,.75) 57%,
     rgba(120,210,255,0) 63%,
     rgba(120,210,255,0) 100%);
   background-size:300% 100%;
   background-repeat:no-repeat;
   -webkit-background-clip:text; background-clip:text;
   color:transparent; -webkit-text-fill-color:transparent;
-  filter:blur(9px) saturate(2);
+  filter:blur(8px) saturate(2.4);
   text-shadow:none;
   pointer-events:none;
   z-index:-1;
 }
 .slide.night.active .night-title,
 .slide.night.active .night-title::after {
-  animation:ntTitleSheen 1.6s linear forwards;
+  /* delay .55s：标题 0.15s 起淡入 0.9s，扫光等它显形后再走，否则光扫在透明处看不见 */
+  animation:ntTitleSheen 1.9s linear .55s forwards;
 }
 @keyframes ntTitleSheen {
   from { background-position:100% 0; }
@@ -242,25 +243,28 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   border-radius:7px;
   background:linear-gradient(90deg,
     rgba(120,210,255,0) 0%,
-    rgba(126,213,255,0) 34%,
-    rgba(150,220,255,.5) 42%,
-    rgba(255,255,255,.85) 47%,
-    rgba(255,247,226,.75) 51%,
-    rgba(186,198,255,.55) 57%,
-    rgba(140,205,255,.45) 61%,
-    rgba(120,210,255,0) 70%,
+    rgba(126,213,255,0) 40%,
+    rgba(150,220,255,.5) 46%,
+    rgba(255,255,255,.88) 50%,
+    rgba(255,247,226,.78) 53%,
+    rgba(186,198,255,.6) 57%,
+    rgba(140,205,255,.45) 60%,
+    rgba(120,210,255,0) 66%,
     rgba(120,210,255,0) 100%);
   background-size:200% 100%;
   background-repeat:no-repeat;
-  background-position:-100% 0;
+  background-position:115% 0;
   filter:blur(5px);
   opacity:.9;
   pointer-events:none;
-  animation:skelSheen 1.8s linear infinite;
+  animation:skelSheen 3.2s linear infinite;
 }
+/* 图层 200% 宽时，position 百分比越大画面里越靠左；要左→右扫，起点必须是大值。
+   115%→-15% 的区间里光带约 77% 的时间都在条内，扫完只在两端各留很短的空白，
+   循环重置时光带恰在可视区外，不会闪一下 */
 @keyframes skelSheen {
-  from { background-position:-100% 0; }
-  to   { background-position:100% 0; }
+  from { background-position:115% 0; }
+  to   { background-position:-15% 0; }
 }
 /* 收起时必须先摘掉 skelEnter 的 fill-mode both，否则动画把新增行的 height 锁在 14px，会残留两行收不干净 */
 .night-chat .bub.reveal .skel, .night-chat .bub.skel-out .skel { height:0; margin-top:0; margin-bottom:0; opacity:0; animation:none !important; }
@@ -740,7 +744,7 @@ function show(i) {
   document.getElementById('hudPage').textContent = pg + ' / ' + String(total).padStart(2, '0');
   var isAI = slides[cur].getAttribute('data-id') === 'pzS';
   document.body.classList.toggle('onAI', isAI);
-  if (isAI) setupNight();
+  if (slides[cur].classList.contains('night')) setupNight();
   fit();
   placeHud();
 }
