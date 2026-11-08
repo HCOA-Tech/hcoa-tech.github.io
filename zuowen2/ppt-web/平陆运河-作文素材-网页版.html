@@ -83,7 +83,7 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   62%  { transform:translate3d(0,5px,0) scale(1.01); }
   100% { transform:translate3d(0,0,0) scale(1); }
 }
-.night-title { position:absolute; left:0; top:210px; width:960px; text-align:center; font-size:37px; font-weight:600; letter-spacing:4px; text-shadow:0 4px 26px rgba(0,0,0,.5); z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; background-image:linear-gradient(100deg, rgba(255,255,255,.86) 0%, rgba(255,255,255,.86) 38%, rgba(255,248,231,.97) 45%, rgb(255,253,244) 48%, rgb(255,255,255) 50%, rgb(222,238,255) 52%, rgba(236,232,255,.96) 55%, rgba(255,255,255,.86) 62%, rgba(255,255,255,.86) 100%); background-size:300% 100%; background-position:100% 0; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; }
+.night-title { position:absolute; left:0; top:210px; width:960px; text-align:center; font-size:37px; font-weight:600; letter-spacing:4px; text-shadow:0 4px 26px rgba(0,0,0,.5); z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; background-image:linear-gradient(100deg, rgba(255,255,255,.8) 0%, rgba(255,255,255,.8) 39%, rgba(255,246,224,.95) 45%, rgb(255,255,255) 50%, rgb(220,237,255) 55%, rgba(255,255,255,.8) 61%, rgba(255,255,255,.8) 100%); background-size:300% 100%; background-position:100% 0; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; }
 /* 标题：进入本页时从左到右扫一次高光，带同字形模糊光晕溢出笔画；扫完停在纯底色，与静态一致。
    8 个字比感谢页多，节奏压到 1.6s，比 16 页的 2.2s 更利落 */
 .night-title { position:relative; isolation:isolate; }
@@ -92,19 +92,17 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   position:absolute; inset:0;
   background-image:linear-gradient(100deg,
     rgba(120,210,255,0) 0%,
-    rgba(126,213,255,0) 37%,
-    rgba(146,218,255,.72) 42%,
-    rgba(255,255,255,1) 46%,
-    rgba(255,246,224,.95) 49%,
-    rgba(214,208,255,1) 53%,
-    rgba(150,208,255,.75) 57%,
-    rgba(120,210,255,0) 63%,
+    rgba(120,210,255,0) 36%,
+    rgba(150,214,255,.55) 43%,
+    rgba(255,255,255,1) 50%,
+    rgba(200,206,255,.9) 56%,
+    rgba(120,210,255,0) 64%,
     rgba(120,210,255,0) 100%);
   background-size:300% 100%;
   background-repeat:no-repeat;
   -webkit-background-clip:text; background-clip:text;
   color:transparent; -webkit-text-fill-color:transparent;
-  filter:blur(8px) saturate(2.4);
+  filter:blur(8px) saturate(2.2);
   text-shadow:none;
   pointer-events:none;
   z-index:-1;
@@ -112,7 +110,7 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .slide.night.active .night-title,
 .slide.night.active .night-title::after {
   /* delay .55s：标题 0.15s 起淡入 0.9s，扫光等它显形后再走，否则光扫在透明处看不见 */
-  animation:ntTitleSheen 1.9s linear .55s forwards;
+  animation:ntTitleSheen 1.7s linear .55s forwards;
 }
 @keyframes ntTitleSheen {
   from { background-position:100% 0; }
@@ -125,29 +123,31 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   color:transparent; -webkit-text-fill-color:transparent;
   filter:drop-shadow(0 0 9px rgba(214,182,122,.22)) drop-shadow(0 0 18px rgba(170,196,244,.14)); }
 .night-badge { position:absolute; left:26px; top:22px; z-index:5; font-size:9.5px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
-.night-badge .nb-pill { display:inline-flex; align-items:center; gap:6px; font-weight:400; color:rgba(203,212,208,.46); letter-spacing:.5px; padding:3px 9px 3px 8px; border-radius:999px; border:1px solid rgba(255,255,255,.075); background:rgba(255,255,255,.028); white-space:nowrap; }
+.night-badge .nb-pill { display:inline-flex; align-items:center; gap:6px; font-weight:400; color:rgba(216,190,138,.72); letter-spacing:.5px; padding:3px 9px 3px 8px; border-radius:999px; border:1px solid transparent; background:linear-gradient(rgba(255,255,255,.035), rgba(255,255,255,.035)) padding-box, linear-gradient(120deg, rgba(206,176,116,.5) 0%, rgba(196,194,226,.3) 42%, rgba(158,184,220,.28) 64%, rgba(206,176,116,.5) 100%) border-box; white-space:nowrap; }
 .night-badge .nb-pill::before { content:''; width:4px; height:4px; border-radius:50%; background:rgba(112,190,140,.72); box-shadow:0 0 5px rgba(112,190,140,.5); }
 .night-logo { position:absolute; right:26px; top:19px; height:44px; width:auto; z-index:5; opacity:1; }
 .night-models { position:absolute; left:0; top:300px; width:960px; display:flex; justify-content:center; gap:12px; z-index:6; }
 .night-models button { position:relative; border:1px solid transparent; border-radius:999px; padding:7px 21px; font-size:12px; cursor:pointer; touch-action:manipulation;
   font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:2px;
-  color:rgba(238,235,228,.62);
+  color:rgba(240,237,230,.72);
   background:
-    linear-gradient(120deg, rgba(255,255,255,.05), rgba(214,182,122,.03)) padding-box,
-    linear-gradient(120deg, rgba(178,148,94,.38) 0%, rgba(176,174,200,.20) 42%, rgba(140,166,204,.18) 64%, rgba(178,148,94,.38) 100%) border-box;
-  box-shadow:0 0 14px rgba(214,182,122,.05), 0 0 26px rgba(168,196,240,.04);
+    linear-gradient(120deg, rgba(255,255,255,.07), rgba(214,182,122,.04)) padding-box,
+    linear-gradient(120deg, rgba(206,176,116,.62) 0%, rgba(196,194,226,.38) 42%, rgba(158,184,220,.34) 64%, rgba(206,176,116,.62) 100%) border-box;
+  box-shadow:0 0 16px rgba(214,182,122,.16), 0 0 32px rgba(168,196,240,.12);
   transition:background .3s, box-shadow .3s, color .3s; }
 .night-models button:hover {
   background:
-    linear-gradient(120deg, rgba(255,255,255,.11), rgba(214,182,122,.07)) padding-box,
-    linear-gradient(120deg, rgba(206,176,116,.56) 0%, rgba(200,198,226,.30) 42%, rgba(158,184,220,.26) 64%, rgba(206,176,116,.56) 100%) border-box;
-  box-shadow:0 0 18px rgba(214,182,122,.09), 0 0 34px rgba(168,196,240,.07); }
+    linear-gradient(120deg, rgba(255,255,255,.13), rgba(214,182,122,.08)) padding-box,
+    linear-gradient(120deg, rgba(228,198,140,.78) 0%, rgba(212,208,238,.5) 42%, rgba(172,196,232,.46) 64%, rgba(228,198,140,.78) 100%) border-box;
+  box-shadow:0 0 22px rgba(214,182,122,.24), 0 0 42px rgba(168,196,240,.18); }
 .night-models button.on {
-  background:linear-gradient(112deg, #BFA470 0%, #D8C28D 26%, #E4D3AB 46%, #B9B4CE 68%, #C9AE7A 86%, #BF9F6E 100%);
-  border-color:transparent;
+  background:
+    linear-gradient(112deg, #BFA470 0%, #D8C28D 26%, #E4D3AB 46%, #B9B4CE 68%, #C9AE7A 86%, #BF9F6E 100%) padding-box,
+    linear-gradient(120deg, #E6D2A0 0%, #D8CFEE 42%, #B4C8EC 64%, #E6D2A0 100%) border-box;
+  border:1px solid transparent;
   color:#12161c; font-weight:600;
-  text-shadow:0 1px 0 rgba(255,255,255,.22);
-  box-shadow:0 6px 20px rgba(186,158,104,.20), 0 2px 30px rgba(176,186,224,.10), inset 0 1px 0 rgba(255,255,255,.32); }
+  text-shadow:0 1px 0 rgba(255,255,255,.25);
+  box-shadow:0 0 20px rgba(214,182,122,.32), 0 0 38px rgba(168,196,240,.2), 0 8px 24px rgba(186,158,104,.26), inset 0 1px 0 rgba(255,255,255,.4); }
 .night-chat { position:absolute; left:80px; top:252px; width:800px; height:176px; overflow-y:auto; z-index:5; padding:12px 10px 16px; -webkit-mask-image:linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 18px), transparent 100%); mask-image:linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 18px), transparent 100%); scrollbar-width:thin; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
 /* 离屏跳过渲染（content-visibility）已移除：移动端滚动时占位高度与真实高度
    切换会造成 scrollTop 中途被夹紧、画面反复跳回；消息数量少，直接渲染更稳 */
