@@ -329,13 +329,13 @@ body.onAI .night-input.mobile-float { display: flex; }
 /* 星星：小而淡，点缀夜空 */
 .star { position:absolute; background:#fff; border-radius:50%; opacity:.62; }
 @keyframes twinkle { 0%,100% { opacity:.45; } 50% { opacity:.85; } }
-/* 夜空淡入 + 输入框上滑 */
+/* 夜空淡入：标题、眉题、输入框都原地淡入，不做任何位移动画 */
 .slide.night .night-bg, .slide.night .night-veil { opacity:0; transition:opacity 1.2s ease; }
 .slide.night.active .night-bg, .slide.night.active .night-veil { opacity:1; }
-.slide.night .night-title { opacity:0; transform:translateY(10px); transition:opacity .9s ease .15s, transform .9s cubic-bezier(.22,1,.36,1) .15s; }
-.slide.night.active .night-title { opacity:1; transform:none; }
-.slide.night .night-input { opacity:0; transform:translateX(-50%) translateY(18px); transition:opacity .9s ease .45s, transform .9s cubic-bezier(.22,1,.36,1) .45s, box-shadow .35s; }
-.slide.night.active .night-input { opacity:1; transform:translateX(-50%) translateY(0); }
+.slide.night .night-title { opacity:0; transition:opacity .9s ease .15s; }
+.slide.night.active .night-title { opacity:1; }
+.slide.night .night-input { opacity:0; transform:translateX(-50%); transition:opacity .9s ease .45s, box-shadow .35s; }
+.slide.night.active .night-input { opacity:1; transform:translateX(-50%); }
 .slide.night .night-eyebrow, .slide.night .night-badge, .slide.night .night-models { opacity:0; transition:opacity .9s ease .3s; }
 .slide.night.active .night-eyebrow, .slide.night.active .night-badge, .slide.night.active .night-models { opacity:1; }
 /* 对话开始后（chat-mode）：标题/眉题/徽章/模型按钮整体收起，对话区上移占满、字号以正文为主 */
