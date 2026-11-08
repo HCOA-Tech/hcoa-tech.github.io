@@ -476,7 +476,7 @@ body.onAI .night-input.mobile-float { display: flex; }
 .thx-title {
   position:relative; isolation:isolate;
   font-family:-apple-system,'SF Pro Display','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
-  font-size:54px; font-weight:600; line-height:1.2; letter-spacing:10px; padding-left:5px;
+  font-size:54px; font-weight:600; line-height:1.2; letter-spacing:8px; padding-left:4px;
   background-image:linear-gradient(100deg,
     rgba(240,244,252,.88) 0%,
     rgba(240,244,252,.88) 36%,
@@ -495,7 +495,7 @@ body.onAI .night-input.mobile-float { display: flex; }
 /* 同字形的模糊副本：高亮带往外溢出的彩色光晕；与上层同一关键帧，光带与光晕始终重合 */
 .thx-title::after {
   content:"感谢观看";
-  position:absolute; inset:0; padding-left:5px;
+  position:absolute; inset:0; padding-left:4px;
   background-image:linear-gradient(100deg,
     rgba(120,210,255,0) 0%,
     rgba(126,213,255,0) 36%,
@@ -518,7 +518,7 @@ body.onAI .night-input.mobile-float { display: flex; }
 /* 只在该页激活时启动，保证每次翻到这一页才扫，且只扫一次 */
 .slide.night.active .thx-title,
 .slide.night.active .thx-title::after {
-  animation:thxSheen 2.6s linear forwards;
+  animation:thxSheen 2.2s linear forwards;
 }
 @keyframes thxSheen {
   from { background-position:100% 0; }
