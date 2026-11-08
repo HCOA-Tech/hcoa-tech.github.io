@@ -79,7 +79,7 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 #prevTurn.show { display:inline-flex; }
 #prevTurn:hover { background:rgba(201,168,106,.18); border-color:rgba(201,168,106,.5); color:rgba(247,245,239,.95); }
 .night-chat .msg { margin-bottom:10px; }
-.night-chat .who { font-size:11.5px; color:rgba(201,168,106,.8); letter-spacing:2px; margin-bottom:3px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
+.night-chat .who { font-size:11.5px; font-weight:600; color:rgba(201,168,106,.8); letter-spacing:1px; margin-bottom:3px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
 .night-chat .who.flow-ai { background:linear-gradient(120deg, rgba(255,107,107,.95), rgba(254,202,87,.95), rgba(72,219,251,.95), rgba(165,94,234,.95), rgba(255,107,107,.95)); background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; animation:inputFlow 8s linear infinite; }
 .night-chat .bub { font-size:17.5px; line-height:1.55; font-weight:600; color:rgba(247,245,239,.97); background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:16px 18px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:.3px; white-space:pre-wrap; word-break:break-word; backdrop-filter:blur(16px) saturate(1.15); -webkit-backdrop-filter:blur(16px) saturate(1.15); position:relative; overflow:hidden; transition:min-height .75s cubic-bezier(.25,1,.4,1), border-color .3s; }
 .night-chat .bub .base { position:relative; z-index:1; display:block; color:rgba(247,245,239,.97); white-space:pre-wrap; word-break:break-word; max-height:0; overflow:hidden; transition:max-height .85s cubic-bezier(.25,1,.4,1) .18s; }
@@ -674,7 +674,7 @@ function addMsg(role, text) {
   wrap.className = 'msg ' + role;
   var who = document.createElement('div');
   who.className = 'who';
-  who.textContent = role === 'user' ? '你 · ' + (MODEL === 'deepseek-v4-pro' ? '深度思考' : '快速') : 'HCOA AI';
+  who.textContent = role === 'user' ? '你 · ' + (MODEL === 'deepseek-v4-pro' ? '深度思考' : '快速') : 'HCOA';
   if (role === 'assistant') who.classList.add('flow-ai');
   var bub = document.createElement('div');
   bub.className = 'bub';
