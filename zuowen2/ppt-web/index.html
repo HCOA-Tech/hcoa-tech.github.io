@@ -476,20 +476,44 @@ body.onAI .night-input.mobile-float { display: flex; }
   font-family:-apple-system,'SF Pro Display','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
   font-size:54px; font-weight:600; line-height:1.2; letter-spacing:10px; padding-left:5px;
   background-image:linear-gradient(100deg,
-    rgba(230,238,250,.68) 0%,
-    rgba(245,246,242,.70) 12%,
+    rgba(238,243,252,.86) 0%,
+    rgba(249,250,247,.88) 12%,
     rgba(255,255,255,.96) 24%,
     rgb(255,249,236) 30%,
     rgb(255,255,255) 36%,
     rgb(203,231,255) 44%,
-    rgba(242,240,252,.72) 56%,
-    rgba(230,238,250,.68) 74%,
-    rgba(230,238,250,.68) 100%);
+    rgba(244,242,252,.88) 56%,
+    rgba(238,243,252,.86) 74%,
+    rgba(238,243,252,.86) 100%);
   background-size:300% 100%;
   background-repeat:no-repeat;
   -webkit-background-clip:text; background-clip:text;
   color:transparent; -webkit-text-fill-color:transparent;
   animation:thxSheen 3s linear infinite;
+}
+/* 同字形的模糊副本：彩色光从笔画边缘溢出形成 AI 光晕；与上层共用 thxSheen，光带和光晕同步移动 */
+.thx-title { position:relative; isolation:isolate; }
+.thx-title::after {
+  content:"感谢观看";
+  position:absolute; inset:0; padding-left:5px;
+  background-image:linear-gradient(100deg,
+    rgba(120,210,255,0) 0%,
+    rgba(126,213,255,.72) 9%,
+    rgba(210,240,255,.86) 18%,
+    rgba(255,255,255,.95) 26%,
+    rgba(228,236,255,.9) 34%,
+    rgba(168,188,255,.86) 42%,
+    rgba(140,205,255,.6) 56%,
+    rgba(120,210,255,0) 74%);
+  background-size:300% 100%;
+  background-repeat:no-repeat;
+  -webkit-background-clip:text; background-clip:text;
+  color:transparent; -webkit-text-fill-color:transparent;
+  filter:blur(9px) saturate(1.9);
+  opacity:1;
+  animation:thxSheen 3s linear infinite;
+  pointer-events:none;
+  z-index:-1;
 }
 @keyframes thxSheen {
   from { background-position:100% 0; }
