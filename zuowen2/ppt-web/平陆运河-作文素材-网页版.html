@@ -108,6 +108,17 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   -webkit-background-clip:border-box; background-clip:border-box;
 }
 .night-chat .bub.structured .zb-anchor { display:block; font-size:13px; font-weight:500; color:rgba(201,168,106,.95); letter-spacing:.6px; margin-bottom:11px; opacity:0; animation:zbIn .5s ease .05s forwards; }
+/* ===== 五块结构：真题 / 讲解 / 观点 / 避错 / 论证段 ===== */
+.night-chat .bub.structured .zb-real, .night-chat .bub.structured .zb-explain, .night-chat .bub.structured .zb-view, .night-chat .bub.structured .zb-warn { display:block; margin-bottom:14px; opacity:0; animation:zbIn .55s cubic-bezier(.22,1,.36,1) forwards; }
+.night-chat .bub.structured .zb-head { font-size:11.5px; font-weight:600; letter-spacing:1.2px; margin-bottom:7px; }
+.night-chat .bub.structured .zb-sub { font-size:15px; line-height:1.72; font-weight:300; color:rgba(232,234,236,.92); letter-spacing:.2px; margin-bottom:5px; }
+.night-chat .bub.structured .zb-sub .zb-label { font-weight:700; color:rgba(255,251,242,.99); }
+.night-chat .bub.structured .zb-real { background:rgba(201,168,106,.08); border:1px solid rgba(201,168,106,.22); border-radius:10px; padding:12px 14px; }
+.night-chat .bub.structured .zb-real .zb-head { color:rgba(201,168,106,.95); }
+.night-chat .bub.structured .zb-explain .zb-head { color:rgba(125,211,252,.9); }
+.night-chat .bub.structured .zb-view .zb-head { color:rgba(247,245,239,.92); }
+.night-chat .bub.structured .zb-warn { background:rgba(248,113,113,.07); border:1px solid rgba(248,113,113,.2); border-radius:10px; padding:12px 14px; }
+.night-chat .bub.structured .zb-warn .zb-head { color:rgba(252,165,165,.95); }
 .night-chat .bub.structured .zb-para { display:block; font-size:16px; font-weight:300; color:rgba(232,234,236,.9); line-height:1.8; letter-spacing:.2px; opacity:0; animation:zbIn .6s cubic-bezier(.22,1,.36,1) .14s forwards; text-align:justify; }
 .night-chat .bub.structured .zb-core { font-weight:700; color:rgba(255,251,242,.99); }
 @keyframes zbIn { to { opacity:1; transform:none; } }
@@ -813,14 +824,24 @@ function aiBurst(text) {
   }, 2200);
 }
 
-/* 结构化解析：〔锚点〕+〔论证段〕（段内可含行内〔核心〕），返回 {anchor,para}；识别不到返回 null */
+/* 结构化解析：五块〔真题〕〔讲解〕〔观点〕〔避错〕〔论证段〕（兼容旧〔锚点〕），段内可含行内〔核心〕；识别不到论证段返回 null */
+function grabBlock(text, name) {
+  var m = text.match(new RegExp('〔' + name + '〕([\\s\\S]*?)〔\\/' + name + '〕'));
+  return m ? m[1].trim() : '';
+}
 function parseStructured(text) {
-  var anchorM = text.match(/〔锚点〕([\s\S]*?)〔\/锚点〕/);
-  var paraM = text.match(/〔论证段〕([\s\S]*?)〔\/论证段〕/);
-  if (!paraM) return null;
-  var para = paraM[1].trim().replace(/\s*\n\s*/g, '');
+  var para = grabBlock(text, '论证段');
   if (!para) return null;
-  return { anchor: anchorM ? anchorM[1].trim() : '', para: para };
+  para = para.replace(/\s*\n\s*/g, '').trim();
+  if (!para) return null;
+  return {
+    real: grabBlock(text, '真题'),
+    explain: grabBlock(text, '讲解'),
+    view: grabBlock(text, '观点'),
+    warn: grabBlock(text, '避错'),
+    anchor: grabBlock(text, '锚点'),
+    para: para
+  };
 }
 /* 把含〔核心〕…〔/核心〕的段落文本渲染成连贯节点：普通文本 + 行内核心 span */
 function renderPara(container, text) {
@@ -835,6 +856,40 @@ function renderPara(container, text) {
   }
   if (last < text.length) container.appendChild(document.createTextNode(text.slice(last)));
 }
+function zbHead(title) {
+  var h = document.createElement('div');
+  h.className = 'zb-head';
+  h.textContent = title;
+  return h;
+}
+function renderSubLines(container, text) {
+  text.split('\n').forEach(function(rawLine) {
+    var line = rawLine.trim().replace(/^[▎▍▌│┃|｜]+/, '');
+    if (!line) return;
+    var d = document.createElement('div');
+    d.className = 'zb-sub';
+    var m = line.match(PLAIN_LABEL_RE);
+    if (m && m[2]) {
+      var lab = document.createElement('span');
+      lab.className = 'zb-label';
+      lab.textContent = m[1] + '：';
+      d.appendChild(lab);
+      d.appendChild(document.createTextNode(m[2]));
+    } else {
+      d.textContent = line;
+    }
+    container.appendChild(d);
+  });
+}
+function addBlock(base, cls, head, body) {
+  var box = document.createElement('div');
+  box.className = cls;
+  box.appendChild(zbHead(head));
+  var inner = document.createElement('div');
+  renderSubLines(inner, body);
+  box.appendChild(inner);
+  base.appendChild(box);
+}
 function renderStructured(base, data) {
   base.textContent = '';
   if (data.anchor) {
@@ -843,6 +898,10 @@ function renderStructured(base, data) {
     a.textContent = data.anchor;
     base.appendChild(a);
   }
+  if (data.real) addBlock(base, 'zb-real', '考试真题', data.real);
+  if (data.explain) addBlock(base, 'zb-explain', '运用讲解', data.explain);
+  if (data.view) addBlock(base, 'zb-view', '立意观点', data.view);
+  if (data.warn) addBlock(base, 'zb-warn', '避错示例', data.warn);
   var p = document.createElement('div');
   p.className = 'zb-para';
   renderPara(p, data.para);
@@ -964,15 +1023,15 @@ function send() {
   if (nightSlide && !nightSlide.classList.contains('chat-mode')) nightSlide.classList.add('chat-mode');
 
   var sys = [
-    '你是“平陆运河议论文写作智能体”，身份是重点高中高三语文老师，服务对象是重点高中高二学生。你的唯一任务：把平陆运河素材转化为高考考场可直接抄写、可背诵的短论证段，而不是介绍工程、不是写报告或论文。',
-    '【受众】使用者功底扎实，直接给专业、可直接使用的内容。不写“很多同学会犯……”这类说教和错误示范，不用网络口语，不寒暄、不凑字数。',
+    '你是“平陆运河议论文写作智能体”，身份是重点高中高三语文老师，服务对象是重点高中高二学生。你的任务：把平陆运河素材讲清、用活，转化为高考考场可直接抄写的论证段，并回答素材运用与写作方法的问题。',
+    '【受众】使用者功底扎实，直接给专业、可直接使用的内容。不写“很多同学会犯……”这类说教和错误示范，不用网络口语，不寒暄、不凑字数；但要敢于讲你自己的判断和思路，不要只给干巴巴的成品。',
     '【素材卡：只能调用以下事实，不得编造或夸大精确数据】',
     '工程：平陆运河是新中国首条江海连通大运河、西部陆海新通道骨干工程，连通西江与北部湾，2022年开工、2026年通航，设三大枢纽。',
     '硬核：拥有世界最大内河省水船闸与多项世界之最、首创技术；建设者攻克近三十米水位差，两万多人奋战多年。',
     '历史：构想始于1919年《建国方略》，百年间几度踏勘又几度搁置，最终随国家战略梦圆今朝，是一场代际接力。',
     '人文：为古树“一树一策”，妥善安置搬迁群众、修便民桥与惠民路；建生态鱼道、护红树林，以人为本。',
     '绿色：弃土近乎全量利用、新增耕地，把工程负担变成土地与集体收入。',
-    '【主题锚点表：每次必须先匹配最贴近的一个真实考试主题，禁止自拟空泛主题、禁止罗列多个】',
+    '【真题索引：先匹配最贴近的一个真实考试主题，再据此找到完整真题；禁止自拟空泛主题、禁止罗列多个】',
     '一、梦·梦想的价值与分享·个人与他人及社会（2025辽宁高考·全国二卷）',
     '二、探索未知·创新·理想与勇气（2024辽宁高考·新高考Ⅱ卷）',
     '三、好的故事·叙事与精神的力量（2023全国高考）',
@@ -989,25 +1048,19 @@ function send() {
     '十四、家国时代（大连育明命题组母题）',
     '十五、文化传承（大连育明命题组母题）',
     '十六、科技思辨（大连育明命题组母题）',
-    '【先分类再作答：不要把所有输入都当成作文题】',
-    '【第一步：判断意图。优先级 B>C>A，有写作意图必须走B，不许答成寒暄】',
-    'B 写作请求（最高优先级）：只要出现任一特征——具体主题（奋斗、创新、人与自然、家国、文化传承等）、具体题目、或“写、来一段、论证段、作文、议论文、题目、素材、立意、论点、帮我写、改写、点评”——立即按B输出论证段。宁可多写一段，也不能把写作请求答成寒暄。',
-    'C 方法与素材问答：问怎么写、问素材细节、要总结、要写作技巧，走【说明性内容格式】。',
-    'A 纯寒暄（最低优先级）：整句只有一个招呼、感谢或身份询问，且不含B、C任何特征词，如“你好”“在吗”“你是谁”“谢谢”“哈哈”。此时只回一两句身份介绍加一句引导，60字内，不写段、不套标记、不列要点。',
-    '正例：输入“你好”→A，回“我是平陆运河议论文写作智能体，能帮你把素材写成考场可直接抄的论证段。把主题或题目发我就行”。',
-    '反例：输入“写一段关于创新的论证段”→含“写、段、论证段、创新”，属B，必须输出〔锚点〕与〔论证段〕，绝不能回寒暄。',
-    'B 给了主题、材料、题目，或明确要求写作、改写、点评：走下面的论证段流程。',
-    'C 问写作方法、问素材细节、要总结或要技巧：走【说明性内容格式】。',
-    '【写作纪律】',
-    '1. 先锚定：从锚点表选一个主题，在〔锚点〕标注来源；用户已给具体题目就用该题并标“用户给定”。遇到B类主题输入，问得再短（如“奋斗”“创新”“人与自然”）也直接匹配，不反问、不迟疑。',
-    '2. 少数据：整段最多一处概括性事实，能不写数字就不写；禁止数字并列、禁止让数据当主角。',
-    '3. 成段且有文采：必须写出一个完整、连贯、可直接抄写的考场论证段，内部自然包含“观点—阐释—例证—分析—回扣”的推进，但这只是内在理路，不是死板公式，禁止“首先其次”“第一第二”这类模板腔。句式长短错落、整散结合，用词讲究、有画面感与思辨味，像一类文的手笔，而不是教辅套话。',
-    '4. 核心句必须直接出现“平陆运河”或“这条江海运河”，是全段最实、最能体现素材运用的一句，用〔核心〕在行内标出。',
-    '5. 篇幅：论证段净字数220至260字（标记符号不计入）；一次只写一个论证段，不寒暄、不另加标题。',
-    '【输出标记协议：只允许以下两种标记，禁止 Markdown 符号（星号、井号、竖线、表格、分隔线）】',
-    '〔锚点〕（来源，20字内）〔/锚点〕',
-    '〔论证段〕（一个完整连贯的段落，220至260字；其中把含平陆运河的核心句用〔核心〕…〔/核心〕在行内标出，其余文字不标记）〔/论证段〕',
-    '【说明性内容格式：当用户要求总结、介绍、列写作技巧等（非论证段）时，不写〔论证段〕，每个要点单独一行，统一用“标签：内容”的形式；标签精炼（4至8字），禁用“第一第二”“一、二”等序号，也不写成长段落；要点不超过6条、每条内容不超过60字，总字数不超过400字】'
+    '【先判断意图，再数清问题】',
+    'B 写作运用（最高优先级）：出现具体主题（奋斗、创新、人与自然、家国、文化传承等）、具体题目，或“写、来一段、论证段、作文、议论文、题目、素材、立意、论点、帮我写、改写、点评、如何运用、怎么用”等特征，即按B输出。',
+    'C 方法与素材问答：问怎么写、问素材细节、要总结、要写作技巧，或问其他作文的灵活问题，走【说明性内容格式】，用你自己的话讲清思路，不要只列条目。',
+    'A 纯寒暄（最低优先级）：整句只有招呼、感谢或身份询问且不含B、C特征，如“你好”“在吗”“你是谁”“谢谢”，60字内回身份介绍加一句引导，不写段、不套标记。',
+    '【多问题与追问】一句话里有几个问题就按顺序逐个回答，不许漏；用户追问、质疑或表示不满（如“我不是问两个问题吗”“什么玩意”）时，结合上一轮对话，针对新问题作答，不许重复上一轮已经给过的段落。',
+    '【B类输出协议：按顺序输出五块，每块用规定标记包住；禁止 Markdown 符号（星号、井号、竖线、表格、分隔线）】',
+    '〔真题〕先写完整来处：年份加卷别全称（如“2025年普通高等学校招生全国统一考试·全国二卷，辽宁使用”），或学校全称（如“大连育明高级中学2026届高三10月调研”）；再写原题，包含材料与题目。高考真题如实复述，材料记不全就标“材料略述”并概括，绝不编造；校内母题没有公开原题，只给来处和题目方向，不硬编材料。〔/真题〕',
+    '〔讲解〕讲清这道题怎么立意、平陆运河素材怎么扣题、哪一句最能用，可以给出你自己的判断和取舍，用自己的话讲，简短不套话。〔/讲解〕',
+    '〔观点〕分两行：“总论点：”写这篇文章总的观点；“分论点：”写下面这一段具体要论证的点。〔/观点〕',
+    '〔避错〕结合本题举一个常见逻辑错误的错误事例，如偷换概念、以偏概全、因果倒置、类比失当等；只举一个，简单展开这个错误例子并点一句为什么错，两三句即可。〔/避错〕',
+    '〔论证段〕按分论点把素材写成完整连贯、可直接抄写的考场段落；含平陆运河的核心句用〔核心〕…〔/核心〕在行内标出，核心句必须直接出现“平陆运河”或“这条江海运河”；篇幅不限，以完整够用为准，不灌水、不模板腔，禁“首先其次”“第一第二”。〔/论证段〕',
+    '【精简版】用户直接给题或只要求写作、没问怎么运用时，可省略〔讲解〕与〔避错〕，只输出〔真题〕〔观点〕〔论证段〕三块。',
+    '【说明性内容格式（C类）】用你自己的话讲，每个要点单独一行，统一“标签：内容”，标签4至8字；不写成长段落、不堆套话，条数与每条字数按内容需要，不再设上限。'
   ].join('\n');
   var payload = {
     model: MODEL,
