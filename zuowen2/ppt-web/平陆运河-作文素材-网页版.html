@@ -1057,6 +1057,10 @@ function send() {
   addMsg('user', q);
   aiInput.value = '';
   startThink();
+  /* 先挂骨架占位气泡：思考再久、网络停顿，加载动画始终在，不会出现干等后直接切结果 */
+  answerEl = addMsg('assistant', '');
+  answerEl.classList.add('pending');
+  addSkeleton(answerEl);
   /* 对话开始：标题/模型按钮等收起，对话区上移占满 */
   var nightSlide = document.querySelector('.slide.night');
   if (nightSlide && !nightSlide.classList.contains('chat-mode')) nightSlide.classList.add('chat-mode');
@@ -1094,9 +1098,10 @@ function send() {
     '【多问题与追问】一句话里有几个问题就按顺序逐个回答，不许漏；用户追问、质疑或表示不满（如“我不是问两个问题吗”“什么玩意”）时，结合上一轮对话，针对新问题作答，不许重复上一轮已经给过的段落。',
     '【B类输出协议：按顺序输出四块，每块用规定标记包住；禁止 Markdown 符号（星号、井号、竖线、表格、分隔线）】',
     '〔真题〕第一行写来处，用简短叫法，如“2025全国二卷（辽宁）”“2024新高考Ⅱ卷”“大连育明2026届高三10月调研”，禁止写“普通高等学校招生全国统一考试”这类全称。再写材料与题目：高考真题如实复述，材料记不全就标“材料略述”并概括；把材料里点出主题、题眼的关键句用〔题眼〕…〔/题眼〕在行内包住，不再单独写讲解；校内母题没有公开原题，只给来处和题目方向，不硬编材料。〔/真题〕',
-    '〔观点〕分两行：“总论点：”写这篇文章总的观点；“分论点：”写下面这一段具体要论证的点。〔/观点〕',
+    '〔观点〕分两行，都从题目和材料的题眼出发、就题目讨论的普遍道理立论，回答题目让我们思考什么，不出现平陆运河、不围着素材写：“总论点：”写全文总的观点；“分论点：”写下面这一段具体要论证的点。〔/观点〕',
     '〔避错〕结合本题举一个常见逻辑错误的错误事例，如偷换概念、以偏概全、因果倒置、类比失当等；只举一个，简单展开这个错误例子，并把“避免什么”的关键错误短语用〔重点〕…〔/重点〕在行内包住，两三句即可。〔/避错〕',
-    '〔论证段〕按分论点把素材写成完整连贯、可直接抄写的考场段落；凡是运用平陆运河素材的句子，必须整句用〔核心〕…〔/核心〕在行内包住，核心句必须直接出现“平陆运河”或“这条江海运河”；篇幅不限，以完整够用为准，不灌水、不模板腔，禁“首先其次”“第一第二”。〔/论证段〕',
+    '〔论证段〕按分论点写成完整连贯、可直接抄写的考场段落，平陆运河只作为证明分论点的一个事例出现，不是介绍运河本身；凡是运用平陆运河素材的句子，必须整句用〔核心〕…〔/核心〕在行内包住，核心句必须直接出现“平陆运河”或“这条江海运河”；全段控制在230字以内（含标点），句句有用，不灌水、不模板腔，禁“首先其次”“第一第二”。〔/论证段〕',
+    '【篇幅】除论证段外，其余各块简短克制，材料如实复述但不堆砌，每块点到即止，不写多余的话。',
     '【精简版】用户直接给题或只要求写作、没问怎么运用时，可省略〔避错〕，只输出〔真题〕〔观点〕〔论证段〕三块。',
     '【说明性内容格式（C类）】用你自己的话讲，每个要点单独一行，统一“标签：内容”，标签4至8字；不写成长段落、不堆套话，条数与每条字数按内容需要，不再设上限。'
   ].join('\n');
@@ -1106,7 +1111,7 @@ function send() {
     stream: true,
     temperature: 0.9,
     /* 深度思考模型的 max_tokens 含思考+正文，必须留足预算，否则思考吃光预算、正文为0（finish_reason=length） */
-    max_tokens: MODEL === 'deepseek-v4-pro' ? 8000 : 4000
+    max_tokens: 8000
   };
 
   var reasoning = '';
@@ -1135,11 +1140,14 @@ function send() {
     if (delta.content) {
       lastDataAt = Date.now();
       if (!answerEl) {
-        endThink();
-        thinkCard.classList.add('collapsed');
         answerEl = addMsg('assistant', '');
         answerEl.classList.add('pending');   /* 生成前：骨架小框占位 + 波浪扫光 */
         addSkeleton(answerEl);
+      }
+      if (!answerEl._started) {
+        answerEl._started = true;
+        endThink();
+        thinkCard.classList.add('collapsed');
       }
       answer += delta.content;
       /* 流式期间不渲染正文（避免逐字蹦出），等 finishOK 整段扩散浮现 */
@@ -1294,7 +1302,10 @@ function send() {
   }).catch(function() {
     /* 流式被拒/中断：若已收到正文，直接保留结果浮现，避免白等 */
     if (answer) { finishOK(); return; }
-    /* 否则改整体读取，最多自动重试 2 次（间隔 900ms），仍失败才报错 */
+    /* 否则改整体读取：思考卡给出可见提示，骨架气泡继续显示，最多自动重试 2 次（间隔 900ms），仍失败才报错 */
+    endThink();
+    thinkCard.classList.remove('collapsed');
+    thinkBody.textContent = '网络停顿，正在重新连接…';
     var attempt = 0;
     function retryWhole() {
       attempt++;
