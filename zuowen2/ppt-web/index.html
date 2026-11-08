@@ -96,8 +96,8 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .night-models button:hover { background:rgba(255,255,255,.12); }
 .night-models button.on { background:rgba(201,168,106,.92); color:#0a1220; border-color:rgba(201,168,106,1); font-weight:600; }
 .night-chat { position:absolute; left:80px; top:252px; width:800px; height:176px; overflow-y:auto; z-index:5; padding:12px 10px 16px; -webkit-mask-image:linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 18px), transparent 100%); mask-image:linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 18px), transparent 100%); scrollbar-width:thin; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
-/* 离屏消息跳过渲染：只渲染可视区附近的气泡，长对话历史不拖累老电脑；Safari 旧版自动忽略，无害 */
-.night-chat .msg { content-visibility:auto; contain-intrinsic-size:auto 240px; }
+/* 离屏跳过渲染（content-visibility）已移除：移动端滚动时占位高度与真实高度
+   切换会造成 scrollTop 中途被夹紧、画面反复跳回；消息数量少，直接渲染更稳 */
 .night-chat::-webkit-scrollbar { width:5px; }
 .night-chat::-webkit-scrollbar-thumb { background:rgba(201,168,106,.35); border-radius:3px; }
 /* 每轮翻页：整块淡入，模拟\"翻开新一页\" */
