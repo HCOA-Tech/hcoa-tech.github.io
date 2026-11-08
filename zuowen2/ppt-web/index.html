@@ -109,10 +109,12 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 }
 .night-chat .bub.structured .zb-anchor { display:block; font-size:13px; font-weight:500; color:rgba(201,168,106,.95); letter-spacing:.6px; margin-bottom:11px; opacity:0; animation:zbIn .5s ease .05s forwards; }
 /* ===== 五块结构：真题 / 讲解 / 观点 / 避错 / 论证段 ===== */
-.night-chat .bub.structured .zb-real, .night-chat .bub.structured .zb-explain, .night-chat .bub.structured .zb-view, .night-chat .bub.structured .zb-warn { display:block; margin-bottom:14px; opacity:0; animation:zbIn .55s cubic-bezier(.22,1,.36,1) forwards; }
+.night-chat .bub.structured .zb-judge, .night-chat .bub.structured .zb-real, .night-chat .bub.structured .zb-explain, .night-chat .bub.structured .zb-view, .night-chat .bub.structured .zb-warn { display:block; margin-bottom:14px; opacity:0; animation:zbIn .55s cubic-bezier(.22,1,.36,1) forwards; }
 .night-chat .bub.structured .zb-head { font-size:11.5px; font-weight:600; letter-spacing:1.2px; margin-bottom:7px; }
 .night-chat .bub.structured .zb-sub { font-size:15px; line-height:1.72; font-weight:300; color:rgba(232,234,236,.92); letter-spacing:.2px; margin-bottom:5px; }
 .night-chat .bub.structured .zb-sub .zb-label { font-weight:700; color:rgba(255,251,242,.99); }
+.night-chat .bub.structured .zb-judge { background:rgba(125,211,252,.07); border:1px solid rgba(125,211,252,.2); border-radius:10px; padding:12px 14px; }
+.night-chat .bub.structured .zb-judge .zb-head { color:rgba(125,211,252,.95); }
 .night-chat .bub.structured .zb-real { background:rgba(201,168,106,.08); border:1px solid rgba(201,168,106,.22); border-radius:10px; padding:12px 14px; }
 .night-chat .bub.structured .zb-real .zb-head { color:rgba(201,168,106,.95); }
 .night-chat .bub.structured .zb-explain .zb-head { color:rgba(125,211,252,.9); }
@@ -163,13 +165,20 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 }
 /* 用户自己的消息：中性玻璃质感（不再是绿色） */
 .night-chat .msg.user .bub { background:rgba(255,255,255,.10); border-color:rgba(255,255,255,.18); }
-.night-think { position:absolute; left:80px; top:252px; width:800px; z-index:6; border:1px solid rgba(201,168,106,.5); border-left:4px solid rgba(201,168,106,1); border-radius:12px; background:rgba(13,26,38,.92); overflow:hidden; transition:max-height .5s cubic-bezier(.22,1,.36,1), opacity .4s; max-height:120px; backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+/* 思考卡：与回答气泡同位置、同玻璃质感，带同款 AI 扫光（复用 skelWave），收起后才展开骨架 */
+.night-think { position:relative; width:100%; box-sizing:border-box; z-index:1; border:1px solid rgba(255,255,255,.1); border-radius:12px; background:rgba(255,255,255,.07); overflow:hidden; transition:max-height .5s cubic-bezier(.22,1,.36,1), opacity .4s, border-color .3s; max-height:220px; backdrop-filter:blur(16px) saturate(1.15); -webkit-backdrop-filter:blur(16px) saturate(1.15); }
+.night-think::before { content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.12), rgba(255,255,255,0)),
+    linear-gradient(120deg, rgba(255,107,107,.10), rgba(254,202,87,.09), rgba(72,219,251,.10), rgba(165,94,234,.10));
+  background-size:100% 230%, 100% 100%;
+  animation:skelWave 1.55s ease-in-out infinite; }
 .night-think.collapsed { max-height:0; opacity:0; border-width:0; }
-.nt-head { display:flex; align-items:center; gap:8px; padding:9px 14px 6px; font-size:12px; color:rgba(201,168,106,.95); letter-spacing:1.5px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
-.nt-spin { width:11px; height:11px; border:2px solid rgba(201,168,106,.3); border-top-color:rgba(201,168,106,1); border-radius:50%; animation:rot .8s linear infinite; }
+.nt-head { position:relative; z-index:1; display:flex; align-items:center; gap:8px; padding:12px 16px 4px; font-size:12px; color:rgba(247,245,239,.85); letter-spacing:1.2px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
+.nt-spin { width:11px; height:11px; border:2px solid rgba(255,255,255,.25); border-top-color:rgba(255,255,255,.9); border-radius:50%; animation:rot .8s linear infinite; }
 @keyframes rot { to { transform:rotate(360deg); } }
-.nt-sec { color:rgba(201,168,106,.8); font-size:11px; }
-#thinkBody { max-height:64px; overflow-y:auto; padding:2px 14px 9px; font-size:12.5px; line-height:1.7; color:rgba(247,245,239,.75); font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; white-space:pre-wrap; word-break:break-word; }
+.nt-sec { color:rgba(247,245,239,.6); font-size:11px; }
+#thinkBody { position:relative; z-index:1; max-height:72px; overflow-y:auto; padding:2px 16px 12px; font-size:12.5px; line-height:1.7; color:rgba(247,245,239,.75); font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; white-space:pre-wrap; word-break:break-word; }
 /* 输入框：整块淡淡的彩虹渐变 + 高斯模糊毛玻璃，无生硬描边 */
 .night-input { position:absolute; left:50%; bottom:20px; transform:translateX(-50%); width:450px; height:36px; z-index:7; display:flex; align-items:center; gap:7px; padding:3px 10px 3px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.10); background:linear-gradient(120deg, rgba(255,107,107,.22), rgba(254,202,87,.2), rgba(72,219,251,.22), rgba(165,94,234,.22), rgba(255,107,107,.22)); background-size:300% 100%; backdrop-filter:blur(30px) saturate(1.5); -webkit-backdrop-filter:blur(30px) saturate(1.5); box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 10px 34px rgba(0,0,0,.4); animation:inputFlow 8s linear infinite; transition:box-shadow .35s, transform .35s; }
 /* 光晕：常驻一圈淡淡彩色光晕贴着输入框外沿，颜色随渐变同步流动；聚焦时只有一次小脉冲 */
@@ -222,9 +231,8 @@ body.onAI .night-input.mobile-float { display: flex; }
 .slide.night.chat-mode .night-eyebrow,
 .slide.night.chat-mode .night-badge,
 .slide.night.chat-mode .night-models { opacity:0 !important; transform:translateY(-16px) !important; pointer-events:none; }
-.slide.night .night-chat, .slide.night .night-think { transition:top .7s cubic-bezier(.22,1,.36,1), height .7s cubic-bezier(.22,1,.36,1); }
+.slide.night .night-chat { transition:top .7s cubic-bezier(.22,1,.36,1), height .7s cubic-bezier(.22,1,.36,1); }
 .slide.night.chat-mode .night-chat { top:32px; height:430px; }
-.slide.night.chat-mode .night-think { top:32px; }
 
 /* ============ 生成瞬间：AI 光效 + 向上水波 + 内容飞升 ============ */
 /* 整页淡彩光效：从底部涌起，中段最亮，末段化开，不生硬 */
@@ -360,11 +368,15 @@ body.onAI .night-input.mobile-float { display: flex; }
   <div class="night-title">灵活运用素材</div>
   <div class="night-badge"><span class="nb-pill">已接入 HCOA AI 与 DeepSeek</span></div>
   <div class="night-models"><button data-m="deepseek-flash" class="on">快速</button><button data-m="deepseek-v4-pro">深度思考</button></div>
-  <div id="thinkCard" class="night-think collapsed">
-    <div class="nt-head"><span class="nt-spin"></span><span>思考过程</span><span class="nt-sec" id="thinkSec">0s</span></div>
-    <div id="thinkBody"></div>
+  <div id="aiScroll" class="night-chat">
+    <div class="msg think-msg" id="thinkWrap">
+      <div class="who flow-ai">HCOA</div>
+      <div id="thinkCard" class="night-think collapsed">
+        <div class="nt-head"><span class="nt-spin"></span><span>思考过程</span><span class="nt-sec" id="thinkSec">0s</span></div>
+        <div id="thinkBody"></div>
+      </div>
+    </div>
   </div>
-  <div id="aiScroll" class="night-chat"></div>
   <div class="night-input"><input id="aiInput" type="text" inputmode="text" enterkeyhint="send" placeholder="报一个角度或题目，AI 现场写给你看……" autocomplete="off"/><button id="aiSend">生成</button></div>
 </section>
 <section class="slide" data-note="" data-id="pzD"><div class="pg-bg" style="background-image:url(assets/img/Q1Vhbwbr5oHNfAxJS4OcAXvtnQh.jpg);background-size:cover;background-position:center;"></div><div class="el el-text" style="left:238.79999999999998px;top:193.85000000000002px;width:498.95px;height:118.4px;font-size:54px;font-family:'Kaiti SC','STKaiti','KaiTi',KaiTi,serif;color:rgba(46, 110, 94, 1);;text-align:center;line-height:1.3;justify-content:flex-start;display:flex;flex-direction:column;"><p style="text-align:center;line-height:1.3"><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(46, 110, 94, 1);;font-size:54px;font-family:'Kaiti SC','STKaiti','KaiTi',KaiTi,serif">感谢观看</span></span></p></div><div class="el" style="left:456.0px;top:284.85px;width:48.0px;height:1.5px;background-color:rgba(201, 168, 106, 1);"><div class="el-inner" style="font-size:16px;font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;color:rgba(31, 35, 41, 1);;padding-top:3.6px;padding-bottom:3.6px;padding-left:7.2px;padding-right:7.2px;"><p style="text-align:center;line-height:1.2"><span style="color:rgba(255, 255, 255, 1);;font-size:18px;font-family:'Songti SC','STSong','SimSun',SimSun,serif"> </span></p></div></div><div class="el el-text" style="left:177.738031496063px;top:312.2640157480315px;width:604.5232283464567px;height:68.39622047244094px;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif;color:rgba(74, 74, 66, 1);;text-align:center;line-height:1.7;justify-content:flex-start;display:flex;flex-direction:column;"><p style="text-align:center;line-height:1.7;margin-top:10.0px;margin-left:18.0px;text-indent:-18.0px"><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(74, 74, 66, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">平陆运河不仅是一条水道——它是</span></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><b><span style="color:rgba(46, 110, 94, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">百年家国夙愿的接力</span></b></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(74, 74, 66, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">，是</span></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><b><span style="color:rgba(46, 110, 94, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">工程卓越的见证</span></b></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(74, 74, 66, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">，更是</span></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><b><span style="color:rgba(46, 110, 94, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">生态温柔的典范</span></b></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(74, 74, 66, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">。</span></span></p></div><div class="el el-text" style="left:195.05850393700786px;top:395.0564566929134px;width:569.8829921259843px;height:55.87503937007874px;font-size:15px;font-family:'Songti SC','STSong','SimSun',SimSun,serif;color:rgba(140, 140, 125, 1);;text-align:center;line-height:1.8;justify-content:flex-start;display:flex;flex-direction:column;"><p style="text-align:center;line-height:1.8;margin-top:10.0px;margin-left:18.0px;text-indent:-18.0px"><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(140, 140, 125, 1);;font-size:15px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">从1919年《建国方略》的构想到2026年建成通航，平陆运河凝聚了奋斗、创新与人与自然和谐共生的精神。</span></span></p></div><div class="el el-text" style="left:416.62503937007875px;top:89.81850393700788px;width:126.75px;height:39.37503937007874px;font-size:24px;font-family:'Songti SC','STSong','SimSun',SimSun,serif;color:rgba(46, 110, 94, 0.349);;text-align:left;line-height:1.1;justify-content:flex-start;display:flex;flex-direction:column;"></div></section>
@@ -571,6 +583,7 @@ var aiScroll = document.getElementById('aiScroll');
 var aiInput = document.getElementById('aiInput');
 var aiSend = document.getElementById('aiSend');
 var thinkCard = document.getElementById('thinkCard');
+var thinkWrap = document.getElementById('thinkWrap');
 var thinkBody = document.getElementById('thinkBody');
 var thinkSec = document.getElementById('thinkSec');
 var keyGate = document.getElementById('keyGate');
@@ -726,9 +739,13 @@ var prevBtn = document.getElementById('prevTurn');
 
 /* 清空对话区并播放\"翻页\"淡入：新一页从空白开始 */
 function clearStage() {
-  aiScroll.innerHTML = '';
   aiScroll.scrollTop = 0;
   aiScroll.classList.remove('flip');
+  /* 只移除普通消息，保留思考卡包装；思考卡自身先收起 */
+  Array.prototype.forEach.call(aiScroll.querySelectorAll('.msg:not(.think-msg)'), function(m) {
+    m.parentNode.removeChild(m);
+  });
+  thinkCard.classList.add('collapsed');
   void aiScroll.offsetWidth;      /* 强制重排，保证动画能重新触发 */
   aiScroll.classList.add('flip');
   userScrolled = false;
@@ -830,10 +847,10 @@ function aiBurst(text) {
   }, 2200);
 }
 
-/* 结构化解析（容错版）：块〔真题〕〔讲解〕〔观点〕〔避错〕〔论证段〕（兼容旧〔锚点〕），
+/* 结构化解析（容错版）：块〔见解〕〔真题〕〔讲解〕〔观点〕〔避错〕〔论证段〕（兼容旧〔锚点〕），
    行内〔核心〕〔题眼〕〔重点〕；闭合标记可省略，下一个块开始即上一块结束。
    识别不到论证段返回 null。 */
-var BLOCK_NAMES = ['真题','讲解','观点','避错','论证段','锚点'];
+var BLOCK_NAMES = ['见解','真题','讲解','观点','避错','论证段','锚点'];
 var INLINE_CLASS = { '核心':'zb-core', '题眼':'zb-eye', '重点':'zb-key' };
 function normMarkers(s) {
   return s.replace(/［/g, '〔').replace(/］/g, '〕');
@@ -849,12 +866,13 @@ function parseStructured(raw) {
   });
   if (!starts.length) return null;
   starts.sort(function(a, b) { return a.i - b.i; });
-  var d = { real:'', explain:'', view:'', warn:'', anchor:'', para:'' };
+  var d = { judge:'', real:'', explain:'', view:'', warn:'', anchor:'', para:'' };
   starts.forEach(function(st, k) {
     var end = k + 1 < starts.length ? starts[k + 1].i : text.length;
     var body = text.slice(st.bodyStart, end)
       .replace(new RegExp('〔\\/' + st.name + '〕'), '').trim();
     if (st.name === '论证段') d.para = body.replace(/\s*\n\s*/g, '').trim();
+    else if (st.name === '见解') d.judge = body;
     else if (st.name === '真题') d.real = body;
     else if (st.name === '讲解') d.explain = body;
     else if (st.name === '观点') d.view = body;
@@ -931,6 +949,7 @@ function renderStructured(base, data) {
     a.textContent = data.anchor;
     base.appendChild(a);
   }
+  if (data.judge) addBlock(base, 'zb-judge', '我的判断', data.judge);
   if (data.real) addBlock(base, 'zb-real', '考试真题', data.real);
   if (data.explain) addBlock(base, 'zb-explain', '运用讲解', data.explain);
   if (data.view) addBlock(base, 'zb-view', '立意观点', data.view);
@@ -1056,11 +1075,9 @@ function send() {
   messages.push({ role: 'user', content: q });
   addMsg('user', q);
   aiInput.value = '';
+  /* 思考卡移到用户消息之后并展开（思考期不预挂骨架，思考卡本身带扫光） */
+  aiScroll.appendChild(thinkWrap);
   startThink();
-  /* 先挂骨架占位气泡：思考再久、网络停顿，加载动画始终在，不会出现干等后直接切结果 */
-  answerEl = addMsg('assistant', '');
-  answerEl.classList.add('pending');
-  addSkeleton(answerEl);
   /* 对话开始：标题/模型按钮等收起，对话区上移占满 */
   var nightSlide = document.querySelector('.slide.night');
   if (nightSlide && !nightSlide.classList.contains('chat-mode')) nightSlide.classList.add('chat-mode');
@@ -1096,13 +1113,14 @@ function send() {
     'C 方法与素材问答：问怎么写、问素材细节、要总结、要写作技巧，或问其他作文的灵活问题，走【说明性内容格式】，用你自己的话讲清思路，不要只列条目。',
     'A 纯寒暄（最低优先级）：整句只有招呼、感谢或身份询问且不含B、C特征，如“你好”“在吗”“你是谁”“谢谢”，60字内回身份介绍加一句引导，不写段、不套标记。',
     '【多问题与追问】一句话里有几个问题就按顺序逐个回答，不许漏；用户追问、质疑或表示不满（如“我不是问两个问题吗”“什么玩意”）时，结合上一轮对话，针对新问题作答，不许重复上一轮已经给过的段落。',
-    '【B类输出协议：按顺序输出四块，每块用规定标记包住；禁止 Markdown 符号（星号、井号、竖线、表格、分隔线）】',
+    '【B类输出协议：按顺序输出五块，每块用规定标记包住；禁止 Markdown 符号（星号、井号、竖线、表格、分隔线）】',
+    '〔见解〕先用一句话直接回答用户的问题：能用就说“可以”，不太合适就说“不太行”或“部分适用”，再用你自己的话讲清判断和理由，像老师当面说话，不要套话。如果这个素材用在这类主题上有风险（比如容易偷换概念、以偏概全、强行拔高），在这里直接点出来。两三句即可。〔/见解〕',
     '〔真题〕第一行写来处，用简短叫法，如“2025全国二卷（辽宁）”“2024新高考Ⅱ卷”“大连育明2026届高三10月调研”，禁止写“普通高等学校招生全国统一考试”这类全称。再写材料与题目：高考真题如实复述，材料记不全就标“材料略述”并概括；把材料里点出主题、题眼的关键句用〔题眼〕…〔/题眼〕在行内包住，不再单独写讲解；校内母题没有公开原题，只给来处和题目方向，不硬编材料。〔/真题〕',
     '〔观点〕分两行，都从题目和材料的题眼出发、就题目讨论的普遍道理立论，回答题目让我们思考什么，不出现平陆运河、不围着素材写：“总论点：”写全文总的观点；“分论点：”写下面这一段具体要论证的点。〔/观点〕',
     '〔避错〕结合本题举一个常见逻辑错误的错误事例，如偷换概念、以偏概全、因果倒置、类比失当等；只举一个，简单展开这个错误例子，并把“避免什么”的关键错误短语用〔重点〕…〔/重点〕在行内包住，两三句即可。〔/避错〕',
     '〔论证段〕按分论点写成完整连贯、可直接抄写的考场段落，平陆运河只作为证明分论点的一个事例出现，不是介绍运河本身；凡是运用平陆运河素材的句子，必须整句用〔核心〕…〔/核心〕在行内包住，核心句必须直接出现“平陆运河”或“这条江海运河”；全段控制在230字以内（含标点），句句有用，不灌水、不模板腔，禁“首先其次”“第一第二”。〔/论证段〕',
     '【篇幅】除论证段外，其余各块简短克制，材料如实复述但不堆砌，每块点到即止，不写多余的话。',
-    '【精简版】用户直接给题或只要求写作、没问怎么运用时，可省略〔避错〕，只输出〔真题〕〔观点〕〔论证段〕三块。',
+    '【精简版】用户直接给题或只要求写作、没问怎么运用时，可省略〔避错〕，只输出〔见解〕〔真题〕〔观点〕〔论证段〕四块。',
     '【说明性内容格式（C类）】用你自己的话讲，每个要点单独一行，统一“标签：内容”，标签4至8字；不写成长段落、不堆套话，条数与每条字数按内容需要，不再设上限。'
   ].join('\n');
   var payload = {
@@ -1117,6 +1135,7 @@ function send() {
   var reasoning = '';
   var answer = '';
   var answerEl = null;
+  var bubbleQueued = false;   /* 骨架气泡排队标志：思考卡收起后再创建 */
   var truncated = false;   /* finish_reason=length 截断标志：兜底提示而非干等 */
   var lastDataAt = Date.now();   /* 网络假死检测：60s 无任何数据则切换整体读取 */
 
@@ -1139,15 +1158,18 @@ function send() {
     }
     if (delta.content) {
       lastDataAt = Date.now();
-      if (!answerEl) {
-        answerEl = addMsg('assistant', '');
-        answerEl.classList.add('pending');   /* 生成前：骨架小框占位 + 波浪扫光 */
-        addSkeleton(answerEl);
-      }
-      if (!answerEl._started) {
-        answerEl._started = true;
+      if (!answerEl && !bubbleQueued) {
+        bubbleQueued = true;
+        /* 先收起思考卡，等它收起后再展开骨架气泡（同一位置，不重叠） */
         endThink();
         thinkCard.classList.add('collapsed');
+        setTimeout(function() {
+          if (!answerEl) {
+            answerEl = addMsg('assistant', '');
+            answerEl.classList.add('pending');   /* 骨架小框占位 + 波浪扫光 */
+            addSkeleton(answerEl);
+          }
+        }, 450);
       }
       answer += delta.content;
       /* 流式期间不渲染正文（避免逐字蹦出），等 finishOK 整段扩散浮现 */
@@ -1183,6 +1205,7 @@ function send() {
     streaming = false;
     aiSend.disabled = false;
     endThink();
+    thinkCard.classList.add('collapsed');   /* 思考卡无论如何都收起 */
     answer = sanitizeText(answer);   /* 显示前剥掉残留 Markdown 标记，保证干净可直接看 */
     var hint = truncated
       ? '输出因长度上限被截断，没能生成正文。请把问题拆小一点，或分多次让我写，再点一次生成。'
@@ -1239,6 +1262,7 @@ function send() {
 
   function authFail() {
     streaming = false; aiSend.disabled = false; endThink();
+    thinkCard.classList.add('collapsed');
     keyErr.textContent = 'Key 无效或已过期，请重新填写';
     KEY = '';
     localStorage.removeItem('ds_key');
