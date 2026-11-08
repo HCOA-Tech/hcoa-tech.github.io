@@ -164,13 +164,14 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .night-chat .bub.structured .zb-line { display:block; font-size:16px; line-height:1.74; font-weight:300; color:rgba(232,234,236,.92); letter-spacing:.2px; margin-bottom:10px; opacity:0; animation:zbIn .55s cubic-bezier(.22,1,.36,1) forwards; }
 .night-chat .bub.structured .zb-line .zb-label { font-weight:700; color:rgba(255,251,242,.99); }
 .night-chat .bub.structured .zb-line.is-title { font-size:18px; font-weight:600; color:rgba(255,251,242,.98); margin-bottom:12px; }
-/* 生成前：长方形小骨架（四个小圆角），底层淡AI彩虹+亮带从上到下波浪流动；完成后高度+margin 软弹收回（不占位） */
+/* 生成前：长方形小骨架（四个小圆角），底层淡AI彩虹 + 一条亮带从左到右扫过（与思考文字扫光同向同速）；完成后高度+margin 软弹收回（不占位） */
 .night-chat .bub .skel { position:relative; z-index:1; display:block; height:14px; border-radius:4px; margin:8px 0;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.16), rgba(255,255,255,0)),
+    linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 32%, rgba(255,255,255,.34) 50%, rgba(255,255,255,0) 70%, rgba(255,255,255,0) 100%),
     linear-gradient(90deg, rgba(255,107,107,.11), rgba(254,202,87,.10), rgba(72,219,251,.11), rgba(165,94,234,.10));
-  background-size:100% 230%, 100% 100%;
-  animation:skelWave 1.55s ease-in-out infinite;
+  background-size:220% 100%, 100% 100%;
+  background-position:-110% 0, 0 0;
+  animation:skelSheen .9s linear infinite;
   transition:height .65s cubic-bezier(.3,1.25,.5,1), margin .65s cubic-bezier(.3,1.25,.5,1), opacity .45s ease; }
 .night-chat .bub .skel:nth-child(2) { width:88%; }
 .night-chat .bub .skel:nth-child(3) { width:62%; }
@@ -181,13 +182,16 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .night-chat .bub .skel:nth-child(8) { width:90%; }
 .night-chat .bub .skel:nth-child(9) { width:64%; }
 /* 长文本等待：新增骨架行从左到右滑入，高度同步撑开，边框自然向下展开 */
-.night-chat .bub .skel.skel-enter { animation:skelEnter .6s cubic-bezier(.22,1,.36,1) both, skelWave 1.55s ease-in-out .6s infinite; }
+.night-chat .bub .skel.skel-enter { animation:skelEnter .6s cubic-bezier(.22,1,.36,1) both, skelSheen .9s linear .6s infinite; }
 @keyframes skelEnter {
   0% { height:0; margin-top:0; margin-bottom:0; opacity:0; transform:translateX(-46px); }
   60% { opacity:1; }
   100% { height:14px; margin-top:8px; margin-bottom:8px; opacity:1; transform:none; }
 }
-@keyframes skelWave { 0% { background-position:0 -115%, 0 0; } 100% { background-position:0 115%, 0 0; } }
+@keyframes skelSheen {
+  from { background-position:-110% 0, 0 0; }
+  to   { background-position:110% 0, 0 0; }
+}
 /* 收起时必须先摘掉 skelEnter 的 fill-mode both，否则动画把新增行的 height 锁在 14px，会残留两行收不干净 */
 .night-chat .bub.reveal .skel, .night-chat .bub.skel-out .skel { height:0; margin-top:0; margin-bottom:0; opacity:0; animation:none !important; }
 /* 骨架收起阶段：先软收起骨架并淡掉底色，再渲染正文，杜绝硬切 */
@@ -265,7 +269,7 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .think-msg.collapsed { display:none; }
 .nt-head { position:relative; z-index:1; display:flex; align-items:center; gap:10px; padding:12px 16px 4px; font-size:15px; color:rgba(247,245,239,.85); letter-spacing:1.2px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
 .nt-spin { width:15px; height:15px; border:2px solid rgba(255,255,255,.25); border-top-color:rgba(255,255,255,.9); border-radius:50%; animation:rot 1.2s linear infinite; flex:none; }
-/* 标题文字：高光贴着文字字形从左到右扫过，周期与转圈完全一致（1.2s）——转一圈、光扫一次；
+/* 标题文字：高光贴着文字字形从左到右扫过；单独提速到 0.9s，让“正在思考”的呼吸感更明显；
    底色压暗、亮带收窄到纯白，扫过时对比明显 */
 .nt-label {
   display:inline-block;
@@ -281,7 +285,7 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   background-clip:text;
   color:transparent;
   -webkit-text-fill-color:transparent;
-  animation:ntSheen 1.2s linear infinite;
+  animation:ntSheen .9s linear infinite;
 }
 @keyframes rot { to { transform:rotate(360deg); } }
 @keyframes ntSheen { from { background-position:100% 0; } to { background-position:0% 0; } }
