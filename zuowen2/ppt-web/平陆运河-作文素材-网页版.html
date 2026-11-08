@@ -1451,10 +1451,12 @@ function send() {
           buf = buf.slice(nl + 1);
         }
         if (buf) handleLine(buf);
+        if (!answer.trim() && !truncated) return 'EMPTY';
         finishOK();
       } else {
         var full = await res.text();
         full.split('\n').forEach(handleLine);
+        if (!answer.trim() && !truncated) return 'EMPTY';
         finishOK();
       }
       return 'DONE';
@@ -1480,9 +1482,27 @@ function send() {
     lastDataAt = Date.now();
   }
 
+  /* 空正文自动重试：HTTP 200 但模型没给内容（偶发空响应），
+     不等用户手动点，复用同一套 5 秒间隔、最多 3 次的自动重连 */
+  function scheduleEmptyRetry() {
+    if (autoRound < AUTO_ROUNDS) {
+      autoRound++;
+      resetTurnForRetry('模型返回了空内容，' + (AUTO_GAP / 1000) + ' 秒后自动重试（第 ' + autoRound + ' 次，共 ' + AUTO_ROUNDS + ' 次）…');
+      autoRetryTimer = setTimeout(function() {
+        autoRetryTimer = null;
+        runRound();
+      }, AUTO_GAP);
+    } else {
+      retryQ = q;
+      finishOK();
+      showRetry();   /* 自动重试耗尽，露出手动重试按钮 */
+    }
+  }
+
   function runRound() {
     fetchOnce(true).then(function(st) {
       if (st === 'AUTH') return;
+      if (st === 'EMPTY') { scheduleEmptyRetry(); return; }
     }).catch(function() {
       /* 已收到部分正文：保留结果直接浮现，不再重来 */
       if (answer) { finishOK(); return; }
@@ -1493,6 +1513,7 @@ function send() {
       thinkBody.textContent = '网络停顿，正在重新连接…';
       fetchOnce(false).then(function(st2) {
         if (st2 === 'AUTH') return;
+        if (st2 === 'EMPTY') { scheduleEmptyRetry(); return; }
       }).catch(function(e2) {
         /* 仍然失败：自己等 5 秒重来，不让用户动手 */
         if (autoRound < AUTO_ROUNDS) {
