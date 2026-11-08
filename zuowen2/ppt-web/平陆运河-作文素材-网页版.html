@@ -118,15 +118,35 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   to   { background-position:0% 0; }
 }
 .night-sub { position:absolute; left:0; top:168px; width:960px; text-align:center; font-size:14.5px; font-weight:400; color:rgba(190,205,198,.72); letter-spacing:1.5px; z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
-.night-eyebrow { position:absolute; left:0; top:178px; width:960px; text-align:center; font-size:13.5px; font-weight:500; color:rgba(201,168,106,.88); letter-spacing:5px; z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
+.night-eyebrow { position:absolute; left:0; top:178px; width:960px; text-align:center; font-size:13.5px; font-weight:500; letter-spacing:5px; z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+  background-image:linear-gradient(100deg, rgba(198,164,100,.96) 0%, rgba(230,208,158,.98) 20%, rgba(250,240,214,1) 36%, rgba(252,247,236,.98) 50%, rgba(210,208,240,.94) 70%, rgba(172,196,238,.9) 84%, rgba(206,172,106,.96) 100%);
+  -webkit-background-clip:text; background-clip:text;
+  color:transparent; -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 9px rgba(214,182,122,.22)) drop-shadow(0 0 18px rgba(170,196,244,.14)); }
 .night-badge { position:absolute; left:26px; top:22px; z-index:5; font-size:10px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
 .night-badge .nb-pill { display:inline-flex; align-items:center; gap:6px; font-weight:400; color:rgba(214,224,220,.62); letter-spacing:.6px; padding:4px 11px 4px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.04); white-space:nowrap; }
 .night-badge .nb-pill::before { content:''; width:5px; height:5px; border-radius:50%; background:rgba(125,211,156,.9); box-shadow:0 0 6px rgba(125,211,156,.7); }
 .night-logo { position:absolute; right:26px; top:19px; height:44px; width:auto; z-index:5; opacity:1; }
 .night-models { position:absolute; left:0; top:300px; width:960px; display:flex; justify-content:center; gap:12px; z-index:6; }
-.night-models button { border:1px solid rgba(201,168,106,.45); background:rgba(255,255,255,.1); color:rgba(247,245,239,.85); border-radius:999px; padding:9px 28px; font-size:13px; cursor:pointer; transition:.3s; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:2px; touch-action:manipulation; }
-.night-models button:hover { background:rgba(255,255,255,.12); }
-.night-models button.on { background:rgba(201,168,106,.92); color:#0a1220; border-color:rgba(201,168,106,1); font-weight:600; }
+.night-models button { position:relative; border:1px solid transparent; border-radius:999px; padding:9px 28px; font-size:13px; cursor:pointer; touch-action:manipulation;
+  font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; letter-spacing:2px;
+  color:rgba(247,245,239,.85);
+  background:
+    linear-gradient(120deg, rgba(255,255,255,.10), rgba(214,182,122,.05)) padding-box,
+    linear-gradient(120deg, rgba(206,176,116,.55) 0%, rgba(216,214,240,.30) 42%, rgba(168,198,240,.26) 64%, rgba(206,176,116,.55) 100%) border-box;
+  box-shadow:0 0 18px rgba(214,182,122,.10), 0 0 34px rgba(168,196,240,.08);
+  transition:background .3s, box-shadow .3s, color .3s; }
+.night-models button:hover {
+  background:
+    linear-gradient(120deg, rgba(255,255,255,.16), rgba(214,182,122,.10)) padding-box,
+    linear-gradient(120deg, rgba(226,200,150,.72) 0%, rgba(216,214,240,.42) 42%, rgba(168,198,240,.38) 64%, rgba(226,200,150,.72) 100%) border-box;
+  box-shadow:0 0 22px rgba(214,182,122,.16), 0 0 42px rgba(168,196,240,.13); }
+.night-models button.on {
+  background:linear-gradient(112deg, #D8BC86 0%, #EEDBAE 26%, #F8EFDA 46%, #D3C9E6 68%, #E1C793 86%, #D6B980 100%);
+  border-color:transparent;
+  color:#0a1220; font-weight:600;
+  text-shadow:0 1px 0 rgba(255,255,255,.35);
+  box-shadow:0 8px 26px rgba(214,182,122,.28), 0 2px 40px rgba(188,200,244,.18), inset 0 1px 0 rgba(255,255,255,.5); }
 .night-chat { position:absolute; left:80px; top:252px; width:800px; height:176px; overflow-y:auto; z-index:5; padding:12px 10px 16px; -webkit-mask-image:linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 18px), transparent 100%); mask-image:linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 18px), transparent 100%); scrollbar-width:thin; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
 /* 离屏跳过渲染（content-visibility）已移除：移动端滚动时占位高度与真实高度
    切换会造成 scrollTop 中途被夹紧、画面反复跳回；消息数量少，直接渲染更稳 */
