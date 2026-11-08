@@ -217,15 +217,15 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   transform:translate3d(0,-110%,0);
 }
 .night-chat .bub.reveal .bub-flow, .night-chat .bub.reveal-plain .bub-flow {
-  animation:flowFade 2.1s cubic-bezier(.22,1,.36,1) forwards;
+  animation:flowFade 2.2s linear forwards;
 }
 .night-chat .bub.reveal .bub-flow::before, .night-chat .bub.reveal-plain .bub-flow::before {
   animation:bandDown 1.05s cubic-bezier(.33,.85,.28,1) forwards;
 }
+/* 出现后从头到尾匀速淡出：只留起和终两个平台，中间没有加速点，不会出现“先淡一点再突然掉光”的台阶 */
 @keyframes flowFade {
   0%   { opacity:0; }
-  14%  { opacity:.92; }
-  40%  { opacity:.58; }
+  12%  { opacity:.95; }
   100% { opacity:0; }
 }
 .night-chat .bub.reveal .bub-flow::before, .night-chat .bub.reveal-plain .bub-flow::before {
