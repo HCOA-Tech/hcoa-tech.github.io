@@ -200,6 +200,38 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   opacity:1; transition:opacity 1.3s ease;
 }
 .night-chat .bub.fade::after, .night-chat .bub.skel-out::after { opacity:0; }
+/* 正文弹出：苹果式多色流光——四边多色光晕（暖金上/青蓝左/紫右/品红下）+ 光带从上到下扫过，
+   随弹出同步晕开、再用长 ease-out 缓慢衰减；光带用 transform 走合成器（跟刷新率不丢帧），
+   不用 filter、不做 background-position 重绘，老电脑不卡。光在文字下层，呈背光感 */
+.night-chat .bub .bub-flow {
+  position:absolute; inset:0; border-radius:12px; z-index:0; pointer-events:none; opacity:0;
+  background:
+    linear-gradient(180deg, rgba(255,214,178,.42), transparent 20%),
+    linear-gradient(0deg, rgba(214,168,255,.40), transparent 22%),
+    linear-gradient(90deg, rgba(120,220,226,.34), transparent 22%),
+    linear-gradient(270deg, rgba(165,150,255,.34), transparent 22%);
+}
+.night-chat .bub .bub-flow::before {
+  content:''; position:absolute; left:0; right:0; top:0; height:42%;
+  background:linear-gradient(180deg, transparent 0%, rgba(150,200,255,.30) 30%, rgba(196,178,255,.24) 55%, rgba(214,168,255,.16) 75%, transparent 96%);
+  transform:translate3d(0,-110%,0);
+}
+.night-chat .bub.reveal .bub-flow, .night-chat .bub.reveal-plain .bub-flow {
+  animation:flowFade 2.1s cubic-bezier(.22,1,.36,1) forwards;
+}
+.night-chat .bub.reveal .bub-flow::before, .night-chat .bub.reveal-plain .bub-flow::before {
+  animation:bandDown 1.05s cubic-bezier(.33,.85,.28,1) forwards;
+}
+@keyframes flowFade {
+  0%   { opacity:0; }
+  14%  { opacity:.92; }
+  40%  { opacity:.58; }
+  100% { opacity:0; }
+}
+@keyframes bandDown {
+  0%   { transform:translate3d(0,-110%,0); }
+  100% { transform:translate3d(0,240%,0); }
+}
 /* 完成：框缓慢下沉弹开（放慢，幅度更大）+ 文字从上到下扩散并轻微下沉（苹果写作工具式） */
 .night-chat .bub.reveal { min-height:0; animation:boxSettle 1.2s cubic-bezier(.22,1,.36,1); }
 @keyframes boxSettle { 0% { transform:translateY(32px); } 55% { transform:translateY(-7px); } 100% { transform:none; } }
@@ -215,6 +247,9 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .night-think::before { content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
   background:linear-gradient(120deg, rgba(255,107,107,.06), rgba(254,202,87,.05), rgba(72,219,251,.06), rgba(165,94,234,.06)); }
 .night-think.collapsed { max-height:0; opacity:0; border-width:0; }
+/* 收起时内容先淡出并向上滑回，与外框收缩同步，避免内容被 max-height 硬裁切的“向上硬切”感 */
+.night-think .nt-head, .night-think #thinkBody { transition:opacity .42s ease, transform .55s cubic-bezier(.22,1,.36,1); }
+.night-think.collapsed .nt-head, .night-think.collapsed #thinkBody { opacity:0; transform:translateY(-16px); }
 /* 思考卡收起时整个包装（含 HCOA 标签）一起隐藏，杜绝光剩文字的残留 */
 .think-msg.collapsed { display:none; }
 .nt-head { position:relative; z-index:1; display:flex; align-items:center; gap:8px; padding:12px 16px 4px; font-size:12px; color:rgba(247,245,239,.85); letter-spacing:1.2px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
@@ -414,7 +449,7 @@ body.onAI .night-input.mobile-float { display: flex; }
   <div class="night-models"><button data-m="deepseek-flash" class="on">快速</button><button data-m="deepseek-v4-pro">深度思考</button></div>
   <div id="aiScroll" class="night-chat">
     <div class="msg think-msg collapsed" id="thinkWrap">
-      <div class="who">HCOA</div>
+      <div class="who">写作智能体</div>
       <div id="thinkCard" class="night-think collapsed">
         <div class="nt-head"><span class="nt-spin"></span><span>思考过程</span><span class="nt-sec" id="thinkSec">0s</span></div>
         <div id="thinkBody"></div>
@@ -786,11 +821,14 @@ function addMsg(role, text) {
   wrap.className = 'msg ' + role;
   var who = document.createElement('div');
   who.className = 'who';
-  who.textContent = role === 'user' ? '你 · ' + (MODEL === 'deepseek-v4-pro' ? '深度思考' : '快速') : 'HCOA';
+  who.textContent = role === 'user' ? '你 · ' + (MODEL === 'deepseek-v4-pro' ? '深度思考' : '快速') : '写作智能体';
   var bub = document.createElement('div');
   bub.className = 'bub';
   if (role === 'assistant') {
-    /* 单层文字：完成后自身彩虹流动再渐变白色（无第二层叠加） */
+    /* 单层文字：完成后自身彩虹流动再渐变白色（无第二层叠加）；bub-flow 为弹出时的多色流光层 */
+    var flow = document.createElement('span');
+    flow.className = 'bub-flow';
+    bub.appendChild(flow);
     var base = document.createElement('span');
     base.className = 'base';
     base.textContent = text;
