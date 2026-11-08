@@ -83,7 +83,7 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   62%  { transform:translate3d(0,5px,0) scale(1.01); }
   100% { transform:translate3d(0,0,0) scale(1); }
 }
-.night-title { position:absolute; left:0; top:210px; width:960px; text-align:center; font-size:37px; font-weight:600; letter-spacing:4px; text-shadow:0 4px 26px rgba(0,0,0,.5); z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; background-image:linear-gradient(100deg, rgba(255,255,255,.8) 0%, rgba(255,255,255,.8) 39%, rgba(255,246,224,.95) 45%, rgb(255,255,255) 50%, rgb(220,237,255) 55%, rgba(255,255,255,.8) 61%, rgba(255,255,255,.8) 100%); background-size:300% 100%; background-position:100% 0; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; }
+.night-title { position:absolute; left:0; top:210px; width:960px; text-align:center; font-size:37px; font-weight:600; letter-spacing:4px; text-shadow:0 4px 26px rgba(0,0,0,.5); z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; background-image:linear-gradient(100deg, rgba(255,255,255,.8) 0%, rgba(255,255,255,.8) 38%, rgba(226,242,255,.96) 45%, rgba(255,255,255,1) 50%, rgba(226,242,255,.96) 55%, rgba(255,255,255,.8) 62%, rgba(255,255,255,.8) 100%); background-size:300% 100%; background-position:100% 0; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; }
 /* 标题：进入本页时从左到右扫一次高光，带同字形模糊光晕溢出笔画；扫完停在纯底色，与静态一致。
    8 个字比感谢页多，节奏压到 1.6s，比 16 页的 2.2s 更利落 */
 .night-title { position:relative; isolation:isolate; }
@@ -91,13 +91,15 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   content:"灵活运用素材";
   position:absolute; inset:0;
   background-image:linear-gradient(100deg,
-    rgba(120,210,255,0) 0%,
-    rgba(120,210,255,0) 36%,
-    rgba(150,214,255,.55) 43%,
+    rgba(120,205,255,0) 0%,
+    rgba(120,205,255,0) 35%,
+    rgba(130,206,255,.8) 43%,
+    rgba(200,234,255,.98) 47%,
     rgba(255,255,255,1) 50%,
-    rgba(200,206,255,.9) 56%,
-    rgba(120,210,255,0) 64%,
-    rgba(120,210,255,0) 100%);
+    rgba(200,234,255,.98) 53%,
+    rgba(130,206,255,.8) 57%,
+    rgba(120,205,255,0) 65%,
+    rgba(120,205,255,0) 100%);
   background-size:300% 100%;
   background-repeat:no-repeat;
   -webkit-background-clip:text; background-clip:text;
@@ -257,7 +259,7 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
   filter:blur(5px);
   opacity:.9;
   pointer-events:none;
-  animation:skelSheen 3.2s linear infinite;
+  animation:skelSheen 2.9s linear infinite;
 }
 /* 图层 200% 宽时，position 百分比越大画面里越靠左；要左→右扫，起点必须是大值。
    115%→-15% 的区间里光带约 77% 的时间都在条内，扫完只在两端各留很短的空白，
