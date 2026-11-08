@@ -60,24 +60,35 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 /* 原群山压暗 + 顶部黑色渐变遮罩：天空纯黑，山形保留深黑轮廓 */
 .night-bg { background:url(assets/img/Q1Vhbwbr5oHNfAxJS4OcAXvtnQh.jpg) center top/cover; filter:brightness(.28) saturate(.48) contrast(1.3); }
 .night-veil { background:linear-gradient(180deg, rgba(0,0,0,.96) 0%, rgba(1,3,6,.82) 34%, rgba(2,5,9,.5) 62%, rgba(3,6,10,.2) 80%, rgba(3,6,10,0) 92%); }
-/* 点生成时整页一起“duang”：除 AI 输入框外，所有直接子元素快速上跳再缓慢回弹；
-   左下角 HUD 在页面外、本就不动。只动 transform 走 GPU 合成，不触发重排。
-   前景元素纯位移；背景层额外 scale，保证上移不露边。幅度加大到 32px，保证明显 */
+/* 点生成时的“玻璃波浪”：先快速浮起，再连续三道衰减波浪、缓慢归位；
+   各元素按页面高低错峰（下方先动、向上传递），形成波浪而非整体平移。
+   只动 transform 走 GPU 合成，不触发重排；用明确元素选择器，不碰输入框与动态光效。
+   背景层额外 scale 防露边。HUD 在页面外、本就不动。 */
 .slide.night.burst > .night-bg,
-.slide.night.burst > .night-veil { animation:bgLift 1.2s cubic-bezier(.28,.72,.32,1); }
-.slide.night.burst > :not(.night-input):not(.night-bg):not(.night-veil):not(.ai-glow):not(.ai-sweep):not(.ai-flyer) { animation:allLift 1.2s cubic-bezier(.28,.72,.32,1); }
-@keyframes allLift {
+.slide.night.burst > .night-veil { animation:bgWave 1.6s cubic-bezier(.26,.7,.3,1); }
+.slide.night.burst > .night-models { animation:waveLift 1.6s cubic-bezier(.26,.7,.3,1); }
+.slide.night.burst > #aiScroll { animation:waveLift 1.6s cubic-bezier(.26,.7,.3,1) .05s both; }
+.slide.night.burst > .night-title { animation:waveLift 1.6s cubic-bezier(.26,.7,.3,1) .1s both; }
+.slide.night.burst > .night-eyebrow { animation:waveLift 1.6s cubic-bezier(.26,.7,.3,1) .13s both; }
+.slide.night.burst > .night-badge { animation:waveLift 1.6s cubic-bezier(.26,.7,.3,1) .18s both; }
+@keyframes waveLift {
   0%   { transform:translate3d(0,0,0); }
-  16%  { transform:translate3d(0,-32px,0); }
-  50%  { transform:translate3d(0,7px,0); }
-  74%  { transform:translate3d(0,-3px,0); }
+  9%   { transform:translate3d(0,-30px,0); }
+  26%  { transform:translate3d(0,8px,0); }
+  42%  { transform:translate3d(0,-13px,0); }
+  58%  { transform:translate3d(0,5px,0); }
+  72%  { transform:translate3d(0,-6px,0); }
+  86%  { transform:translate3d(0,2px,0); }
   100% { transform:translate3d(0,0,0); }
 }
-@keyframes bgLift {
+@keyframes bgWave {
   0%   { transform:translate3d(0,0,0) scale(1); }
-  16%  { transform:translate3d(0,-32px,0) scale(1.08); }
-  50%  { transform:translate3d(0,7px,0) scale(1.02); }
-  74%  { transform:translate3d(0,-3px,0) scale(1.006); }
+  9%   { transform:translate3d(0,-30px,0) scale(1.07); }
+  26%  { transform:translate3d(0,8px,0) scale(1.02); }
+  42%  { transform:translate3d(0,-13px,0) scale(1.015); }
+  58%  { transform:translate3d(0,5px,0) scale(1.01); }
+  72%  { transform:translate3d(0,-6px,0) scale(1.005); }
+  86%  { transform:translate3d(0,2px,0) scale(1.002); }
   100% { transform:translate3d(0,0,0) scale(1); }
 }
 .night-title { position:absolute; left:0; top:210px; width:960px; text-align:center; font-size:37px; font-weight:600; letter-spacing:4px; text-shadow:0 4px 26px rgba(0,0,0,.5); z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; background:linear-gradient(120deg, rgba(255,255,255,.99), rgba(255,240,228,.95), rgba(226,240,255,.95), rgba(244,236,255,.94), rgba(255,255,255,.99)); background-size:250% 100%; background-position:60% 0; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; }
