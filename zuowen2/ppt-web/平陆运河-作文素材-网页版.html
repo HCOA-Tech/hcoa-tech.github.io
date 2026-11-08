@@ -462,6 +462,48 @@ body.onAI .night-input.mobile-float { display: flex; }
 /* 真实气泡在落点轻轻浮现，与飞升副本交接，避免硬切 */
 .msg.user { animation:userLand .5s cubic-bezier(.22,1,.36,1) .22s both; }
 @keyframes userLand { from { opacity:0; transform:translateY(12px) scale(.97); } to { opacity:1; transform:none; } }
+/* ============ 第16页 感谢页：与第15页同源的夜色底 + 科技感文字 ============ */
+.thx-wrap {
+  position:absolute; left:0; top:0; width:960px; height:540px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:26px;
+  opacity:0; transform:translateY(12px);
+  transition:opacity 1s ease .2s, transform 1s cubic-bezier(.22,1,.36,1) .2s;
+}
+.slide.night.active .thx-wrap { opacity:1; transform:none; }
+/* 标题：冷白→暖金→冷蓝的渐变直接裁进字形，光带只在笔画里从左到右缓慢滑过，不用任何矩形块；
+   letter-spacing 会在末字后多留一格空白，用 padding-left 补回一半让它视觉居中 */
+.thx-title {
+  font-family:-apple-system,'SF Pro Display','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+  font-size:54px; font-weight:600; line-height:1.2; letter-spacing:10px; padding-left:5px;
+  background-image:linear-gradient(100deg,
+    rgba(230,238,250,.68) 0%,
+    rgba(245,246,242,.70) 12%,
+    rgba(255,255,255,.96) 24%,
+    rgb(255,249,236) 30%,
+    rgb(255,255,255) 36%,
+    rgb(203,231,255) 44%,
+    rgba(242,240,252,.72) 56%,
+    rgba(230,238,250,.68) 74%,
+    rgba(230,238,250,.68) 100%);
+  background-size:300% 100%;
+  background-repeat:no-repeat;
+  -webkit-background-clip:text; background-clip:text;
+  color:transparent; -webkit-text-fill-color:transparent;
+  animation:thxSheen 3s linear infinite;
+}
+@keyframes thxSheen {
+  from { background-position:100% 0; }
+  to   { background-position:0% 0; }
+}
+.thx-line { width:104px; height:1.5px; background:linear-gradient(90deg, rgba(201,168,106,0), rgba(214,182,122,.9), rgba(201,168,106,0)); }
+/* 副文：无衬线 + 宽字距，向第15页的科技感靠；重点词用淡金，只换样式不改文案；宽度留够保证整句一行 */
+.thx-sub {
+  width:788px; margin:0; text-align:center;
+  font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+  font-size:15.5px; font-weight:400; line-height:2.1; letter-spacing:1.3px;
+  color:rgba(214,224,220,.8);
+}
+.thx-k { color:rgba(229,207,156,.96); font-weight:500; }
 </style>
 </head>
 <body>
@@ -502,7 +544,15 @@ body.onAI .night-input.mobile-float { display: flex; }
   </div>
   <div class="night-input"><input id="aiInput" type="text" inputmode="text" enterkeyhint="send" placeholder="报一个角度或题目，AI 现场写给你看……" autocomplete="off"/><button id="aiRetry" type="button">重试</button><button id="aiSend">生成</button></div>
 </section>
-<section class="slide" data-note="" data-id="pzD"><div class="pg-bg" style="background-image:url(assets/img/Q1Vhbwbr5oHNfAxJS4OcAXvtnQh.jpg);background-size:cover;background-position:center;"></div><div class="el el-text" style="left:238.79999999999998px;top:193.85000000000002px;width:498.95px;height:118.4px;font-size:54px;font-family:'Kaiti SC','STKaiti','KaiTi',KaiTi,serif;color:rgba(46, 110, 94, 1);;text-align:center;line-height:1.3;justify-content:flex-start;display:flex;flex-direction:column;"><p style="text-align:center;line-height:1.3"><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(46, 110, 94, 1);;font-size:54px;font-family:'Kaiti SC','STKaiti','KaiTi',KaiTi,serif">感谢观看</span></span></p></div><div class="el" style="left:456.0px;top:284.85px;width:48.0px;height:1.5px;background-color:rgba(201, 168, 106, 1);"><div class="el-inner" style="font-size:16px;font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;color:rgba(31, 35, 41, 1);;padding-top:3.6px;padding-bottom:3.6px;padding-left:7.2px;padding-right:7.2px;"><p style="text-align:center;line-height:1.2"><span style="color:rgba(255, 255, 255, 1);;font-size:18px;font-family:'Songti SC','STSong','SimSun',SimSun,serif"> </span></p></div></div><div class="el el-text" style="left:177.738031496063px;top:312.2640157480315px;width:604.5232283464567px;height:68.39622047244094px;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif;color:rgba(74, 74, 66, 1);;text-align:center;line-height:1.7;justify-content:flex-start;display:flex;flex-direction:column;"><p style="text-align:center;line-height:1.7;margin-top:10.0px;margin-left:18.0px;text-indent:-18.0px"><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(74, 74, 66, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">平陆运河不仅是一条水道——它是</span></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><b><span style="color:rgba(46, 110, 94, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">百年家国夙愿的接力</span></b></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(74, 74, 66, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">，是</span></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><b><span style="color:rgba(46, 110, 94, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">工程卓越的见证</span></b></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(74, 74, 66, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">，更是</span></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><b><span style="color:rgba(46, 110, 94, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">生态温柔的典范</span></b></span><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(74, 74, 66, 1);;font-size:19.5px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">。</span></span></p></div><div class="el el-text" style="left:195.05850393700786px;top:395.0564566929134px;width:569.8829921259843px;height:55.87503937007874px;font-size:15px;font-family:'Songti SC','STSong','SimSun',SimSun,serif;color:rgba(140, 140, 125, 1);;text-align:center;line-height:1.8;justify-content:flex-start;display:flex;flex-direction:column;"><p style="text-align:center;line-height:1.8;margin-top:10.0px;margin-left:18.0px;text-indent:-18.0px"><span style="text-shadow:2.25px 2.25px 2.25px rgba(247, 245, 239, 0.6)"><span style="color:rgba(140, 140, 125, 1);;font-size:15px;font-family:'Songti SC','STSong','SimSun',SimSun,serif">从1919年《建国方略》的构想到2026年建成通航，平陆运河凝聚了奋斗、创新与人与自然和谐共生的精神。</span></span></p></div><div class="el el-text" style="left:416.62503937007875px;top:89.81850393700788px;width:126.75px;height:39.37503937007874px;font-size:24px;font-family:'Songti SC','STSong','SimSun',SimSun,serif;color:rgba(46, 110, 94, 0.349);;text-align:left;line-height:1.1;justify-content:flex-start;display:flex;flex-direction:column;"></div></section>
+<section class="slide night thanks" data-note="" data-id="pzD">
+  <div class="pg-bg night-bg"></div>
+  <div class="pg-bg night-veil"></div>
+  <div class="thx-wrap">
+    <div class="thx-title">感谢观看</div>
+    <div class="thx-line"></div>
+    <p class="thx-sub">平陆运河不仅是一条水道——它是<span class="thx-k">百年家国夙愿的接力</span>，是<span class="thx-k">工程卓越的见证</span>，更是<span class="thx-k">生态温柔的典范</span>。</p>
+  </div>
+</section>
   </div>
 </div>
 <audio id="aiCue" preload="auto" src="assets/audio/ai-cue.m4a"></audio>
