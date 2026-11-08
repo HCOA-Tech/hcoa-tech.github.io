@@ -60,6 +60,16 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 /* 原群山压暗 + 顶部黑色渐变遮罩：天空纯黑，山形保留深黑轮廓 */
 .night-bg { background:url(assets/img/Q1Vhbwbr5oHNfAxJS4OcAXvtnQh.jpg) center top/cover; filter:brightness(.28) saturate(.48) contrast(1.3); }
 .night-veil { background:linear-gradient(180deg, rgba(0,0,0,.96) 0%, rgba(1,3,6,.82) 34%, rgba(2,5,9,.5) 62%, rgba(3,6,10,.2) 80%, rgba(3,6,10,0) 92%); }
+/* 点生成时背景跟着光球“duang”一下：快速抬起（前14%），再缓慢回弹并轻微过冲；
+   只动背景层的 transform，输入框与其他元素不位移；scale 保证上移不露边，终态回原位无跳变 */
+.night-bg.burst, .night-veil.burst { animation:bgLift 1.25s cubic-bezier(.28,.72,.32,1); }
+@keyframes bgLift {
+  0%   { transform:translate3d(0,0,0) scale(1); }
+  14%  { transform:translate3d(0,-16px,0) scale(1.06); }
+  48%  { transform:translate3d(0,3px,0) scale(1.015); }
+  72%  { transform:translate3d(0,-1.5px,0) scale(1.005); }
+  100% { transform:translate3d(0,0,0) scale(1); }
+}
 .night-title { position:absolute; left:0; top:210px; width:960px; text-align:center; font-size:37px; font-weight:600; letter-spacing:4px; text-shadow:0 4px 26px rgba(0,0,0,.5); z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; background:linear-gradient(120deg, rgba(255,255,255,.99), rgba(255,240,228,.95), rgba(226,240,255,.95), rgba(244,236,255,.94), rgba(255,255,255,.99)); background-size:250% 100%; background-position:60% 0; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; }
 /* 标题流光已改为固定渐变（原 titleFlow 停用，降低常驻渲染开销） */
 .night-sub { position:absolute; left:0; top:168px; width:960px; text-align:center; font-size:14.5px; font-weight:400; color:rgba(190,205,198,.72); letter-spacing:1.5px; z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; }
@@ -878,7 +888,14 @@ function aiBurst(text) {
   var night = document.querySelector('.slide.night');
   if (!night) return;
 
-  /* 整页不再整体抬升：那会让输入框跟着上下位移；光效与水浪保留，输入框固定不动 */
+  /* 整页不再整体抬升：那会让输入框跟着上下位移；只让背景层自己快速抬起再缓慢回弹 */
+  var bgLayers = night.querySelectorAll('.night-bg, .night-veil');
+  for (var bi = 0; bi < bgLayers.length; bi++) {
+    bgLayers[bi].classList.remove('burst');
+    void bgLayers[bi].offsetWidth;                 /* 强制重排，保证连点生成时每次都能重新播放 */
+    bgLayers[bi].classList.add('burst');
+  }
+
   var glow = document.createElement('div');
   glow.className = 'ai-glow';
   night.appendChild(glow);
@@ -905,6 +922,7 @@ function aiBurst(text) {
   setTimeout(function() {
     var olds = night.querySelectorAll('.ai-glow, .ai-sweep, .ai-flyer');
     for (var j = 0; j < olds.length; j++) olds[j].parentNode.removeChild(olds[j]);
+    for (var bk = 0; bk < bgLayers.length; bk++) bgLayers[bk].classList.remove('burst');
   }, 2200);
 }
 
