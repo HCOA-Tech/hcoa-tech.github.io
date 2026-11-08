@@ -51,6 +51,8 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 #hudKeyInput.open { width:178px; max-width:190px; opacity:1; padding:6px 12px; border-color:rgba(201,168,106,.35); }
 #hudKeyInput::placeholder { color:rgba(247,245,239,.45); }
 #hudKeyInput.shake { animation:keyShake .4s ease; }
+#keyHint { position:fixed; z-index:50; left:30px; bottom:70px; font-size:10.5px; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; color:rgba(201,168,106,.72); letter-spacing:1px; opacity:0; transform:translateY(5px); transition:opacity .3s, transform .3s; pointer-events:none; user-select:none; }
+#keyHint.show { opacity:1; transform:none; }
 @keyframes keyShake { 0%,100% { transform:translateX(0); } 25% { transform:translateX(-5px); } 75% { transform:translateX(5px); } }
 
 /* ============ AI 现场创作台页 ============ */
@@ -393,6 +395,7 @@ body.onAI .night-input.mobile-float { display: flex; }
   <input id="hudKeyInput" type="password" autocomplete="off" spellcheck="false"/>
   <button id="btnFull" type="button">全屏</button>
 </div>
+<div id="keyHint">请联系开发者获取</div>
 <div id="hitL" title="上一页"></div>
 <div id="hitR" title="下一页"></div>
 
@@ -581,6 +584,7 @@ var thinkBody = document.getElementById('thinkBody');
 var thinkSec = document.getElementById('thinkSec');
 var btnKey = document.getElementById('btnKey');
 var hudKeyInput = document.getElementById('hudKeyInput');
+var keyHint = document.getElementById('keyHint');
 
 /* 老浏览器（如 Win10 旧版内核）不支持 background-clip:text 时，彩虹文字会整段透明不可见 */
 var CLIP_OK = !!(window.CSS && CSS.supports && (CSS.supports('background-clip', 'text') || CSS.supports('-webkit-background-clip', 'text')));
@@ -617,9 +621,10 @@ function openKeyInput(msg) {
   hudKeyInput.value = '';
   hudKeyInput.placeholder = msg || '粘贴 API Key，回车保存';
   hudKeyInput.classList.add('open');
+  keyHint.classList.add('show');
   setTimeout(function() { hudKeyInput.focus(); }, 130);
 }
-function closeKeyInput() { hudKeyInput.classList.remove('open'); }
+function closeKeyInput() { hudKeyInput.classList.remove('open'); keyHint.classList.remove('show'); }
 function saveKey() {
   var v = hudKeyInput.value.trim();
   if (!v) {
