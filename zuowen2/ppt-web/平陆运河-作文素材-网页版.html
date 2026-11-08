@@ -65,7 +65,7 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
    前景元素纯位移；背景层额外 scale，保证上移不露边。幅度加大到 32px，保证明显 */
 .slide.night.burst > .night-bg,
 .slide.night.burst > .night-veil { animation:bgLift 1.2s cubic-bezier(.28,.72,.32,1); }
-.slide.night.burst > :not(.night-input):not(.night-bg):not(.night-veil) { animation:allLift 1.2s cubic-bezier(.28,.72,.32,1); }
+.slide.night.burst > :not(.night-input):not(.night-bg):not(.night-veil):not(.ai-glow):not(.ai-sweep):not(.ai-flyer) { animation:allLift 1.2s cubic-bezier(.28,.72,.32,1); }
 @keyframes allLift {
   0%   { transform:translate3d(0,0,0); }
   16%  { transform:translate3d(0,-32px,0); }
