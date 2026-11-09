@@ -1158,13 +1158,13 @@ function aiBurst(text) {
   glow.className = 'ai-glow';
   night.appendChild(glow);
 
-  /* 【临时取消·展示后恢复】两道上升水浪会让底部像被整片托起，先停用，只保留柔光与飞升卡片；下面四行展示后恢复 */
-  // var s1 = document.createElement('div');
-  // s1.className = 'ai-sweep';
-  // night.appendChild(s1);
-  // var s2 = document.createElement('div');
-  // s2.className = 'ai-sweep delay';
-  // night.appendChild(s2);
+  var s1 = document.createElement('div');
+  s1.className = 'ai-sweep';
+  night.appendChild(s1);
+
+  var s2 = document.createElement('div');
+  s2.className = 'ai-sweep delay';
+  night.appendChild(s2);
 
   if (text) {
     var f = document.createElement('div');
