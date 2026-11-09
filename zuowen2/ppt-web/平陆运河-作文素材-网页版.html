@@ -1149,10 +1149,10 @@ function aiBurst(text) {
   var night = document.querySelector('.slide.night');
   if (!night) return;
 
-  /* 整页加 burst：除输入框外所有元素一起上跳回弹；输入框与左下角 HUD 固定不动 */
-  night.classList.remove('burst');
-  void night.offsetWidth;                 /* 强制重排，保证连点生成时每次都能重新播放 */
-  night.classList.add('burst');
+  /* 【临时取消·展示后恢复】整页 burst 上移先固定，只保留水波纹/飞升光效，下面三行展示后恢复 */
+  // night.classList.remove('burst');
+  // void night.offsetWidth;                 // 强制重排，保证连点生成时每次都能重新播放
+  // night.classList.add('burst');
 
   var glow = document.createElement('div');
   glow.className = 'ai-glow';
@@ -1180,7 +1180,7 @@ function aiBurst(text) {
   setTimeout(function() {
     var olds = night.querySelectorAll('.ai-glow, .ai-sweep, .ai-flyer');
     for (var j = 0; j < olds.length; j++) olds[j].parentNode.removeChild(olds[j]);
-    night.classList.remove('burst');
+    // night.classList.remove('burst');   /* 临时取消，展示后随上面一起恢复 */
   }, 2200);
 }
 
