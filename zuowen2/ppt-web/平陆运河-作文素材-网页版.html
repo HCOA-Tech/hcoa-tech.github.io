@@ -334,10 +334,10 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 /* 用户自己的消息：中性玻璃质感（不再是绿色） */
 .night-chat .msg.user .bub { background:rgba(255,255,255,.10); border-color:rgba(255,255,255,.20); }
 /* 思考卡：静态玻璃（轻量透底模糊+内高光+外投影），扫光已停用以降低常驻渲染开销 */
-.night-think { position:relative; width:100%; box-sizing:border-box; z-index:1; border:1px solid rgba(255,255,255,.16); border-radius:14px; background:rgba(255,255,255,.08); overflow:hidden; transition:max-height .5s cubic-bezier(.22,1,.36,1), opacity .4s, border-color .3s; max-height:330px; backdrop-filter:blur(16px) saturate(1.3); -webkit-backdrop-filter:blur(16px) saturate(1.3); box-shadow:inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(255,255,255,.05), 0 8px 30px rgba(0,0,0,.38); }
+.night-think { position:relative; width:100%; box-sizing:border-box; z-index:1; border:1px solid rgba(255,255,255,.16); border-radius:14px; background:rgba(255,255,255,.08); overflow:hidden; transition:opacity .45s ease; max-height:330px; backdrop-filter:blur(16px) saturate(1.3); -webkit-backdrop-filter:blur(16px) saturate(1.3); box-shadow:inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(255,255,255,.05), 0 8px 30px rgba(0,0,0,.38); }
 .night-think::before { content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
   background:linear-gradient(120deg, rgba(255,107,107,.06), rgba(254,202,87,.05), rgba(72,219,251,.06), rgba(165,94,234,.06)); }
-.night-think.collapsed { max-height:0; opacity:0; border-width:0; }
+.night-think.collapsed { opacity:0; }   /* 固定尺寸，只淡入淡出，不再做高度展开/位移 */
 /* 收起时内容先淡出并向上滑回，与外框收缩同步，避免内容被 max-height 硬裁切的“向上硬切”感 */
 .night-think .nt-head, .night-think #thinkBody { transition:opacity .42s ease, transform .55s cubic-bezier(.22,1,.36,1); }
 .night-think.collapsed .nt-head, .night-think.collapsed #thinkBody { opacity:0; transform:none; }
@@ -1388,8 +1388,9 @@ var thinkTimer = null, thinkStart = 0;
 var autoRetryTimer = null;
 function startThink() {
   thinkBody.textContent = '';
-  thinkCard.classList.remove('collapsed');
-  thinkWrap.classList.remove('collapsed');
+  thinkWrap.classList.remove('collapsed');   /* 先让外层由 display:none 变为显示，此时卡片仍透明 */
+  void thinkCard.offsetWidth;                /* 强制重排，登记透明起始态，保证下面的淡入能真正触发 */
+  thinkCard.classList.remove('collapsed');   /* 卡片在固定尺寸上淡入，不再硬切 */
   thinkStart = Date.now();
   thinkSec.textContent = '0s';
   if (thinkTimer) clearInterval(thinkTimer);
