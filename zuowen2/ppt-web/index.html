@@ -73,19 +73,13 @@ body.onAI #hitL, body.onAI #hitR { display:none; }
 .slide.night.burst > .night-badge { animation:waveLift 1.15s cubic-bezier(.25,.8,.35,1); }
 /* 阻尼弹簧：先快速抬起，再从上方向下过冲、回弹、二次小过冲，最后软落位，全程非线性 */
 @keyframes waveLift {
-  0%   { transform:translate3d(0,0,0); }
-  16%  { transform:translate3d(0,-32px,0); }
-  46%  { transform:translate3d(0,8px,0); }
-  68%  { transform:translate3d(0,-4px,0); }
-  84%  { transform:translate3d(0,2px,0); }
+  0%   { transform:translate3d(0,0,0); animation-timing-function:cubic-bezier(.34,.7,.4,1); }
+  18%  { transform:translate3d(0,-32px,0); animation-timing-function:cubic-bezier(.22,.61,.36,1); }
   100% { transform:translate3d(0,0,0); }
 }
 @keyframes bgWave {
-  0%   { transform:translate3d(0,0,0) scale(1); }
-  16%  { transform:translate3d(0,-32px,0) scale(1.07); }
-  46%  { transform:translate3d(0,8px,0) scale(1.01); }
-  68%  { transform:translate3d(0,-4px,0) scale(1); }
-  84%  { transform:translate3d(0,2px,0) scale(1); }
+  0%   { transform:translate3d(0,0,0) scale(1); animation-timing-function:cubic-bezier(.34,.7,.4,1); }
+  18%  { transform:translate3d(0,-32px,0) scale(1.07); animation-timing-function:cubic-bezier(.22,.61,.36,1); }
   100% { transform:translate3d(0,0,0) scale(1); }
 }
 .night-title { position:absolute; left:0; top:210px; width:960px; text-align:center; font-size:37px; font-weight:600; letter-spacing:4px; text-shadow:0 4px 26px rgba(0,0,0,.5); z-index:5; font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif; background-image:linear-gradient(100deg, rgba(255,255,255,.8) 0%, rgba(255,255,255,.8) 38%, rgba(226,242,255,.96) 45%, rgba(255,255,255,1) 50%, rgba(226,242,255,.96) 55%, rgba(255,255,255,.8) 62%, rgba(255,255,255,.8) 100%); background-size:300% 100%; background-position:100% 0; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; }
@@ -1627,12 +1621,11 @@ function send() {
     if (answerEl) {
       answerEl.classList.remove('pending');
       answerEl._base.textContent = msg;
-      answerEl.classList.add(CLIP_OK ? 'reveal' : 'reveal-plain');
-      setTimeout(function() {
-        if (answerEl && answerEl._base) answerEl._base.style.maxHeight = 'none';
-      }, 900);
+      answerEl.classList.add('reveal-plain');
+      answerEl._base.style.maxHeight = 'none';
     } else {
-      addMsg('assistant', msg);
+      var eb = addMsg('assistant', msg);
+      eb.classList.add('reveal-plain');
     }
     turns.push({ q: q, a: msg });   /* 失败也计入历史，保证翻页不失语 */
     retryQ = q; retryPending = true; showRetry();   /* 让用户在生成左侧一键重发 */
@@ -1672,7 +1665,7 @@ function send() {
     }).then(function(res) { return done(res); }, function(e) { return done(Promise.reject(e)); })
       .then(async function(res) {
       if (res.status === 401 || res.status === 403) { authFail(); return 'AUTH'; }
-      if (res.status === 402) { fail('余额不足，请到 DeepSeek 控制台充值后重试。'); return 'DONE'; }
+      if (res.status === 402) { fail('该 DeepSeek 账号余额不足，AI 无法生成。请用电脑打开 platform.deepseek.com 充值，或更换一个有余额的 Key 后重试。'); return 'DONE'; }
       if (!res.ok) {
         var em = '';
         try { var j = await res.json(); em = (j.error && j.error.message) || ''; } catch (e) {}
